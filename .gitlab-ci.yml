@@ -1,8 +1,12 @@
-before_script:
+stages:
+  - Build
+
+Payday 2 (Linux):
+  stage: Build
+
+  before_script:
   - apt update && apt install -y -qq libcurl4-openssl-dev zlib1g-dev libopenal-dev
 
-build:
-  stage: build
   image: rikorose/gcc-cmake:gcc-9
   script:
     - git submodule init
@@ -14,3 +18,34 @@ build:
   artifacts:
     paths:
       - build/libsuperblt_loader.so
+
+.shared_windows_runners:
+  before_script:
+    - choco install -y python3
+    - choco install -y cmake
+    - $env:Path += ';C:\Program Files\CMake\bin'
+    - $env:Path += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+    - '&"C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe" modify --passive --installPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools" --add Microsoft.VisualStudio.Component.VC.ATL'
+  tags:
+  - shared-windows
+  - windows
+  - windows-1809
+
+Payday 2 (Windows):
+  stage: Build
+
+  extends:
+  - .shared_windows_runners
+
+  script:
+    - git submodule init
+    - git submodule update
+    - mkdir build
+    - cd build
+    - cmake .. -A Win32 -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release
+    - $Env:Path += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+    - msbuild SuperBLT.sln /t:Build /p:Configuration=Release
+  artifacts:
+    paths:
+      - build/Release/IPHLPAPI.dll
+      - build/Release/WSOCK32.dll
