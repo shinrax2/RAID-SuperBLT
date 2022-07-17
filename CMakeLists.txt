@@ -1,12 +1,28 @@
 cmake_minimum_required(VERSION 3.18)
 project(SuperBLT)
 
+# Set the default game to build, payday
+if(NOT GAME)
+    set(GAME "PAYDAY2")
+endif()
+
+# Valid Games:
+# PAYDAY2
+# RAID
+
 # Allow us to attach the winmm.lib dependency to OpenAL on Windows
 cmake_policy(SET CMP0079 NEW)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 support
 	set(UNIX true)
 endif()
+
+if (CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+	set(HOOK64 true)
+endif()
+
+# Define what game we're building for so that we can make changes if necessary.
+add_definitions(-DGAME_${GAME})
 
 ###############################################################################
 ## misc. definitions ##########################################################
@@ -288,8 +304,14 @@ endmacro()
 if(UNIX)
 	Add_Loader("superblt_loader" ${linux_loader_file})
 elseif(WIN32)
-	Add_Loader("IPHLPAPI" ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def)
-	Add_Loader("WSOCK32" ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def)
+	if (HOOK64)
+		Add_Loader("IPHLPAPI" ${win32_loader_path}/loader.asm ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def)
+		Add_Loader("WSOCK32" ${win32_loader_path}/loader.asm ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def)
+	else()
+		Add_Loader("IPHLPAPI" ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def)
+		Add_Loader("WSOCK32" ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def)
+	endif()
+
 	target_compile_options(IPHLPAPI PRIVATE -DBLT_USE_IPHLPAPI)
 	target_compile_options(WSOCK32 PRIVATE -DBLT_USE_WSOCK)
 else()
