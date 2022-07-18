@@ -48,8 +48,8 @@ struct dsl_Vector
 {
 	unsigned int size;
 	unsigned int capacity;
-	intptr_t contents_ptr;
 	void* allocator;
+	intptr_t contents_ptr;
 };
 
 static void skipVector(std::istream& in)
@@ -94,8 +94,8 @@ DieselDB* DieselDB::Instance()
 	return &instance;
 }
 
-static void loadPackageHeader(DieselBundle* bundle, FileList);
-static void loadBundleHeader(std::string filename, FileList);
+static void loadPackageHeader(std::string headerPath, std::string dataPath, FileList);
+static void loadBundleHeader(std::string headerPath, std::string dataPath, FileList);
 
 ////////////////////////
 ////// DSL FILE ////////
@@ -149,6 +149,7 @@ DieselDB::DieselDB()
 
 	// Sortmap
 	in.seekg(sizeof(void*) * 2, std::ios::cur);
+	in.seekg(sizeof(void*), std::ios::cur);
 
 	// Files
 	struct MiniFile
@@ -203,6 +204,7 @@ DieselDB::DieselDB()
 
 	// Load each of the bundle headers
 	std::string suffix = "_h.bundle";
+	std::string prefix = "all_";
 	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
 	{
 		if (name.length() <= suffix.size())
@@ -211,11 +213,10 @@ DieselDB::DieselDB()
 			continue;
 		if (name == "all_h.bundle")
 			continue; // all_h handling later
-		if (name.size() != 25)
-		{
-			PD2HOOK_LOG_WARN("Invalid bundle name '" + name + "' - ignoring");
-			continue;
-		}
+
+		bool package = true;
+		if (name.compare(0, prefix.size(), prefix) == 0)
+			package = false;
 
 		std::string headerPath = "assets/" + name;
 
@@ -223,14 +224,14 @@ DieselDB::DieselDB()
 		std::string dataPath = headerPath;
 		dataPath.erase(dataPath.end() - 9, dataPath.end() - 7);
 
-		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
-		auto* bundle = new DieselBundle();
-		bundle->headerPath = headerPath;
-		bundle->path = dataPath;
-		loadPackageHeader(bundle, filesList);
+		if (package)
+			loadPackageHeader(headerPath, dataPath, filesList);
+#if defined(GAME_RAID)
+		else
+			loadBundleHeader(headerPath, dataPath, filesList);
+#endif
 	}
 
-	loadBundleHeader("assets/all_h.bundle", filesList);
 
 	// We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
 	uint64_t end_time = monotonicTimeMicros();
@@ -242,8 +243,13 @@ DieselDB::DieselDB()
 	PD2HOOK_LOG_LOG(buff);
 }
 
-static void loadPackageHeader(DieselBundle* bundle, FileList files)
+static void loadPackageHeader(std::string headerPath, std::string dataPath, FileList files)
 {
+	// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
+	auto* bundle = new DieselBundle();
+	bundle->headerPath = headerPath;
+	bundle->path = dataPath;
+
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
 	in.open(bundle->headerPath, std::ios::binary);
@@ -278,11 +284,11 @@ static void loadPackageHeader(DieselBundle* bundle, FileList files)
 	// TODO set a length for the last file
 }
 
-static void loadBundleHeader(std::string filename, FileList files)
+static void loadBundleHeader(std::string headerPath, std::string dataPath, FileList files)
 {
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
-	in.open(filename, std::ios::binary);
+	in.open(headerPath, std::ios::binary);
 
 	// Skip an int, the length of the header
 	in.seekg(4, std::ios::cur);
@@ -290,15 +296,12 @@ static void loadBundleHeader(std::string filename, FileList files)
 	struct BundleInfo
 	{
 		intptr_t id;
-		intptr_t zero;
 		dsl_Vector vec;
+		intptr_t zero;
 		intptr_t one;
 	};
-#if defined(__x86_64__)
+
 	static_assert(sizeof(BundleInfo) == 48);
-#else
-	static_assert(sizeof(BundleInfo) == 28);
-#endif
 
 	struct ItemInfo
 	{
@@ -308,25 +311,26 @@ static void loadBundleHeader(std::string filename, FileList files)
 	};
 	static_assert(sizeof(ItemInfo) == 12); // True on 32/64 bit
 
-	for (BundleInfo bundle : loadVector<BundleInfo>(in, 4))
+	BundleInfo bundle = {0};
+	in.read((char*)&bundle, sizeof(bundle));
+
+	assert(bundle.zero == 0);
+	assert(bundle.one == 1);
+
+	// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
+	DieselBundle* dieselBundle = new DieselBundle();
+	dieselBundle->headerPath = headerPath;
+	dieselBundle->path = dataPath;
+
+	for (ItemInfo item : loadVector<ItemInfo>(in, 4, bundle.vec))
 	{
-		assert(bundle.zero == 0);
-		assert(bundle.one == 1);
-
-		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
-		DieselBundle* dieselBundle = new DieselBundle();
-		dieselBundle->headerPath = filename;
-		dieselBundle->path = "assets/all_" + std::to_string(bundle.id) + ".bundle";
-
-		for (ItemInfo item : loadVector<ItemInfo>(in, 4, bundle.vec))
-		{
-			DslFile* fi = &files.at(item.fileId - 1);
-			fi->bundle = dieselBundle;
-			fi->offset = item.offset;
-			fi->length = item.length;
-		}
+		DslFile* fi = &files.at(item.fileId - 1);
+		fi->bundle = dieselBundle;
+		fi->offset = item.offset;
+		fi->length = item.length;
 	}
 }
+
 
 DslFile* DieselDB::Find(idstring name, idstring ext)
 {

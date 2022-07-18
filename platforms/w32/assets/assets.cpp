@@ -40,43 +40,57 @@ class PDString
 	// String that can deal with the actual data ownership
 	std::string s;
 };
+#if defined(_M_AMD64)
+static_assert(sizeof(PDString) == 32 + sizeof(std::string), "PDString is the wrong size!");
+#else
 static_assert(sizeof(PDString) == 24 + sizeof(std::string), "PDString is the wrong size!");
+#endif
 
-// The signature is the same for all try_open methods, so one typedef will work for all of them.
-typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring type, blt::idstring name, int a, int b);
+typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring* type, blt::idstring* name,
+                                     unsigned long long u1, unsigned long long u2);
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive,
-                      blt::idstring type, blt::idstring name, int u1, int u2);
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type,
+                      blt::idstring* name, unsigned long long u1, unsigned long long u2);
 
-#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                              \
-	static subhook::Hook hook_##id;                                                                                \
-	void __fastcall stub_##id(void* this_, int edx, void* archive, blt::idstring type, blt::idstring name, int u1, \
-	                          int u2)                                                                              \
-	{                                                                                                              \
-		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);           \
+#define DECLARE_PASSTHROUGH(func)                                                                        \
+	static subhook::Hook hook_##func;                                                                    \
+	void __fastcall stub_##func(void* this_, void* archive, blt::idstring* type, blt::idstring* name,    \
+                                unsigned long long u1, unsigned long long u2)                              \
+	{                                                                                                    \
+		hook_load((try_open_t)func, hook_##func, this_, archive, type, name, u1, u2);                    \
 	}
 
-// Four hooks for the other try_open functions: property_match_resolver, language_resolver, english_resolver and funcptr_resolver
+#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                    \
+	static subhook::Hook hook_##id;                                                                      \
+	void __fastcall stub_##id(void* this_, void* archive, blt::idstring* type, blt::idstring* name,      \
+	                        unsigned long long u1, unsigned long long u2)                                    \
+	{                                                                                                    \
+		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2); \
+	}
+
+DECLARE_PASSTHROUGH(try_open_property_match_resolver);
+
+// Three hooks for the other try_open functions: language_resolver, english_resolver and funcptr_resolver
 DECLARE_PASSTHROUGH_ARRAY(0)
 DECLARE_PASSTHROUGH_ARRAY(1)
 DECLARE_PASSTHROUGH_ARRAY(2)
 DECLARE_PASSTHROUGH_ARRAY(3)
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive,
-                      blt::idstring type, blt::idstring name, int u1, int u2)
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type,
+                      blt::idstring* name, unsigned long long u1, unsigned long long u2)
 {
 	// Try hooking this asset, and see if we need to handle it differently
 	BLTAbstractDataStore* datastore = nullptr;
 	int64_t pos = 0, len = 0;
 	std::string ds_name;
-	bool found = hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, false);
+	bool found = hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, false);
 
 	// If we do need to load a custom asset as a result of that, do so now
 	// That just means making our own version of of the archive
 	if (found)
 	{
 		PDString pd_name(ds_name);
-		Archive_ctor(archive, &pd_name, datastore, pos, len, false, 0);
+		Archive_ctor(archive, &pd_name, datastore, pos, len, false);
 		return;
 	}
 
@@ -88,20 +102,31 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 	bool probably_not_loaded_flag = *(bool*)((char*)archive + 0x30);
 	if (probably_not_loaded_flag)
 	{
-		if (hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, true))
+		if (hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, true))
 		{
 			// Note the deadbeef is for the stack padding argument - see the comment on this signature's declaration
 			// for more information.
 			PDString pd_name(ds_name);
-			Archive_ctor(archive, &pd_name, datastore, pos, len, false, 0);
+			Archive_ctor(archive, &pd_name, datastore, pos, len, false);
 			return;
 		}
 	}
 }
 
+#if defined(_M_AMD64)
+	#define HOOK_OPTION subhook::HookOptions::HookOption64BitOffset
+#else
+	#define HOOK_OPTION subhook::HookOptions::HookOptionsNone
+#endif
+
 void blt::win32::InitAssets()
 {
-#define SETUP_PASSTHROUGH_ARRAY(id) hook_##id.Install(try_open_functions.at(id), stub_##id)
+#define SETUP_PASSTHROUGH(func) hook_##func.Install(func, stub_##func, HOOK_OPTION)
+#define SETUP_PASSTHROUGH_ARRAY(id) hook_##id.Install(try_open_functions.at(id), stub_##id, HOOK_OPTION)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-cast"
+	SETUP_PASSTHROUGH(try_open_property_match_resolver);
+
 	if (!try_open_functions.empty())
 		SETUP_PASSTHROUGH_ARRAY(0);
 	if (try_open_functions.size() > 1)

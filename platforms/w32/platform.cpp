@@ -30,26 +30,30 @@ blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::
 
 static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
 
+#if defined(_M_AMD64)
+#define HOOK_OPTION subhook::HookOptions::HookOption64BitOffset
+#else
+#define HOOK_OPTION subhook::HookOptions::HookOptionsNone
+#endif
+
 static void init_idstring_pointers()
 {
 	char *tmp;
 
-	if (try_open_functions.empty())
-	{
-		PD2HOOK_LOG_WARN("Could not init idstring pointers because no asset resolver functions were found.");
-		return;
-	}
+	tmp = (char*)try_open_property_match_resolver;
+	tmp += 0x4F;
+	tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
 
-	tmp = (char*)try_open_functions.at(0);
-	tmp += 0x63;
-	blt::platform::last_loaded_name = *((blt::idstring**)tmp);
+	blt::platform::last_loaded_name = (blt::idstring*)tmp;
 
-	tmp = (char*)try_open_functions.at(0);
-	tmp += 0x53;
-	blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
+	tmp = (char*)try_open_property_match_resolver;
+	tmp += 0x48;
+	tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
+
+	blt::platform::last_loaded_ext = (blt::idstring*)tmp;
 }
 
-static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char freakin, int clue)
+static int __fastcall luaL_newstate_new(void* thislol, char no, char freakin, int clue)
 {
 	subhook::ScopedHookRemove scoped_remove(&newStateDetour);
 
@@ -63,8 +67,7 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 
 	return ret;
 }
-
-void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
+void* __fastcall do_game_update_new(void* thislol, int* a, int* b)
 {
 	subhook::ScopedHookRemove scoped_remove(&gameUpdateDetour);
 
@@ -93,10 +96,73 @@ void lua_close_new(lua_State* L)
 
 //////////// Start of XML tweaking stuff
 
-static void __fastcall edit_node_from_xml_hook(int arg);
-
-static void __cdecl node_from_xml_new(void* node, char* data, int* len)
+#if defined(_M_AMD64)
+extern "C"
 {
+	// Fastcall wrapper
+	static void __fastcall edit_node_from_xml_hook(int arg);
+	static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len);
+
+	void (*NFXNF)(void* node, char* data, int* len);
+	node_from_xmlptr NFX;
+
+	void node_from_xml_new();
+
+	void __fastcall do_xmlload_invoke(void* node, char* data, int* len);
+
+	static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len)
+	{
+		char* modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
+		int modLen = *len;
+
+		if (modded != data)
+		{
+			modLen = strlen(modded);
+		}
+
+		edit_node_from_xml_hook(false);
+		do_xmlload_invoke(node, modded, &modLen);
+		edit_node_from_xml_hook(true);
+
+		pd2hook::tweaker::free_tweaked_pd2_xml(modded);
+	}
+
+	static void setup_xml_function_addresses()
+	{
+		NFXNF = &node_from_xml_new_fastcall;
+		NFX = node_from_xml;
+	}
+}
+
+#else
+
+// Fastcall wrapper
+static void __fastcall edit_node_from_xml_hook(int arg);
+static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len);
+
+static void node_from_xml_new()
+{
+	// PD2 seems to be using some weird calling convention, that's like MS fastcall but
+	// with a caller-restored stack. Thus we have to use assembly to bridge to it.
+	// TODO what do we have to clean up?
+	__asm
+	{
+		push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
+		call node_from_xml_new_fastcall
+		retn
+	}
+}
+
+static void __fastcall do_xmlload_invoke(void *node, char *data, int *len)
+{
+	__asm
+	{
+		call node_from_xml
+	}
+	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
+}
+
+static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len) {
 	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
 	int modLen = *len;
 
@@ -110,12 +176,13 @@ static void __cdecl node_from_xml_new(void* node, char* data, int* len)
 
 	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
 }
+#endif
 
 static void __fastcall edit_node_from_xml_hook(int arg)
 {
 	if (arg)
 	{
-		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new);
+		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, HOOK_OPTION);
 	}
 	else
 	{
@@ -151,10 +218,13 @@ void blt::platform::InitPlatform()
 
 	SignatureSearch::Search();
 
-	gameUpdateDetour.Install(do_game_update, do_game_update_new);
-	newStateDetour.Install(luaL_newstate, luaL_newstate_new);
-	luaCloseDetour.Install(lua_close, lua_close_new);
+	gameUpdateDetour.Install(do_game_update, do_game_update_new, HOOK_OPTION);
+	newStateDetour.Install(luaL_newstate, luaL_newstate_new, HOOK_OPTION);
+	luaCloseDetour.Install(lua_close, lua_close_new, HOOK_OPTION);
 
+#if defined(_M_AMD64)
+	setup_xml_function_addresses();
+#endif
 	edit_node_from_xml_hook(true);
 
 	VRManager::CheckAndLoad();

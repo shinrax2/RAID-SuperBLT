@@ -65,7 +65,7 @@ class SignatureCacheDB
 			infile.read(name, length);
 			string name_str = string(name, length);
 
-			DWORD address;
+			size_t address;
 			READ_BIN(address);
 
 			locations[name_str] = address;
@@ -74,7 +74,7 @@ class SignatureCacheDB
 #undef READ_BIN
 	}
 
-	DWORD GetAddress(string name)
+	size_t GetAddress(string name)
 	{
 		if (locations.count(name))
 		{
@@ -86,7 +86,7 @@ class SignatureCacheDB
 		}
 	}
 
-	void UpdateAddress(string name, DWORD address)
+	void UpdateAddress(string name, size_t address)
 	{
 		if (name.length() > BUFF_LEN)
 		{
@@ -126,7 +126,7 @@ class SignatureCacheDB
 			outfile.write(sig.first.c_str(), length);
 
 			// address
-			DWORD address = sig.second;
+			size_t address = sig.second;
 			WRITE_BIN(address);
 		}
 
@@ -137,7 +137,7 @@ class SignatureCacheDB
 
   private:
 	const string filename;
-	std::map<string, DWORD> locations;
+	std::map<string, size_t> locations;
 
 	static const uint32_t CACHEDB_REVISION = 1;
 	static const uint32_t BUFF_LEN = 1024;
@@ -153,11 +153,11 @@ MODULEINFO GetModuleInfo(string szModule)
 	return modinfo;
 }
 
-static bool CheckSignature(const char* pattern, DWORD patternLength, const char* mask, DWORD base, DWORD size, DWORD i,
-                           DWORD* result)
+static bool CheckSignature(const char* pattern, size_t patternLength, const char* mask, size_t base, size_t size, size_t i,
+                           size_t* result)
 {
 	bool found = true;
-	for (DWORD j = 0; j < patternLength; j++)
+	for (size_t j = 0; j < patternLength; j++)
 	{
 		found &= mask[j] == '?' || pattern[j] == *(char*)(base + i + j);
 	}
@@ -171,19 +171,19 @@ static bool CheckSignature(const char* pattern, DWORD patternLength, const char*
 	return false;
 }
 
-DWORD FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, DWORD hint,
-                  bool* hintCorrect, DWORD* hintOut)
+size_t FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, size_t hint,
+                   bool* hintCorrect, size_t* hintOut)
 {
 	*hintOut = NULL;
 
 	MODULEINFO mInfo = GetModuleInfo(module);
-	DWORD base = (DWORD)mInfo.lpBaseOfDll;
-	DWORD size = (DWORD)mInfo.SizeOfImage;
-	DWORD patternLength = (DWORD)strlen(mask);
+	size_t base = (size_t)mInfo.lpBaseOfDll;
+	size_t size = (size_t)mInfo.SizeOfImage;
+	size_t patternLength = (size_t)strlen(mask);
 
 	if (hint >= 0 && hint < size - patternLength)
 	{
-		DWORD result;
+		size_t result;
 		*hintCorrect = CheckSignature(pattern, patternLength, mask, base, size, hint, &result);
 		if (*hintCorrect)
 			return result;
@@ -193,17 +193,17 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 		*hintCorrect = false;
 	}
 
-	for (DWORD i = 0; i < size - patternLength; i++)
+	for (size_t i = 0; i < size - patternLength; i++)
 	{
-		DWORD result;
+		size_t result;
 		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
 		if (correct)
 		{
 #ifdef CHECK_DUPLICATE_SIGNATURES
 			// Sigdup checking
-			for (DWORD ci = i + 1; ci < size - patternLength; ci++)
+			for (size_t ci = i + 1; ci < size - patternLength; ci++)
 			{
-				DWORD addr;
+				size_t addr;
 				bool correct = CheckSignature(pattern, patternLength, mask, base, size, ci, &addr);
 				if (correct)
 				{
@@ -234,21 +234,18 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	// and run the same custom asset loading code - we don't really care which one is which, we just need
 	// all of them.
 	const char* pattern =
-		"\x55\x8B\xEC\x6A\xFF\x68????\x64\xA1\x00\x00\x00\x00\x50\x81\xEC\x5C\x01\x00\x00"
-		"\xA1????\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00\x00\x8B\xD9\x8B\x45\x1C"
-		"?????????????????????????????????????????????????????????????????????????" // Padding required to avoid another function
-		"\x83\xBB\xAC";
-	const char* mask = "xxxxxx????xxxxxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxx"
-					   "?????????????????????????????????????????????????????????????????????????"
-					   "xxx";
+		"\x48\x89\x54\x24\x10\x55\x53\x56\x57\x41\x54\x41\x56\x41\x57\x48\x8D"
+		"\x6C\x24\xE9\x48\x81\xEC\xF0\x00\x00\x00\x48\xC7\x44\x24\x58\xFE\xFF"
+		"\xFF\xFF\x49\x8B\xF1\x4D\x8B";
+	const char* mask = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 	// There should be four copies of this function
 	int target_count = 4;
 
 	MODULEINFO mInfo = GetModuleInfo(module);
-	DWORD base = (DWORD)mInfo.lpBaseOfDll;
-	DWORD size = (DWORD)mInfo.SizeOfImage;
-	DWORD patternLength = (DWORD)strlen(mask);
+	size_t base = (size_t)mInfo.lpBaseOfDll;
+	size_t size = (size_t)mInfo.SizeOfImage;
+	size_t patternLength = (size_t)strlen(mask);
 
 	std::vector<void*>& results = try_open_functions;
 
@@ -258,13 +255,13 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	{
 		for (int i = 0; i < cache_count; i++)
 		{
-			DWORD target = cache.GetAddress("asset_load_signatures_id_" + to_string(i));
+			size_t target = cache.GetAddress("asset_load_signatures_id_" + to_string(i));
 
 			// Make sure this signature is in-bounds
 			if (target >= size - patternLength)
 				goto cache_fail;
 
-			DWORD result;
+			size_t result;
 			bool correct = CheckSignature(pattern, patternLength, mask, base, size, target, &result);
 			if (!correct)
 				goto cache_fail;
@@ -279,9 +276,9 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	// Make sure the cache gets updated afterwards
 	(*cache_misses)++;
 
-	for (DWORD i = 0; i < size - patternLength; i++)
+	for (size_t i = 0; i < size - patternLength; i++)
 	{
-		DWORD result;
+		size_t result;
 		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
 
 		if (!correct)
@@ -362,11 +359,11 @@ void SignatureSearch::Search()
 		}
 
 		string funcname = it->funcname;
-		DWORD hint = cache.GetAddress(funcname);
+		size_t hint = cache.GetAddress(funcname);
 
 		bool hintCorrect;
-		DWORD hintOut = NULL;
-		DWORD addr =
+		size_t hintOut = NULL;
+		size_t addr =
 			(FindPattern(filename, it->funcname, it->signature, it->mask, hint, &hintCorrect, &hintOut) + it->offset);
 		*((void**)it->address) = (void*)addr;
 

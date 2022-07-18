@@ -66,99 +66,89 @@ typedef struct lua_Debug lua_Debug;	// activation record
 // Functions to be called by the debuger in specific events
 typedef void(*lua_Hook) (lua_State* L, lua_Debug* ar);
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_call, void, "\x8B\x44\x24\x08\x8B\x54\x24\x04\xFF\x44\x24\x0C\x8D\x0C\xC5\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pcall, int, "\x8B\x54\x24\x04\x8B\x4C\x24\x10\x53\x56\x8B\x72\x08\x8A", "xxxxxxxxxxxxxx", 0, lua_State*, int, int, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_gettop, int, "\x8B\x4C\x24\x04\x8B\x41\x14\x2B\x41\x10\xC1\xF8\x03\xC3", "xxxxxxxxxxxxxx", 0, lua_State*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_settop, void, "\x8B\x44\x24\x08\x85\xC0\x78\x5B\x53\x56\x8B\x74\x24\x0C\x57\x8B", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_toboolean, int, "\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8\x00\x00\x00\x00\x83\xC4\x08\x83\x78\x04\xFE\x1B\xC0\xF7\xD8\xC3", "xxxxxxxxx????xxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tointeger, size_t, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x08\xFF\x75\x0C\xFF\x75\x08\xE8\x00\x00\x00\x00\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF2\x73\x0C\xF2\x0F\x10\x00\xF2\x0F\x2C\xC0\x8B\xE5\x5D\xC3\x83\xF9\xFB\x75\x26", "xxxxxxxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tonumber, lua_Number, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x08\xFF\x75\x0C\xFF\x75\x08\xE8\x00\x00\x00\x00\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF2\x77\x06\xDD", "xxxxxxxxxxxxxxxx????xxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tolstring, const char*, "\x83\xEC\x24\xA1\x00\x00\x00\x00\x33\xC4\x89\x44\x24\x20\x53\x8B\x5C\x24\x2C\x56\x8B\x74\x24\x34", "xxxx????xxxxxxxxxxxxxxxx", 0, lua_State*, int, size_t*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_objlen, size_t, "\x83\xEC\x24\xA1\x00\x00\x00\x00\x33\xC4\x89\x44\x24\x20\x8B\x44", "xxxx????xxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_touserdata, void*, "\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8****\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF3", "xxxxxxxxx????xxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_call, void, "\x48\x63\xC2\x48\x8B\x51\x28\x4C\x8B\xD1\x48\xC1\xE0\x03\x4C\x8B", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pcall, int, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x48\x8B\x59\x10\x41\x8B\xF0\x4C\x63", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int, int, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_gettop, int, "\x48\x8B\x41\x28\x48\x2B\x41\x20\x48\xC1\xF8\x03\xC3", "xxxxxxxxxxxxx", 0, lua_State*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_settop, void, "\x40\x53\x48\x83\xEC\x20\x48\x8B\xD9\x85\xD2\x78\x7A\x4C\x8B\x41", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_toboolean, int, "\x48\x83\xEC\x28\xE8\x00\x00\x00\x00\x48\x8B\x08\x33\xC0\x48\xC1", "xxxxx????xxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tointeger, ptrdiff_t, "\x48\x83\xEC\x28\xE8\x00\x00\x00\x00\x48\x8B\x10\x48\x8B\xCA\x48\xC1\xF9\x2F\x83\xF9\xF2\x73\x0E", "xxxxx????xxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tonumber, lua_Number, "\x48\x83\xEC\x28\xE8\x00\x00\x00\x00\x48\x8B\x10\x48\x8B\xCA\x48\xC1\xF9\x2F\x83\xF9\xF2\x77\x09", "xxxxx????xxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tolstring, const char*, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x49\x8B\xF8\x8B\xDA\x48\x8B\xF1\xE8", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int, size_t*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_objlen, size_t, "\x40\x53\x48\x83\xEC\x20\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x48\x8B", "xxxxxxxxxx????xx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_touserdata, void*, "\x48\x83\xEC\x28\xE8\xCC\xCC\xCC\xCC\x48\x8B\x00", "xxxxx????xxx", 0, lua_State*, int)
 
-// This is actually luaL_loadfilex() (as per Lua 5.2) now. The new parameter corresponds to mode, and specifying NULL causes Lua
-// to default to "bt", i.e. 'binary and text'
-// https://www.lua.org/manual/5.2/manual.html#luaL_loadfilex
-// https://www.lua.org/manual/5.2/manual.html#pdf-load
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_loadfilex, int, "\x81\xEC\x08\x02\x00\x00\xA1\x00\x00\x00\x00\x33\xC4\x89\x84\x24", "xxxxxxx????xxxxx", 0, lua_State*, const char*, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_loadstring, int, "\x8B\x54\x24\x08\x83\xEC\x08\x8B\xC2\x56\x8D\x70\x01\x8D\x49\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_loadx, int, "\x55\x8B\xEC\x83\xE4\xF8\x81\xEC\x80\x00\x00\x00\xA1\xCC\xCC\xCC\xCC\x33", "xxxxxxxxxxxxx????x", 0, lua_State*, lua_Reader, void*, const char*, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getfield, void, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x08\x56\x8B\x75\x08\x57\xFF\x75", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setfield, void, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x10\x56\x8B\x75\x08\x57\xFF\x75", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_createtable, void, "\x56\x8B\x74\x24\x08\x8B\x4E\x08\x8B\x41\x14\x3B\x41\x18\x72\x07\x8B\xCE\xE8\x00\x00\x00\x00\x8B\x44\x24\x10\x85\xC0\x74\x12\x83", "xxxxxxxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, int, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newuserdata, void*, "\x56\x8B\x74\x24\x08\x8B\x4E\x08\x8B\x41\x14\x3B\x41\x18\x72\x07\x8B\xCE\xE8\x00\x00\x00\x00\x8B\x4C\x24\x0C\x81\xF9\x00\xFF\xFF", "xxxxxxxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, size_t)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_insert, void, "\x8B\x4C\x24\x08\x56\x57\x85\xC9\x7E\x21\x8B\x54\x24\x0C\x8D\x71", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_replace, void, "\x56\x8B\x74\x24\x08\xFF\x74\x24\x0C\x8B\x46\x14\x83\xE8\x08\x50\x56\xE8\x00\x00\x00\x00\x83\x46\x14\xF8\x83\xC4\x0C\x5E\xC3", "xxxxxxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_remove, void, "\x8B\x4C\x24\x08\x56\x57\x85\xC9\x7E\x21\x8B\x7C\x24\x0C\x8B\x47\x10\x8B\x57\x14\x8D\x77\x14\x8D\x04\xC8\x83\xC0\xF8\x3B\xC2\x72", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newstate, lua_State*, "\x53\x8B\x5C\x24\x0C\x55\x8B\x6C\x24\x0C\x56\x57\x68\x40\x10\x00\x00\x6A\x00\x6A\x00\x53\xFF\xD5\x8B\xF0\x83\xC4\x10\x8D\x7E\x30", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_Alloc, void*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_close, void, "\x8B\x44\x24\x04\x53\x56\x57\x8B\x78\x08\x8B\x77\x74\x56\xE8", "xxxxxxxxxxxxxxx", 0, lua_State*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_loadfilex, int, "\x48\x89\x5C\x24\x20\x55\x56\x57\x48\x81\xEC\x50\x02\x00\x00\x48\x8B", "xxxxxxxxxxxxxxxxx", 0, lua_State*, const char*, const char*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_loadstring, int, "\x48\x83\xEC\x48\x48\x89\x54\x24\x30\x48\x83\xC8\xFF\x0F\x1F\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
 
-// Reviving lua_settable() since the function exists again, and because the Crimefest 2015 alternative relied upon internal Lua
-// VM functions, which do not apply to LuaJIT
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_gettable, void , "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x4E\x14\x83\xE9\x08\x51\x50\x56\xE8\x00\x00\x00\x00\x8B\xD0\x83", "xxxxxxxxxxx????xxxxxxxxxx????xxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_settable, void, "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x4E\x14\x83\xE9\x10\x51\x50\x56", "xxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, int)
-//                                                                            that 0x08 vs 0x10 is where gettable and settable differ  ^^^^
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setmetatable, int, "\x53\x55\x56\x57\xFF\x74\x24\x18\x8B\x7C\x24\x18\x57\xE8\x00\x00\x00\x00\x8B\x77\x14\x83\xC4\x08", "xxxxxxxxxxxxxx????xxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getmetatable, int, "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF4\x75\x07\x8B\x00\x8B\x48\x10\xEB", "xxxxxxxxxxx????xxxxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_loadx, int, "\x4C\x8B\xDC\x53\x56\x57\x48\x00\x00\x00\x00\x00\x00\x48\x8B\x05\x3C\x23\x4A\x00", "xxxxxxx??????xxxxxxx", 0, lua_State*, lua_Reader, void*, const char*, const char*)
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushnumber, void, "\x8B\x4C\x24\x04\xF2\x0F\x10\x44\x24\x08\x8B\x41\x14\xF2\x0F\x11\x00\x8B\x51\x14\xF2\x0F\x10\x02\x66\x0F\x2E\xC0\x9F\xF6\xC4\x44", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, lua_Number)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushinteger, void, "\x66\x0F\x6E\x44\x24\x08\x8B\x4C\x24\x04\xF3\x0F\xE6\xC0\x8B\x41", "xxxxxxxxxxxxxxxx", 0, lua_State*, size_t)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushboolean, void, "\x8B\x4C\x24\x04\x33\xC0\x39\x44\x24\x08\xBA\xFE\xFF\xFF\xFF\x0F", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushcclosure, void, "\x56\x8B\x74\x24\x08\x8B\x4E\x08\x8B\x41\x14\x3B\x41\x18\x72\x07\x8B\xCE\xE8\x00\x00\x00\x00\x8B\x46\x10\x8B\x40\xF8\x80\x78\x05", "xxxxxxxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, lua_CFunction, int);
-// lua_pushstring()'s signature was found before lua_pushlstring()'s, so I'm leaving it here now since it's valid anyway
-// It was used as a quick and dirty - and broken - workaround since most lua_pushlstring() calls are inlined, but it ended up
-// breaking HTTP downloads of zip archives due to its sensitivity to premature null characters. A non-inlined signature for
-// lua_pushlstring() was found by cross-referencing the string 'loaders' to lj_cf_package_require(), which is part of LuaJIT
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushlstring, void, "\x56\x8B\x74\x24\x08\x8B\x4E\x08\x8B\x41\x14\x3B\x41\x18\x72\x07\x8B\xCE\xE8\x00\x00\x00\x00\xFF", "xxxxxxxxxxxxxxxxxxx????x", 0, lua_State*, const char*, size_t)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushstring, void, "\x56\x8B\x74\x24\x08\x57\x8B\x7C\x24\x10\x85\xFF\x75\x0C\x8B\x46", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushfstring, const char*, "\x56\x8B\x74\x24\x08\x8B\x4E\x08\x8B\x41\x14\x3B\x41\x18\x72\x07\x8B\xCE\xE8\x00\x00\x00\x00\x8D\x44\x24\x10\x50\xFF\x74\x24\x10", "xxxxxxxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, const char*, ...)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_checkstack, int, "\x8B\x54\x24\x08\x81\xFA\x40\x1F\x00\x00\x7F\x38\x8B\x4C\x24\x04", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushvalue, void, "\x56\x57\xFF\x74\x24\x10\x8B\x7C\x24\x10\x57\xE8\x00\x00\x00\x00\x8B\x10\x8B\x77\x14\x83\xC4\x08\x89\x16\x8B\x40\x04\x89\x46\x04", "xxxxxxxxxxxx????xxxxxxxxxxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushnil, void, "\x8B\x4C\x24\x04\x8B\x41\x14\xC7\x40\x04\xFF\xFF\xFF\xFF\x83\x41\x14\x08\x8B\x41\x14\x3B\x41\x18\x0F\x83\x00\x00\x00\x00\xC3", "xxxxxxxxxxxxxxxxxxxxxxxxxx????x", 0, lua_State*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getfield, void, "\x48\x89\x5C\x24\x10\x57\x48\x83\xEC\x20\x4D\x8B\xD0\x48\x8B\xD9", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setfield, void, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x4D\x8B\xD0\x48\x8B\xD9", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_createtable, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x4C\x8B\x49\x10\x41\x8B\xF8\x8B\xF2", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int, int)
 
-// luaI_openlib() is really luaL_openlib(), see lauxlib.h in Lua 5.1's source code
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaI_openlib, void, "\x55\x8B\xEC\x83\xE4\xF8\xF2\x0F\x10\x00\x00\x00\x00\x00\x83\xEC\x08\x56\x8B\x75\x08\x57\x8B\x46\x14\xF2\x0F", "xxxxxxxxx?????xxxxxxxxxxxxx", 0, lua_State*, const char*, const luaL_Reg*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_ref, int, "\x55\x8B\xEC\x83\xE4\xF8\x8B\x55\x0C\x83\xEC\x08\x8D\x82\x0F\x27\x00\x00\x56\x8B\x75\x08\x57", "xxxxxxxxxxxxxxxx", 0, lua_State*, int);
-// Reviving lua_rawgeti() since the function exists again, and because the Crimefest 2015 alternative relied upon internal Lua VM
-// functions, which do not apply to LuaJIT
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawget, void, "\x56\x8B\x74\x24\x08\x57\xFF\x74\x24\x10\x56\xE8\x00\x00\x00\x00\x8B\x7E\x14\x83\xC7\xF8\x57\xFF\x30\x56\xE8\x00\x00\x00\x00\x8B", "xxxxxxxxxxxx????xxxxxxxxxxx????x", 0, lua_State*, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawset, void, "\x53\x56\x8B\x74\x24\x0C\x57\xFF\x74\x24\x14\x56\xE8\x00\x00\x00\x00\x8B\x7E\x14\x8B\x18\x83\xEF\x10\x57\x53\x56\xE8", "xxxxxxxxxxxxx????xxxxxxxxxxxx", 0, lua_State*, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawgeti, void, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x56\xFF\x75\x0C\x8B\x75\x08\x56\xE8", "xxxxxxxxxxxxxxxxxx", 0, lua_State*, int, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawseti, void, "\x53\x56\x8B\x74\x24\x0C\x57\xFF\x74\x24\x14\x56\xE8\x00\x00\x00\x00\x8B\x38\x8B", "xxxxxxxxxxxxx????xxx", 0, lua_State*, int, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_type, int, "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\xD0\x83\xC4\x08\x8B\x4A\x04\x83\xF9\xF2\x77\x07\xB8\x03\x00\x00\x00\x5E\xC3\x8B\x46\x08\x05\x90", "xxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_typename, const char*, "\x8B\x44\x24\x08\x8B\x00\x00\x00\x00\x00\x00\xC3\xCC", "xxxxx??????xx", 0, lua_State*, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_unref, void, "\x53\x8B\x5C\x24\x10\x85\xDB\x78\x67\x56\x8B\x74\x24\x0C\x57\x8B", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, int);
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_equal, int, "\x56\x8B\x74\x24\x08\x57\xFF\x74\x24\x10\x56\xE8\x00\x00\x00\x00\xFF\x74\x24\x1C\x8B\xF8\x56\xE8\x00\x00\x00\x00\x8B\x57\x04\x83", "xxxxxxxxxxxx????xxxxxxxx????xxxx", 0, lua_State*, int, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newuserdata, void*, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x4C\x8B\x41\x10", "xxxxxxxxxxxxxx", 0, lua_State*, size_t)
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_newmetatable, int, "\x8B\x54\x24\x08\x53\x56\x8B\x74\x24\x0C\x8B\xCA\x8B\x46\x08\x57", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_checkudata, int, "\x56\x8B\x74\x24\x08\x57\xFF\x74\x24\x10\x56\xE8\x00\x00\x00\x00\x83\xC4\x08\x83\x78\x04\xF3\x75\x49\x8B\x54\x24\x14\x8B\x38\x8B", "xxxxxxxxxxxx????xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
-CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x8D\x44\x24\x0C\x50\xFF\x74\x24\x0C\xFF\x74\x24\x0C\xE8\x00\x00\x00\x00\x83\xC4\x0C\x50\xFF\x74\x24\x08\xE8", "xxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, const char*, ...)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_error, int, "\x56\x8B\x74\x24\x08\x57\x56\xE8\x00\x00\x00\x00\x83\xC4\x04\x85\xC0\x74\x4A\x8B\x4E\x1C\x8B\x7E\x14\x03\xC8\x8B\x46\x08\x83\xA0", "xxxxxxxx????xxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_insert, void, "\x4C\x8B\xC9\x85\xD2\x7E\x24\x8D\x42\xFF\x48\x63\xD0\x48\x8B\x41", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_replace, void, "\x40\x53\x48\x83\xEC\x20\x44\x8B\xC2", "xxxxxxxxx", 0, lua_State*, int)
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml, void, "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x18\x56\x57\xA1\x00\x00\x00\x00\x33\xC5\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00\x00\xC7\x45\xE8\x00\x00\x00\x00\xC7\x45\xEC\x00\x00\x00\x00\xC7\x45\xF0\x00\x00\x00\x00", "xxxxxx????xxxxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_remove, void, "\x4C\x8B\xC1\x85\xD2\x7E\x23\x8D\x42\xFF\x48\x63\xD0\x48\x8B\x41\x20\x48\x8B\x49\x28\x48\x8D\x04", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newstate, lua_State*, "\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x57\x48\x83\xEC\x20\x48\x8B\xF2\x48\x8B\xE9\x41\xB9\x70\x0B\x00\x00", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_Alloc, void*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_close, void, "\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x57\x48\x83\xEC\x20\x48\x8B\x79\x10\x48\x8B\xB7\xC8\x00\x00\x00\x48", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
 
-// The four different try_open functions, each one with a different resolver to filter files
-// Unfortunately, the language, english, and funcptr resolvers are identical bar for a different function call
-// address, so we can't hook them normally. They have special handling by means of the FindAssetLoadSignatures
-// function. Their addresses then get filled out here:
-// (note: ifdef'd off so we don't have to include vector everywhere)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_gettable, void, "\x40\x53\x48\x83\xEC\x20\x48\x8B\xD9\xE8\x00\x00\x00\x00\x4C\x8B\x43\x28\x49\x83\xE8\x08", "xxxxxxxxxx????xxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_settable, void, "\x40\x53\x48\x83\xEC\x20\x48\x8B\xD9\xE8\x00\x00\x00\x00\x4C\x8B\x43\x28\x49\x83\xE8\x10\x48\x8B", "xxxxxxxxxx????xxxxxxxxxx", 0, lua_State*, int)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setmetatable, int, "\x48\x83\xEC\x28\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x49\x8B\x52\x28\x4C", "xxxxxxxx????xxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getmetatable, int, "\x48\x83\xEC\x28\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x48\x8B\x08\x48\x8B\xC1\x48\xC1\xF8\x2F\x83\xF8\xF4\x74\x05\x83\xF8\xF3\x75\x13", "xxxxxxxx????xxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushnumber, void, "\x48\x8B\x41\x28\xF2\x0F\x11\x08", "xxxxxxxx", 0, lua_State*, lua_Number)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushinteger, void, "\x48\x8B\x41\x28\x0F\x57\xC0\xF2\x48\x0F\x2A\xC2\xF2\x0F\x11\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, size_t)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushboolean, void, "\x33\xC0\x85\xD2\x0F\x95\xC0\xFF\xC0\x48\x63\xD0\x48\x8B\x41\x28", "xxxxxxxxxxxxxxxx", 0, lua_State*, bool)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushcclosure, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x4C\x8B\x49\x10\x49\x63\xF8\x48\x8B", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, lua_CFunction, int);
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushlstring, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x4C\x8B\x49\x10\x49\x8B\xF8\x48\x8B", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, const char*, size_t)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushstring, void, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x48\x8B\xFA\x48\x8B\xD9\x48\x85\xD2\x75\x0D\x48\x8B\x41", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
+
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushfstring, const char*, "\x48\x89\x54\x24\x10\x4C\x89\x44\x24\x18\x4C\x89\x4C\x24\x20\x53\x48\x83\xEC\x20\x4C\x8B\x41\x10\x48\x8B\xD9", "xxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, const char*, ...)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_checkstack, int, "\x40\x53\x48\x83\xEC\x20\x48\x8B\xD9\x81\xFA\x40\x1F\x00\x00\x7F", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushvalue, void, "\x48\x83\xEC\x28\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x49\x8B\x52\x28\x48\x8B\x00", "xxxxxxxx????xxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_pushnil, void, "\x48\x8B\x41\x28\x48\xC7\x00\xFF\xFF\xFF\xFF\x48\x83\x41\x28\x08\x48\x8B\x41\x28\x48\x3B\x41\x30\x0F\x83", "xxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaI_openlib, void, "\x48\x89\x5C\x24\x18\x55\x56\x41\x56\x48\x83\xEC\x20\x48\x8B\x41", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*, const luaL_Reg*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_ref, int, "\x48\x89\x5C\x24\x20\x57\x48\x83\xEC\x20\x8D\x82\x0F\x27\x00\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, int);
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawget, void, "\x40\x53\x48\x83\xEC\x20\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x49\x8B\x5A\x28", "xxxxxxxxxx????xxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawset, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x48\x8B\xD9\xE8\x00\x00\x00\x00\x48\x8B\x73\x28", "xxxxxxxxxxxxxxxxxxx????xxxx", 0, lua_State*, int)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawgeti, void, "\x40\x53\x48\x83\xEC\x20\x4D\x63\xD0\x48\x8B\xD9\xE8\x00\x00\x00\x00\x48\x8B\x08\x48\xBA\xFF\xFF", "xxxxxxxxxxxxx????xxxxxxx", 0, lua_State*, int, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawseti, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x4D\x63\xD0\x48\x8B\xD9\xE8", "xxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_type, int, "\x48\x83\xEC\x28\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x48\x8B\x08\x4C", "xxxxxxxx????xxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_typename, const char*, "\x48\x8D\x00\x00\x00\x00\x00\x48\x63\xC2\x48\x8B\x04\xC1\xC3\xCC", "xx?????xxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_unref, void, "\x45\x85\xC0\x0F\x88\x00\x00\x00\x00\x48\x89\x5C\x24\x08\x48\x89", "xxxxx????xxxxxxx", 0, lua_State*, int, int)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_equal, int, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x45\x8B\xD0", "xxxxxxxxxxxxx", 0, lua_State*, int, int)
+
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_newmetatable, int, "\x48\x89\x5C\x24\x10\x48\x89\x74\x24\x18\x41\x56\x48\x83\xEC\x20\x48\x8B\x41\x10", "xxxxxxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_checkudata, int, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x4D\x8B\xD0", "xxxxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
+CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x48\x89\x54\x24\x10\x4C\x89\x44\x24\x18\x4C\x89\x4C\x24\x20\x53\x48\x83\xEC\x20\x4C\x8D\x44\x24\x40", "xxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, const char*, ...)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_error, int, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x48\x8B\xD9\xE8\xCC\xCC\xCC\xCC\x48\x85\xC0", "xxxxxxxxxxxxxx????xxx", 0, lua_State*)
+
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x48\x89\x5C\x24\x10\x57\x48\x83\xEC\x20\x4D\x8B\xD0", "xxxxxxxxxxxxx", 0, int*, int*)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x41\x0F\xB6\xF8\x0F\xB6\xF2\x48\x8B", "xxxxxxxxxxxxxxxxxxxxxxxx", 0, char, char, int)
+
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x48\x8B\xC4\x55\x56\x57\x48\x83\xEC\x70\x48\xC7\x40\xA8\xFE\xFF\xFF\xFF", "xxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
+
 #ifdef INCLUDE_TRY_OPEN_FUNCTIONS
 extern std::vector<void*> try_open_functions;
 #endif
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_property_match_resolver, int, "\x48\x89\x54\x24\x10\x55\x53\x56\x57\x41\x55\x41\x56\x41\x57\x48\x8D\x6C\x24\xE9", "xxxxxxxxxxxxxxxxxxxx", 0)
 
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x55\x8B\xEC\x56\xFF\x75\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxxxx????xxx", 0, int*, int*)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x55\x8B\xEC\x8B\x45\x10\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxxxx", 0, char, char, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, arch_parent, void, "\x40\x55\x56\x57\x41\x56\x41\x57\x48\x8D\x6C\x24\xC9\x48\x81\xEC\xF0\x00\x00\x00", "xxxxxxxxxxxxxxxxxxxx", 0, void* a1, void* a2, void* a3, void* a4);
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, Archive_ctor, void, "\x48\x89\x4C\x24\x08\x57\x48\x83\xEC\x30\x48\xC7\x44\x24\x20\xFE\xFF\xFF\xFF\x48\x89\x5C\x24\x48\x48\x89\x74\x24\x50\x49\x8B\xD9\x49\x8B\xF8\x48\x8B\xF1\x48\xC7\x41\x18\x0F\x00\x00\x00", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void* name_stdstr, void* datastore, int64_t pos, int64_t size, bool ukn_prob_compression);
 
-// Since the start of this function is very generic, grab a later section and seek backwards
-// Also note about stack_pad: for whatever reason it seems the function pops eight extra bytes, so
-// all the calls to it in-game I saw subtracted eight from ESP before pushing their arguments. I
-// don't know *why* it would be doing this, but here's an easy way to compensate for it:
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, Archive_ctor, void, "\xE8\x00\x00\x00\x00\x8B\x45\x10\x89\x46\x18\x8B\x45\x14\x89\x46\x1C\x8B\x45\x18\x89\x46\x20\x8B\x45\x1C", "x????xxxxxxxxxxxxxxxxxxxxx", -65, void* name_stdstr, void* datastore, int64_t pos, int64_t size, bool ukn_prob_compression, uint64_t stack_pad);
-
-// Some internal LuaJIT bits and pieces we can use to implement LuaJIT methods inlined by the compiler
-CREATE_LUAJIT_CALLABLE_SIGNATURE(lj_cf_rawset, int, "\x56\x8B\x74\x24\x08\x8B\x46\x10\x8B\x4E\x14\x3B\xC1\x0F\x83\x85\x00\x00\x00\x83\x78\x04\xF4\x75\x7F\x8D\x50\x08\x3B\xD1\x73\x5E", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
-CREATE_LUAJIT_CALLABLE_SIGNATURE(index2adr, void*, "\x8B\x4C\x24\x08\x85\xC9\x7E\x1F\x8B\x54\x24\x04\x8B\x42\x10\x8D\x04\xC8\x83\xC0\xF8\x3B\x42\x14\x0F\x82\x98\x00\x00\x00\x8B\x42", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(index2adr, void*, "\x4C\x8B\xC1\x85\xD2\x7E\x23\x8D\x42\xFF\x48\x63\xD0\x48\x8B\x41\x20\x48\x8D\x04", "xxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
 
 // lua c-functions
 

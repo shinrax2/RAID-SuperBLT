@@ -149,7 +149,12 @@ if(UNIX)
 	target_link_libraries(debug_shim dl)
 
 elseif(WIN32)
-	add_library(SuperBLT STATIC ${sources} ${win32_sources})
+	if (HOOK64)
+		add_library(SuperBLT STATIC ${sources} ${win32_sources} platforms/w32/platform_xml.asm)
+	else()
+		add_library(SuperBLT STATIC ${sources} ${win32_sources})
+	endif()
+
 	target_compile_options(SuperBLT PRIVATE
 		-DAL_LIBTYPE_STATIC
 		-DCURL_STATICLIB
