@@ -80,7 +80,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_touserdata, void*, "\x48\x83\xEC\x28\xE8\xC
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_loadfilex, int, "\x48\x89\x5C\x24\x20\x55\x56\x57\x48\x81\xEC\x50\x02\x00\x00\x48\x8B", "xxxxxxxxxxxxxxxxx", 0, lua_State*, const char*, const char*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_loadstring, int, "\x48\x83\xEC\x48\x48\x89\x54\x24\x30\x48\x83\xC8\xFF\x0F\x1F\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_loadx, int, "\x4C\x8B\xDC\x53\x56\x57\x48\x00\x00\x00\x00\x00\x00\x48\x8B\x05\x3C\x23\x4A\x00", "xxxxxxx??????xxxxxxx", 0, lua_State*, lua_Reader, void*, const char*, const char*)
+	CREATE_NORMAL_CALLABLE_SIGNATURE(lua_loadx, int, "\x4C\x8B\xDC\x53\x56\x57\x48\x00\x00\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x4A\x00", "xxxxxxx??????xxx??xx", 0, lua_State*, lua_Reader, void*, const char*, const char*)
 
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getfield, void, "\x48\x89\x5C\x24\x10\x57\x48\x83\xEC\x20\x4D\x8B\xD0\x48\x8B\xD9", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setfield, void, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x4D\x8B\xD0\x48\x8B\xD9", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
