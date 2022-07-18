@@ -161,6 +161,16 @@ elseif(WIN32)
 		-DSUBHOOK_STATIC
 	)
 
+	# General optimisation breaks calls to certain lua functions, so replace it.
+	if(MSVC)
+		# We statically link to reduce dependencies
+		foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+			if(${flag_var} MATCHES "/O2")
+				string(REGEX REPLACE "/O2" "/Od /Oi /Ot /Oy /Ob2 /GF /Gy" ${flag_var} "${${flag_var}}")
+			endif(${flag_var} MATCHES "/O2")
+		endforeach(flag_var)
+	endif(MSVC)
+
 	# Link against libraries
 	target_link_libraries(SuperBLT ws2_32.lib)
 	target_link_libraries(SuperBLT crypt32.lib)
