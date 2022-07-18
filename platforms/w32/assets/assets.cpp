@@ -99,13 +99,11 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 
 	// Read the probably_not_loaded_flag to see if this archive failed to load - if so try again but also
 	// look for hooks with the fallback bit set
-	bool probably_not_loaded_flag = *(bool*)((char*)archive + 0x30);
+	bool probably_not_loaded_flag = *(bool*)((char*)archive + 0x38);
 	if (probably_not_loaded_flag)
 	{
 		if (hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, true))
 		{
-			// Note the deadbeef is for the stack padding argument - see the comment on this signature's declaration
-			// for more information.
 			PDString pd_name(ds_name);
 			Archive_ctor(archive, &pd_name, datastore, pos, len, false);
 			return;
