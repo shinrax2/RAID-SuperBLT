@@ -81,9 +81,9 @@ lua_Integer luaL_optinteger(lua_State * L, int narg, lua_Integer def) {
 }
 
 void luaL_checkstack(lua_State *L, int size, const char *msg) {
-	int top = lua_gettop(L);
+	/*int top = lua_gettop(L);
 	if (!lua_checkstack(L, size))
-		luaL_error(L, "Could not increase stack size by %d to %d - %s", size, size + top, msg);
+		luaL_error(L, "Could not increase stack size by %d to %d - %s", size, size + top, msg);*/
 }
 
 typedef union TValue TValue;

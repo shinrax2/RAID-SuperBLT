@@ -68,3 +68,22 @@ RAID World War II (Windows):
     paths:
       - build/Release/IPHLPAPI.dll
       - build/Release/WSOCK32.dll
+
+Payday The Heist (Windows):
+  stage: Build
+
+  extends:
+  - .shared_windows_runners
+
+  script:
+    - git submodule init
+    - git submodule update
+    - mkdir build
+    - cd build
+    - cmake .. -DGAME:STRING="PDTH" -A Win32 -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release
+    - $Env:Path += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+    - msbuild SuperBLT.sln /t:Build /p:Configuration=Release
+  artifacts:
+    paths:
+      - build/Release/IPHLPAPI.dll
+      - build/Release/WSOCK32.dll

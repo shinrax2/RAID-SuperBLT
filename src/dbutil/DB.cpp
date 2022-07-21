@@ -128,7 +128,12 @@ DieselDB::DieselDB()
 
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
+
+#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
 	in.open("assets/bundle_db.blb", std::ios::binary);
+#elif defined(GAME_PDTH)
+	in.open("assets/all.blb", std::ios::binary);
+#endif
 
 	// Skip a pointer - vtable or allocator probably?
 	in.seekg(sizeof(void*), std::ios::cur);
@@ -137,8 +142,8 @@ DieselDB::DieselDB()
 	struct LanguageData
 	{
 		idstring name;
-		int id;
-		int padding; // Probably padding, at least - always zero
+		uint32_t id;
+		uint32_t padding; // Probably padding, at least - always zero
 	};
 	static_assert(sizeof(LanguageData) == 16);
 	std::map<int, idstring> languages;
@@ -156,10 +161,10 @@ DieselDB::DieselDB()
 	{
 		idstring type;
 		idstring name;
-		int32_t langId;
-		int32_t zero_1;
-		int32_t fileId;
-		int32_t zero_2;
+		uint32_t langId;
+		uint32_t zero_1;
+		uint32_t fileId;
+		uint32_t zero_2;
 	};
 	static_assert(sizeof(MiniFile) == 32); // Same on 32 and 64 bit
 	std::vector<MiniFile> miniFiles = loadVector<MiniFile>(in, 0);
@@ -168,12 +173,20 @@ DieselDB::DieselDB()
 	for (size_t i = 0; i < miniFiles.size(); i++)
 	{
 		MiniFile& mini = miniFiles[i];
-		// printf("File: %016llx.%016llx\n", mini.name, mini.type);
+		//printf("File: %016llx.%016llx\n", mini.name, mini.type);
+
+#if defined(GAME_PAYDAY2) || defined(GAME_RAID) //PDTH seemingly stores something here.
 		assert(mini.zero_1 == 0);
 		assert(mini.zero_2 == 0);
+#endif
 
 		// Since the file IDs form a sequence of 1 upto the file count (though not in
 		// order), we can use those as indexes into our file list.
+
+		if (mini.fileId > filesList.size()) {
+			filesList.resize(mini.fileId);
+		}
+
 		DslFile& fi = filesList.at(mini.fileId - 1);
 
 		fi.name = mini.name;
@@ -200,7 +213,7 @@ DieselDB::DieselDB()
 		files[fi.Key()] = &fi;
 	}
 
-	// printf("File count: %ld\n", files.size());
+	//printf("File count: %ld\n", files.size());
 
 	// Load each of the bundle headers
 	std::string suffix = "_h.bundle";
@@ -226,7 +239,7 @@ DieselDB::DieselDB()
 
 		if (package)
 			loadPackageHeader(headerPath, dataPath, filesList);
-#if defined(GAME_RAID)
+#if defined(GAME_RAID) || defined(GAME_PDTH)
 		else
 			loadBundleHeader(headerPath, dataPath, filesList);
 #endif

@@ -284,10 +284,23 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 		if (!correct)
 			continue;
 
+		std::stringstream hex_address;
+		hex_address << "0x" << std::hex << result;
+
+		// Some games (PDTH) have very similar try_open signatures, so double check here.
+		if (result == (size_t)try_open_property_match_resolver)
+		{
+			PD2HOOK_LOG_LOG(string("Asset loading signature (") + hex_address.str() +
+			                string(") matched 'try_open_property_match_resolver' (") + hex_address.str() +
+			                string(") ignoring..."));
+
+			continue;
+		}
+
 		cache.UpdateAddress("asset_load_signatures_id_" + to_string(results.size()), i);
 		results.push_back((void*)result);
-		PD2HOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") +
-		                to_string((DWORD)result));
+		
+		PD2HOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") + hex_address.str());
 	}
 
 	cache.UpdateAddress("asset_load_signatures_count", results.size());
@@ -386,6 +399,10 @@ void SignatureSearch::Search()
 			cache.UpdateAddress(funcname, hintOut);
 			cacheMisses++;
 		}
+
+		std::stringstream hex_address;
+		hex_address << "0x" << std::hex << addr;
+		PD2HOOK_LOG_LOG(funcname + ": " + hex_address.str());
 	}
 
 	int asset_cache_misses = 0;

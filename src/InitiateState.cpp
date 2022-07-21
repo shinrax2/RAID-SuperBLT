@@ -292,7 +292,11 @@ namespace pd2hook
 	{
 		size_t length = 0;
 		const char* filename = lua_tolstring(L, 1, &length);
+#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
 		int error = luaL_loadfilex(L, filename, nullptr);
+#elif defined(GAME_PDTH)
+		int error = luaL_loadfile(L, filename);
+#endif
 		if (error != 0)
 		{
 			size_t len;
@@ -1006,7 +1010,11 @@ namespace blt
 			int result;
 			PD2HOOK_LOG_LOG("Initiating Hook");
 
+#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
 			result = luaL_loadfilex(L, "mods/base/base.lua", nullptr);
+#elif defined(GAME_PDTH)
+			result = luaL_loadfile(L, "mods/base/base.lua");
+#endif
 			if (result == LUA_ERRSYNTAX)
 			{
 				size_t len;

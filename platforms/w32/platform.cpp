@@ -136,9 +136,15 @@ extern "C"
 
 #else
 
+#if defined(GAME_PAYDAY2)
+#define NODE_FROM_XML_ARGS void* node, char* data, int* len
+#elif defined(GAME_PDTH)
+#define NODE_FROM_XML_ARGS void* node, void* u1, void* u2, void* u3, void* u4, void* u5, void* u6, void* u7, void* u8, void* u9, char* data, void* u10, void* u11, void* u12, int len
+#endif
+
 // Fastcall wrapper
 static void __fastcall edit_node_from_xml_hook(int arg);
-static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len);
+static void __fastcall node_from_xml_new_fastcall();
 
 static void node_from_xml_new()
 {
@@ -147,34 +153,39 @@ static void node_from_xml_new()
 	// TODO what do we have to clean up?
 	__asm
 	{
-		push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
-		call node_from_xml_new_fastcall
-		retn
+		//push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
+		jmp node_from_xml
 	}
 }
 
-static void __fastcall do_xmlload_invoke(void *node, char *data, int *len)
+static void __fastcall do_xmlload_invoke()
 {
 	__asm
 	{
-		call node_from_xml
+		jmp node_from_xml
 	}
 	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
 }
 
-static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len) {
-	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
+static void __fastcall node_from_xml_new_fastcall()
+{
+#if defined(GAME_PAYDAY2)
 	int modLen = *len;
+#elif defined(GAME_PDTH)
+	//int modLen = len;
+#endif
 
-	if (modded != data) {
-		modLen = strlen(modded);
-	}
+	//char* modded = data; //pd2hook::tweaker::tweak_pd2_xml(data, modLen);
+	//if (modded != data)
+	//{
+	//	modLen = strlen(modded);
+	//}
 
 	edit_node_from_xml_hook(false);
 	node_from_xml(node, modded, &modLen);
 	edit_node_from_xml_hook(true);
 
-	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
+	//pd2hook::tweaker::free_tweaked_pd2_xml(modded);
 }
 #endif
 
@@ -225,7 +236,7 @@ void blt::platform::InitPlatform()
 #if defined(_M_AMD64)
 	setup_xml_function_addresses();
 #endif
-	edit_node_from_xml_hook(true);
+	//edit_node_from_xml_hook(true);
 
 	VRManager::CheckAndLoad();
 	blt::win32::InitAssets();
