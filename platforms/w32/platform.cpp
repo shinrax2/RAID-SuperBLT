@@ -18,6 +18,7 @@
 #include <fstream>
 #include <string>
 #include <thread>
+#include <tweaker/wrenloader.h>
 
 using namespace std;
 using namespace pd2hook;
@@ -136,15 +137,9 @@ extern "C"
 
 #else
 
-#if defined(GAME_PAYDAY2)
-#define NODE_FROM_XML_ARGS void* node, char* data, int* len
-#elif defined(GAME_PDTH)
-#define NODE_FROM_XML_ARGS void* node, void* u1, void* u2, void* u3, void* u4, void* u5, void* u6, void* u7, void* u8, void* u9, char* data, void* u10, void* u11, void* u12, int len
-#endif
-
 // Fastcall wrapper
 static void __fastcall edit_node_from_xml_hook(int arg);
-static void __fastcall node_from_xml_new_fastcall(NODE_FROM_XML_ARGS);
+static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len);
 
 static void __declspec(naked) node_from_xml_new()
 {
@@ -159,7 +154,7 @@ static void __declspec(naked) node_from_xml_new()
 	}
 }
 
-static void __fastcall do_xmlload_invoke(NODE_FROM_XML_ARGS)
+static void __fastcall do_xmlload_invoke(void* node, char* data, int* len)
 {
 	__asm
 	{
@@ -168,7 +163,9 @@ static void __fastcall do_xmlload_invoke(NODE_FROM_XML_ARGS)
 	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
 }
 
-static void __fastcall node_from_xml_new_fastcall(NODE_FROM_XML_ARGS) {
+
+static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len)
+{
 	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
 	int modLen = *len;
 
@@ -182,9 +179,11 @@ static void __fastcall node_from_xml_new_fastcall(NODE_FROM_XML_ARGS) {
 
 	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
 }
+#endif
 
 static void __fastcall edit_node_from_xml_hook(int arg)
 {
+#if defined(GAME_PAYDAY2)
 	if (arg)
 	{
 		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, HOOK_OPTION);
@@ -193,8 +192,12 @@ static void __fastcall edit_node_from_xml_hook(int arg)
 	{
 		node_from_xmlDetour.Remove();
 	}
-}
+#elif defined(GAME_PDTH)
+	// I give up trying to figure out the stack nonsense for the PDTH node_from_xml, legacy tweaking just won't be supported and I'll init wren right here.
+	auto lock = pd2hook::wren::lock_wren_vm();
+	WrenVM* vm = pd2hook::wren::get_wren_vm();
 #endif
+}
 
 //////////// End of XML tweaking stuff
 
@@ -231,7 +234,7 @@ void blt::platform::InitPlatform()
 #if defined(_M_AMD64)
 	setup_xml_function_addresses();
 #endif
-	//edit_node_from_xml_hook(true);
+	edit_node_from_xml_hook(true);
 
 	VRManager::CheckAndLoad();
 	blt::win32::InitAssets();
