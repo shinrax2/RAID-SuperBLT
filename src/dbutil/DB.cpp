@@ -129,11 +129,41 @@ DieselDB::DieselDB()
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
 
-#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
-	in.open("assets/bundle_db.blb", std::ios::binary);
-#elif defined(GAME_PDTH)
-	in.open("assets/all.blb", std::ios::binary);
-#endif
+	// "Future" proofing.
+	std::string blb_names[2] = {
+		"all",
+		"bundle_db"
+	};
+
+	std::string blb_suffix = ".blb";
+	std::string blb_path;
+
+	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
+	{
+		if (name.length() <= blb_suffix.size())
+			continue;
+		if (name.compare(name.size() - blb_suffix.size(), blb_suffix.size(), blb_suffix) != 0)
+			continue;
+
+		bool valid_name = false;
+		for (const std::string& blb_name : blb_names) {
+			if (name.compare(0, blb_name.size(), blb_name) == 0)
+				valid_name = true;
+				continue;
+		}
+
+		if (!valid_name)
+			continue;
+
+		blb_path = name;
+	}
+
+	if (blb_path.empty()) {
+		PD2HOOK_LOG_ERROR("No 'all.blb' or 'bundle_db.blb' found in 'assets' folder, not loading asset database!");
+		return;
+	}
+
+	in.open("assets/" + blb_path, std::ios::binary);
 
 	// Skip a pointer - vtable or allocator probably?
 	in.seekg(sizeof(void*), std::ios::cur);
