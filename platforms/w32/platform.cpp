@@ -144,50 +144,44 @@ extern "C"
 
 // Fastcall wrapper
 static void __fastcall edit_node_from_xml_hook(int arg);
-static void __fastcall node_from_xml_new_fastcall();
+static void __fastcall node_from_xml_new_fastcall(NODE_FROM_XML_ARGS);
 
-static void node_from_xml_new()
+static void __declspec(naked) node_from_xml_new()
 {
 	// PD2 seems to be using some weird calling convention, that's like MS fastcall but
 	// with a caller-restored stack. Thus we have to use assembly to bridge to it.
 	// TODO what do we have to clean up?
 	__asm
 	{
-		//push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
-		jmp node_from_xml
+		push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
+		call node_from_xml_new_fastcall
+		retn
 	}
 }
 
-static void __fastcall do_xmlload_invoke()
+static void __fastcall do_xmlload_invoke(NODE_FROM_XML_ARGS)
 {
 	__asm
 	{
-		jmp node_from_xml
+		call node_from_xml
 	}
 	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
 }
 
-static void __fastcall node_from_xml_new_fastcall()
-{
-#if defined(GAME_PAYDAY2)
+static void __fastcall node_from_xml_new_fastcall(NODE_FROM_XML_ARGS) {
+	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
 	int modLen = *len;
-#elif defined(GAME_PDTH)
-	//int modLen = len;
-#endif
 
-	//char* modded = data; //pd2hook::tweaker::tweak_pd2_xml(data, modLen);
-	//if (modded != data)
-	//{
-	//	modLen = strlen(modded);
-	//}
+	if (modded != data) {
+		modLen = strlen(modded);
+	}
 
 	edit_node_from_xml_hook(false);
 	node_from_xml(node, modded, &modLen);
 	edit_node_from_xml_hook(true);
 
-	//pd2hook::tweaker::free_tweaked_pd2_xml(modded);
+	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
 }
-#endif
 
 static void __fastcall edit_node_from_xml_hook(int arg)
 {
@@ -200,6 +194,7 @@ static void __fastcall edit_node_from_xml_hook(int arg)
 		node_from_xmlDetour.Remove();
 	}
 }
+#endif
 
 //////////// End of XML tweaking stuff
 
