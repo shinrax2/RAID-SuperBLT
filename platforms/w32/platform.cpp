@@ -183,7 +183,7 @@ static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* l
 
 static void __fastcall edit_node_from_xml_hook(int arg)
 {
-#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
+#if defined(GAME_PD2) || defined(GAME_RAID)
 	if (arg)
 	{
 		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, HOOK_OPTION);

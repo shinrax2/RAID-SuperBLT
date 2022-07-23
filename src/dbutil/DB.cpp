@@ -205,7 +205,7 @@ DieselDB::DieselDB()
 		MiniFile& mini = miniFiles[i];
 		//printf("File: %016llx.%016llx\n", mini.name, mini.type);
 
-#if defined(GAME_PAYDAY2) || defined(GAME_RAID) //PDTH seemingly stores something here.
+#if defined(GAME_PD2) || defined(GAME_RAID) //PDTH seemingly stores something here.
 		assert(mini.zero_1 == 0);
 		assert(mini.zero_2 == 0);
 #endif

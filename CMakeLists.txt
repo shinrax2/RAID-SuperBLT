@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.18)
 project(SuperBLT)
 
-# Set the default game to build, payday
+# Set the default game to build, payday 2
 if(NOT GAME)
-    set(GAME "PAYDAY2")
+    set(GAME "PD2")
 endif()
 
 # Valid Games:
-# PAYDAY2
+# PD2
 # RAID
+# PDTH
 
 # Allow us to attach the winmm.lib dependency to OpenAL on Windows
 cmake_policy(SET CMP0079 NEW)

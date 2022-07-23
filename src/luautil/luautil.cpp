@@ -39,7 +39,7 @@ static int vmlua_load(lua_State *L)
 			data->l = 0;
 			return c;
 		};
-#if defined(GAME_PAYDAY2) || defined(RAID)
+#if defined(GAME_PD2) || defined(RAID)
 		status = lua_loadx(L, reader, &data, chunkname, "t");
 #elif defined(GAME_PDTH)
 		status = lua_load(L, reader, &data, chunkname);
@@ -64,7 +64,7 @@ static int vmlua_loadfile (lua_State *L)
 {
 	const char *fname = luaL_checklstring(L, 1, nullptr);
 
-#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
+#if defined(GAME_PD2) || defined(GAME_RAID)
 	return load_aux(L, luaL_loadfilex(L, fname, "t"));
 #elif defined(GAME_PDTH)
 	return load_aux(L, luaL_loadfile(L, fname));
@@ -76,7 +76,7 @@ static int vmlua_dofile (lua_State *L)
 	const char *fname = luaL_checklstring(L, 1, nullptr);
 	int n = lua_gettop(L);
 
-#if defined(GAME_PAYDAY2) || defined(GAME_RAID)
+#if defined(GAME_PD2) || defined(GAME_RAID)
 	if (luaL_loadfilex(L, fname, "t") != 0) lua_error(L);
 #elif defined(GAME_PDTH)
 	if (luaL_loadfile(L, fname) != 0) lua_error(L);
