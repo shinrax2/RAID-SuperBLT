@@ -3,13 +3,9 @@
 
 #include "platform.h"
 
-#include "lua.h"
-#include "lua_functions.h"
-
 #include "console/console.h"
 #include "vr/vr.h"
 #include "signatures/signatures.h"
-#include "tweaker/xmltweaker.h"
 #include "assets/assets.h"
 
 #include "subhook.h"
@@ -17,16 +13,11 @@
 
 #include <fstream>
 #include <string>
-#include <thread>
-#include <tweaker/wrenloader.h>
 
 using namespace std;
 using namespace pd2hook;
 
 static CConsole* console = NULL;
-
-static std::thread::id main_thread_id;
-
 blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
 
 static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
@@ -203,8 +194,6 @@ static void __fastcall edit_node_from_xml_hook(int arg)
 
 void blt::platform::InitPlatform()
 {
-	main_thread_id = std::this_thread::get_id();
-
 	// Set up logging first, so we can see messages from the signature search process
 #ifdef INJECTABLE_BLT
 	gbl_mConsole = new CConsole();
@@ -227,19 +216,10 @@ void blt::platform::InitPlatform()
 
 	SignatureSearch::Search();
 
-	gameUpdateDetour.Install(do_game_update, do_game_update_new, HOOK_OPTION);
-	newStateDetour.Install(luaL_newstate, luaL_newstate_new, HOOK_OPTION);
-	luaCloseDetour.Install(lua_close, lua_close_new, HOOK_OPTION);
-
-#if defined(_M_AMD64)
-	setup_xml_function_addresses();
-#endif
-	edit_node_from_xml_hook(true);
-
 	VRManager::CheckAndLoad();
 	blt::win32::InitAssets();
 
-	init_idstring_pointers();
+	setup_platform_game();
 }
 
 void blt::platform::ClosePlatform()

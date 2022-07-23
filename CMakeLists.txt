@@ -11,6 +11,8 @@ endif()
 # RAID
 # PDTH
 
+string(TOLOWER ${GAME} GAME_LOWER_CASE)
+
 # Allow us to attach the winmm.lib dependency to OpenAL on Windows
 cmake_policy(SET CMP0079 NEW)
 
@@ -42,15 +44,27 @@ add_definitions(-DENABLE_XAUDIO)
 # these instructions search the directory tree when cmake is
 # invoked and put all files that match the pattern in the variables
 # `sources` and `data`
-file(GLOB_RECURSE sources		src/*.cpp src/*.c src/*.h)
-file(GLOB_RECURSE win32_sources		platforms/w32/*.cpp platforms/w32/*.h)
-set(		  win32_loader_path	platforms/w32/loader)
-file(GLOB_RECURSE win32_loaders		${win32_loader_path}/*.cpp)
-list(REMOVE_ITEM  win32_sources		${win32_loaders})
-file(GLOB_RECURSE linux_sources		platforms/linux/src/*.cpp platforms/linux/include/*.hh)
-set(		  linux_loader_file	${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/src/blt_main.cpp)
-list(REMOVE_ITEM  linux_sources		${linux_loader_file})
-set(		  linux_link_script	${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/link.ld)
+file(GLOB_RECURSE	sources		src/*.cpp src/*.c src/*.h)
+
+set(				win32_all_game_path			platforms/w32/game)
+set(				win32_game_path				${win32_all_game_path}/${GAME_LOWER_CASE})
+file(GLOB_RECURSE	all_game_win32_sources	${win32_all_game_path}/*.cpp ${win32_all_game_path}/*.h)
+file(GLOB_RECURSE	game_win32_sources		${win32_game_path}/*.cpp ${win32_game_path}/*.h)
+# Only Payday 2 has a linux build at the moment so we don't really need game specific stuff for it. 
+
+file(GLOB_RECURSE	win32_sources		platforms/w32/*.cpp platforms/w32/*.h)
+set(				win32_loader_path	platforms/w32/loader)
+
+file(GLOB_RECURSE	win32_loaders		${win32_loader_path}/*.cpp)
+list(REMOVE_ITEM	win32_sources		${win32_loaders})
+list(REMOVE_ITEM	win32_sources		${all_game_win32_sources})
+list(APPEND			win32_sources		${game_win32_sources})
+
+file(GLOB_RECURSE	linux_sources		platforms/linux/src/*.cpp platforms/linux/include/*.hh)
+set(				linux_loader_file	${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/src/blt_main.cpp)
+list(REMOVE_ITEM	linux_sources		${linux_loader_file})
+set(				linux_link_script	${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/link.ld)
+
 # you can use set(sources src/main.cpp) etc if you don't want to
 # use globing to find files automatically
 
@@ -184,6 +198,11 @@ target_include_directories(SuperBLT PUBLIC src)
 
 # Make the generated wren header available
 target_include_directories(SuperBLT PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
+
+if(WIN32)
+	# Give access to game specific platforms
+	target_include_directories(SuperBLT PUBLIC ${win32_game_path})
+endif()
 
 ###############################################################################
 ## dependencies ###############################################################
