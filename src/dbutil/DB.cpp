@@ -147,9 +147,10 @@ DieselDB::DieselDB()
 
 		bool valid_name = false;
 		for (const std::string& blb_name : blb_names) {
-			if (name.compare(0, blb_name.size(), blb_name) == 0)
+			if (name.compare(0, blb_name.size(), blb_name) == 0) {
 				valid_name = true;
-				continue;
+				break;
+			}
 		}
 
 		if (!valid_name)
