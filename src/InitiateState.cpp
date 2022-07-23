@@ -904,8 +904,8 @@ namespace blt
 #ifdef _WIN32 // TODO GNU+Linux support
 				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base")))
 				{
-					int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
-					                        "This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
+					int result = MessageBox(NULL, "Do you want to download the Diesel SuperBLT basemod?\n"
+					                        "This is required for using mods", "SuperBLT 'mods/base' folder missing", MB_YESNO);
 					if (result == IDYES) download_blt();
 
 					return;
@@ -914,7 +914,7 @@ namespace blt
 				if (!Util::DirectoryExists("mods/base/wren"))
 				{
 					int result = MessageBoxA(NULL, "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
-					                         "Please delete your 'mods/base' folder, and run PAYDAY 2 again to automatically download a compatible version",
+					                         "Please delete your 'mods/base' folder, and run the game again to automatically download a compatible version",
 					                         "BLT basemod outdated", MB_OK);
 
 					exit(1);
