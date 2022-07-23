@@ -1,8 +1,11 @@
+#include "util/util.h"
 #include "tweaker/db_hooks.h"
 #include "dbutil/Datastore.h"
 
 #include "platform.h"
 #include "subhook.h"
+
+#include <map>
 
 using pd2hook::tweaker::dbhook::hook_asset_load;
 
@@ -32,23 +35,43 @@ class PDString
 
 static_assert(sizeof(PDString) == 24 + sizeof(std::string), "PDString is the wrong size!");
 
+static std::map<blt::idfile, std::string> custom_assets;
+
+static void open_custom_asset(void* archive, std::string asset)
+{
+	std::string ds_name;
+	PDString pd_name(ds_name);
+
+	BLTFileDataStore* datastore = BLTFileDataStore::Open(asset);
+
+	if (!datastore)
+	{
+		char buff[1024];
+		memset(buff, 0, sizeof(buff));
+		snprintf(buff, sizeof(buff) - 1, "Failed to open custom asset '%s' while loading.", asset);
+		PD2HOOK_LOG_ERROR(buff);
+	}
+
+	Archive_ctor(archive, &pd_name, datastore, 0, datastore->size(), false);
+}
+
 // The signature is the same for all try_open methods, so one typedef will work for all of them.
 typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring type, blt::idstring name, int u1, int u2);
 
 static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring type, blt::idstring name, int u1, int u2);
 
-#define DECLARE_PASSTHROUGH(func)                                                                                          \
+#define DECLARE_PASSTHROUGH(func)                                                                                            \
 	static subhook::Hook hook_##func;                                                                                        \
 	void __fastcall stub_##func(void* this_, int edx, void* archive, blt::idstring type, blt::idstring name, int u1, int u2) \
 	{                                                                                                                        \
-		hook_load((try_open_t)func, hook_##func, this_, archive, type, name, u1, u2);                                          \
+		hook_load((try_open_t)func, hook_##func, this_, archive, type, name, u1, u2);                                        \
 	}
 
-#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                                    \
+#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                                      \
 	static subhook::Hook hook_##id;                                                                                        \
 	void __fastcall stub_##id(void* this_, int edx, void* archive, blt::idstring type, blt::idstring name, int u1, int u2) \
 	{                                                                                                                      \
-		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);                     \
+		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);                   \
 	}
 
 static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring type, blt::idstring name, int u1, int u2)
@@ -98,9 +121,6 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 }
 
 // PDTH DB:create_entry, DB:remove_entry, DB:has
-#include <InitiateState.cpp>
-
-static std::map<blt::idfile, std::string> custom_assets;
 
 int create_entry_ex(lua_State* L)
 {
@@ -152,24 +172,6 @@ int remove_entry(lua_State* L)
 	return 0;
 }
 
-static void open_custom_asset(void* archive, std::string asset)
-{
-	std::string ds_name;
-	PDString pd_name(ds_name);
-
-	BLTFileDataStore* datastore = BLTFileDataStore::Open(asset);
-
-	if (!datastore)
-	{
-		char buff[1024];
-		memset(buff, 0, sizeof(buff));
-		snprintf(buff, sizeof(buff) - 1, "Failed to open custom asset '%s' while loading.", asset);
-		PD2HOOK_LOG_ERROR(buff);
-	}
-
-	Archive_ctor(archive, &pd_name, datastore, 0, datastore->size(), false);
-}
-
 static subhook::Hook hook_dsl_db_add_members;
 static void dt_dsl_db_add_members(lua_State* L)
 {
@@ -208,6 +210,6 @@ int dt_maindb_script_has(lua_State* L)
 
 static void setup_extra_asset_hooks()
 {
-	hook_dsl_db_add_members.Install(dsl_db_add_members, dt_dsl_db_add_members, HOOK_OPTION);
-	hook_maindb_script_has.Install(maindb_script_has, dt_maindb_script_has, HOOK_OPTION);
+	hook_dsl_db_add_members.Install(dsl_db_add_members, dt_dsl_db_add_members);
+	hook_maindb_script_has.Install(maindb_script_has, dt_maindb_script_has);
 }
