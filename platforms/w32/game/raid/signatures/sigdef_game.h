@@ -18,7 +18,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getfield, void, "\x48\x89\x5C\x24\x10\x57\x
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setfield, void, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x4D\x8B\xD8\x48\x8B\xD9", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_createtable, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x4C\x8B\x49\x10\x41\x8B\xF8", "xxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int, int)
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newuserdata, void*, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x4C\x8B\x41\x10\x48\x8D\x51\x10", "xxxxxxxxxxxxxxxxxx", 0, lua_State*, size_t)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newuserdata, void*, "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x4C\x8B\x41\x10\x48\x8B\xFA", "xxxxxxxxxxxxxxxxx", 0, lua_State*, size_t)
 
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_insert, void, "\x4C\x8B\xC9\x85\xD2\x7E\x24", "xxxxxxx", 0, lua_State*, int)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_replace, void, "\x40\x53\x48\x83\xEC\x20\x44\x8B\xC2", "xxxxxxxxx", 0, lua_State*, int)

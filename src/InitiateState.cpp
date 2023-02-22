@@ -835,9 +835,11 @@ namespace pd2hook
 
 		blt::platform::InitPlatform();
 
+#if !defined(GAME_RAID)
 		// Start loading the DB concurrently, so (hopefully) it's done by the time we first use it
 		std::thread db_loader([]() { blt::db::DieselDB::Instance(); });
 		db_loader.detach();
+#endif
 	}
 
 	void DestroyStates()
