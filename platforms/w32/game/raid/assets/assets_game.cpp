@@ -53,36 +53,36 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 
 static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2)
 {
-	// Try hooking this asset, and see if we need to handle it differently
-	BLTAbstractDataStore* datastore = nullptr;
-	int64_t pos = 0, len = 0;
-	std::string ds_name;
-	bool found = hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, false);
+	//// Try hooking this asset, and see if we need to handle it differently
+	//BLTAbstractDataStore* datastore = nullptr;
+	//int64_t pos = 0, len = 0;
+	//std::string ds_name;
+	//bool found = hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, false);
 
-	// If we do need to load a custom asset as a result of that, do so now
-	// That just means making our own version of of the archive
-	if (found)
-	{
-		PDString pd_name(ds_name);
-		Archive_ctor(archive, &pd_name, datastore, pos, len, false);
-		return;
-	}
+	//// If we do need to load a custom asset as a result of that, do so now
+	//// That just means making our own version of of the archive
+	//if (found)
+	//{
+	//	PDString pd_name(ds_name);
+	//	Archive_ctor(archive, &pd_name, datastore, pos, len, false);
+	//	return;
+	//}
 
-	subhook::ScopedHookRemove scoped_remove(&hook);
-	orig(this_, archive, type, name, u1, u2);
+	//subhook::ScopedHookRemove scoped_remove(&hook);
+	//orig(this_, archive, type, name, u1, u2);
 
-	// Read the probably_not_loaded_flag to see if this archive failed to load - if so try again but also
-	// look for hooks with the fallback bit set
-	bool probably_not_loaded_flag = *(bool*)((char*)archive + 0x38);
-	if (probably_not_loaded_flag)
-	{
-		if (hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, true))
-		{
-			PDString pd_name(ds_name);
-			Archive_ctor(archive, &pd_name, datastore, pos, len, false);
-			return;
-		}
-	}
+	//// Read the probably_not_loaded_flag to see if this archive failed to load - if so try again but also
+	//// look for hooks with the fallback bit set
+	//bool probably_not_loaded_flag = *(bool*)((char*)archive + 0x38);
+	//if (probably_not_loaded_flag)
+	//{
+	//	if (hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, true))
+	//	{
+	//		PDString pd_name(ds_name);
+	//		Archive_ctor(archive, &pd_name, datastore, pos, len, false);
+	//		return;
+	//	}
+	//}
 }
 
 static void setup_extra_asset_hooks() {}

@@ -93,6 +93,8 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2); \
 	}
 
+#if !defined(GAME_RAID)
+
 DECLARE_PASSTHROUGH(try_open_property_match_resolver);
 
 // Three hooks for the other try_open functions: language_resolver, english_resolver and funcptr_resolver
