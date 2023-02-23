@@ -276,43 +276,43 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	// Make sure the cache gets updated afterwards
 	(*cache_misses)++;
 
-	//for (size_t i = 0; i < size - patternLength; i++)
-	//{
-	//	size_t result;
-	//	bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
+	for (size_t i = 0; i < size - patternLength; i++)
+	{
+		size_t result;
+		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
 
-	//	if (!correct)
-	//		continue;
+		if (!correct)
+			continue;
 
-	//	std::stringstream hex_address;
-	//	hex_address << "0x" << std::hex << result;
+		std::stringstream hex_address;
+		hex_address << "0x" << std::hex << result;
 
-	//	// Some games (PDTH) have very similar try_open signatures, so double check here.
-	//	if (result == (size_t)try_open_property_match_resolver)
-	//	{
-	//		PD2HOOK_LOG_LOG(string("Asset loading signature (") + hex_address.str() +
-	//		                string(") matched 'try_open_property_match_resolver' (") + hex_address.str() +
-	//		                string(") ignoring..."));
+		// Some games (PDTH) have very similar try_open signatures, so double check here.
+		if (result == (size_t)try_open_property_match_resolver)
+		{
+			PD2HOOK_LOG_LOG(string("Asset loading signature (") + hex_address.str() +
+			                string(") matched 'try_open_property_match_resolver' (") + hex_address.str() +
+			                string(") ignoring..."));
 
-	//		continue;
-	//	}
+			continue;
+		}
 
-	//	cache.UpdateAddress("asset_load_signatures_id_" + to_string(results.size()), i);
-	//	results.push_back((void*)result);
-	//	
-	//	PD2HOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") + hex_address.str());
-	//}
+		cache.UpdateAddress("asset_load_signatures_id_" + to_string(results.size()), i);
+		results.push_back((void*)result);
+		
+		PD2HOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") + hex_address.str());
+	}
 
-	//cache.UpdateAddress("asset_load_signatures_count", results.size());
+	cache.UpdateAddress("asset_load_signatures_count", results.size());
 
-	//if (target_count < results.size())
-	//{
-	//	PD2HOOK_LOG_WARN(string("Failed to locate enough instances of the asset loading function:"));
-	//}
-	//else if (target_count > results.size())
-	//{
-	//	PD2HOOK_LOG_WARN(string("Located too many instances of the asset loading function:"));
-	//}
+	if (target_count < results.size())
+	{
+		PD2HOOK_LOG_WARN(string("Failed to locate enough instances of the asset loading function:"));
+	}
+	else if (target_count > results.size())
+	{
+		PD2HOOK_LOG_WARN(string("Located too many instances of the asset loading function:"));
+	}
 }
 
 std::vector<SignatureF>* allSignatures = NULL;

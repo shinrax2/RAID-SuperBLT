@@ -10,19 +10,19 @@ static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from
 
 static void init_idstring_pointers()
 {
-	//char *tmp;
+	char *tmp;
 
-	//tmp = (char*)try_open_property_match_resolver;
-	//tmp += 0x4F;
-	//tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
+	tmp = (char*)try_open_property_match_resolver;
+	tmp += 0x3A;
+	tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
 
-	//blt::platform::last_loaded_name = (blt::idstring*)tmp;
+	blt::platform::last_loaded_name = (blt::idstring*)tmp;
 
-	//tmp = (char*)try_open_property_match_resolver;
-	//tmp += 0x48;
-	//tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
+	tmp = (char*)try_open_property_match_resolver;
+	tmp += 0x33;
+	tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
 
-	//blt::platform::last_loaded_ext = (blt::idstring*)tmp;
+	blt::platform::last_loaded_ext = (blt::idstring*)tmp;
 }
 
 static int __fastcall luaL_newstate_new(void* thislol, char no, char freakin, int clue)
@@ -71,39 +71,39 @@ void lua_close_new(lua_State* L)
 
 extern "C"
 {
-	//static void node_from_xml_new_fastcall(void* node, char* data, int* len);
+	static void node_from_xml_new_fastcall(void* node, char* data, int* len);
 
-	//void (*NFXNF)(void* node, char* data, int* len);
-	//node_from_xmlptr NFX;
+	void (*NFXNF)(void* node, char* data, int* len);
+	node_from_xmlptr NFX;
 
-	//void node_from_xml_new();
+	void node_from_xml_new();
 
-	//void __fastcall do_xmlload_invoke(void* node, char* data, int* len);
+	void __fastcall do_xmlload_invoke(void* node, char* data, int* len);
 
-	//static void node_from_xml_new_fastcall(void* node, char* data, int* len)
-	//{
-	//	subhook::ScopedHookRemove scoped_remove(&node_from_xmlDetour);
+	static void node_from_xml_new_fastcall(void* node, char* data, int* len)
+	{
+		subhook::ScopedHookRemove scoped_remove(&node_from_xmlDetour);
 
-	//	char* modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
-	//	int modLen = *len;
+		char* modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
+		int modLen = *len;
 
-	//	if (modded != data)
-	//	{
-	//		modLen = strlen(modded);
-	//	}
+		if (modded != data)
+		{
+			modLen = strlen(modded);
+		}
 
-	//	//edit_node_from_xml_hook(false);
-	//	do_xmlload_invoke(node, modded, &modLen);
-	//	//edit_node_from_xml_hook(true);
+		//edit_node_from_xml_hook(false);
+		do_xmlload_invoke(node, modded, &modLen);
+		//edit_node_from_xml_hook(true);
 
-	//	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
-	//}
+		pd2hook::tweaker::free_tweaked_pd2_xml(modded);
+	}
 
-	//static void setup_xml_function_addresses()
-	//{
-	//	NFXNF = &node_from_xml_new_fastcall;
-	//	NFX = node_from_xml;
-	//}
+	static void setup_xml_function_addresses()
+	{
+		NFXNF = &node_from_xml_new_fastcall;
+		NFX = node_from_xml;
+	}
 }
 
 static void setup_platform_game()
@@ -114,8 +114,8 @@ static void setup_platform_game()
 	newStateDetour.Install(luaL_newstate, luaL_newstate_new, subhook::HookOptions::HookOption64BitOffset);
 	luaCloseDetour.Install(lua_close, lua_close_new, subhook::HookOptions::HookOption64BitOffset);
 
-	//setup_xml_function_addresses();
-	//node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookOptions::HookOption64BitOffset);
+	setup_xml_function_addresses();
+	node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookOptions::HookOption64BitOffset);
 
-	//init_idstring_pointers();
+	init_idstring_pointers();
 }
