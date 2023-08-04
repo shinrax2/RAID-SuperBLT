@@ -5,7 +5,6 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <atlstr.h>
 #include <sstream>
 #include <fstream>
 #include <map>
@@ -115,6 +114,14 @@ namespace pd2hook
 		return connection != NULL;
 	}
 
+	static std::string LPWSTRtoString(const LPWSTR wstr)
+	{
+		int count = WideCharToMultiByte(CP_UTF8, 0, wstr, wcslen(wstr), NULL, 0, NULL, NULL);
+		std::string str(count, 0);
+		WideCharToMultiByte(CP_UTF8, 0, wstr, -1, &str[0], count, NULL, NULL);
+		return str;
+	}
+
 	void DebugConnection::Initialize()
 	{
 		LPWSTR *szArglist;
@@ -145,12 +152,12 @@ namespace pd2hook
 					break;
 				}
 
-				string params = CW2A(szArglist[i + 1]);
+				string params = LPWSTRtoString(szArglist[i + 1]);
 				ConnectFromParameters(params);
 
 				// PD2HOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
 			}
-			else if (!StrCmpW(L"--debug-lua-param", szArglist[i]))
+			else if (!lstrcmpW(L"--debug-lua-param", szArglist[i]))
 			{
 				if (i >= nArgs - 2)
 				{
@@ -158,8 +165,8 @@ namespace pd2hook
 					break;
 				}
 
-				string name = CW2A(szArglist[i + 1]);
-				string value = CW2A(szArglist[i + 2]);
+				string name = LPWSTRtoString(szArglist[i + 1]);
+				string value = LPWSTRtoString(szArglist[i + 2]);
 				parameters[name] = value;
 			}
 		}
