@@ -234,8 +234,21 @@ void blt::platform::GetPlatformInformation(lua_State * L)
 	lua_pushstring(L, "mswindows");
 	lua_setfield(L, -2, "platform");
 
-	lua_pushstring(L, "arch");
-	lua_setfield(L, -2, "x86");
+	#if defined(_M_AMD64)
+		lua_pushstring(L, "x86-64");
+	#else
+		lua_pushstring(L, "x86");
+	#endif
+	lua_setfield(L, -2, "arch");
+
+	#if defined(GAME_PD2)
+		lua_pushstring(L, "pd2");
+	#elif defined(GAME_PDTH)
+		lua_pushstring(L, "pdth");
+	#elif defined(GAME_RAID)
+		lua_pushstring(L, "raid");
+	#endif
+	lua_setfield(L, -2, "game");
 }
 
 void blt::platform::win32::OpenConsole()
