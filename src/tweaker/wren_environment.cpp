@@ -8,10 +8,7 @@
 #include <cstdio>
 #include <string.h>
 #include <string>
-
-#ifdef _WIN32
 #include <windows.h>
-#endif
 
 // Hack to get the stack trace
 extern "C"
@@ -19,7 +16,7 @@ extern "C"
 #include "../../lib/wren/src/vm/wren_vm.h"
 }
 
-void get_mod_directory_impl(WrenVM* vm, int depth)
+static void get_mod_directory_impl(WrenVM* vm, int depth)
 {
 	// Poke around in Wren's internals to do this - not ideal but hey it works (for now...)
 	ObjFiber* fibre = vm->fiber;
@@ -66,12 +63,12 @@ void get_mod_directory_impl(WrenVM* vm, int depth)
 	wrenSetSlotString(vm, 0, dir.c_str());
 }
 
-void get_mod_directory(WrenVM* vm)
+static void get_mod_directory(WrenVM* vm)
 {
 	get_mod_directory_impl(vm, 0);
 }
 
-void get_mod_directory_at_depth(WrenVM* vm)
+static void get_mod_directory_at_depth(WrenVM* vm)
 {
 	int type = wrenGetSlotType(vm, 1);
 	if (type != WREN_TYPE_NUM)
@@ -86,20 +83,6 @@ void get_mod_directory_at_depth(WrenVM* vm)
 	int depth = (int)wrenGetSlotDouble(vm, 1);
 
 	get_mod_directory_impl(vm, depth);
-}
-
-void is_vr(WrenVM* vm)
-{
-	bool is_vr = false;
-
-#ifdef _WIN32
-	TCHAR processPath[MAX_PATH + 1];
-	GetModuleFileName(NULL, processPath, MAX_PATH + 1);
-	std::string processPathString = processPath;
-	is_vr = processPathString.rfind("_vr.exe") == processPathString.length() - 7;
-#endif
-
-	wrenSetSlotBool(vm, 0, is_vr);
 }
 
 WrenForeignMethodFn pd2hook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm, const char* module,
@@ -117,10 +100,6 @@ WrenForeignMethodFn pd2hook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm,
 			else if (isStatic && strcmp(signature, "mod_directory_at_depth(_)") == 0)
 			{
 				return &get_mod_directory_at_depth;
-			}
-			else if (isStatic && strcmp(signature, "is_vr") == 0)
-			{
-				return &is_vr;
 			}
 		}
 	}

@@ -1,7 +1,3 @@
-// TODO GNU+Linux support
-
-#ifdef _WIN32
-
 #include "http.h"
 #include "util/util.h"
 #include <curl/curl.h>
@@ -96,5 +92,3 @@ void pd2hook::download_blt()
 	MessageBox(0, "The installation has finished.\nPlease restart the game.", "SuperBLT Downloader", MB_OK);
 	exit(0);
 }
-
-#endif

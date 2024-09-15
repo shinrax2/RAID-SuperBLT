@@ -1,15 +1,9 @@
-#include <vector>
-#define INCLUDE_TRY_OPEN_FUNCTIONS
-
 #include "platform.h"
 
 #include "console/console.h"
-#include "vr/vr.h"
 #include "signatures/signatures.h"
 #include "assets/assets.h"
-
-#include "subhook.h"
-#include "util/util.h"
+#include <util/util.h>
 
 #include <fstream>
 #include <string>
@@ -20,177 +14,7 @@ using namespace pd2hook;
 static CConsole* console = NULL;
 blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
 
-static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
-
-#if defined(_M_AMD64)
-#define HOOK_OPTION subhook::HookOptions::HookOption64BitOffset
-#else
-#define HOOK_OPTION subhook::HookOptions::HookOptionsNone
-#endif
-
-static void init_idstring_pointers()
-{
-	char *tmp;
-
-	tmp = (char*)try_open_property_match_resolver;
-	tmp += 0x4F;
-	tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
-
-	blt::platform::last_loaded_name = (blt::idstring*)tmp;
-
-	tmp = (char*)try_open_property_match_resolver;
-	tmp += 0x48;
-	tmp += *(unsigned int*)tmp + 4; // 64-Bit RIP Offset MOV
-
-	blt::platform::last_loaded_ext = (blt::idstring*)tmp;
-}
-
-static int __fastcall luaL_newstate_new(void* thislol, char no, char freakin, int clue)
-{
-	subhook::ScopedHookRemove scoped_remove(&newStateDetour);
-
-	int ret = luaL_newstate(thislol, no, freakin, clue);
-
-	lua_State* L = (lua_State*)*((void**)thislol);
-	//printf("Lua State: %p\n", (void*)L);
-	if (!L) return ret;
-
-	blt::lua_functions::initiate_lua(L);
-
-	return ret;
-}
-void* __fastcall do_game_update_new(void* thislol, int* a, int* b)
-{
-	subhook::ScopedHookRemove scoped_remove(&gameUpdateDetour);
-
-	// If someone has a better way of doing this, I'd like to know about it.
-	// I could save the this pointer?
-	// I'll check if it's even different at all later.
-	if (std::this_thread::get_id() != main_thread_id)
-	{
-		return do_game_update(thislol, a, b);
-	}
-
-	lua_State* L = (lua_State*)*((void**)thislol);
-
-	blt::lua_functions::update(L);
-
-	return do_game_update(thislol, a, b);
-}
-
-void lua_close_new(lua_State* L)
-{
-	subhook::ScopedHookRemove scoped_remove(&luaCloseDetour);
-
-	blt::lua_functions::close(L);
-	lua_close(L);
-}
-
-//////////// Start of XML tweaking stuff
-
-#if defined(_M_AMD64)
-extern "C"
-{
-	// Fastcall wrapper
-	static void __fastcall edit_node_from_xml_hook(int arg);
-	static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len);
-
-	void (*NFXNF)(void* node, char* data, int* len);
-	node_from_xmlptr NFX;
-
-	void node_from_xml_new();
-
-	void __fastcall do_xmlload_invoke(void* node, char* data, int* len);
-
-	static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len)
-	{
-		char* modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
-		int modLen = *len;
-
-		if (modded != data)
-		{
-			modLen = strlen(modded);
-		}
-
-		edit_node_from_xml_hook(false);
-		do_xmlload_invoke(node, modded, &modLen);
-		edit_node_from_xml_hook(true);
-
-		pd2hook::tweaker::free_tweaked_pd2_xml(modded);
-	}
-
-	static void setup_xml_function_addresses()
-	{
-		NFXNF = &node_from_xml_new_fastcall;
-		NFX = node_from_xml;
-	}
-}
-
-#else
-
-// Fastcall wrapper
-static void __fastcall edit_node_from_xml_hook(int arg);
-static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len);
-
-static void __declspec(naked) node_from_xml_new()
-{
-	// PD2 seems to be using some weird calling convention, that's like MS fastcall but
-	// with a caller-restored stack. Thus we have to use assembly to bridge to it.
-	// TODO what do we have to clean up?
-	__asm
-	{
-		push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
-		call node_from_xml_new_fastcall
-		retn
-	}
-}
-
-static void __fastcall do_xmlload_invoke(void* node, char* data, int* len)
-{
-	__asm
-	{
-		call node_from_xml
-	}
-	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
-}
-
-
-static void __fastcall node_from_xml_new_fastcall(void* node, char* data, int* len)
-{
-	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
-	int modLen = *len;
-
-	if (modded != data) {
-		modLen = strlen(modded);
-	}
-
-	edit_node_from_xml_hook(false);
-	node_from_xml(node, modded, &modLen);
-	edit_node_from_xml_hook(true);
-
-	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
-}
-#endif
-
-static void __fastcall edit_node_from_xml_hook(int arg)
-{
-#if defined(GAME_PD2) || defined(GAME_RAID)
-	if (arg)
-	{
-		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, HOOK_OPTION);
-	}
-	else
-	{
-		node_from_xmlDetour.Remove();
-	}
-#elif defined(GAME_PDTH)
-	// I give up trying to figure out the stack nonsense for the PDTH node_from_xml, legacy tweaking just won't be supported and I'll init wren right here.
-	auto lock = pd2hook::wren::lock_wren_vm();
-	WrenVM* vm = pd2hook::wren::get_wren_vm();
-#endif
-}
-
-//////////// End of XML tweaking stuff
+#include <platform_game.cpp>
 
 void blt::platform::InitPlatform()
 {
@@ -216,7 +40,6 @@ void blt::platform::InitPlatform()
 
 	SignatureSearch::Search();
 
-	VRManager::CheckAndLoad();
 	blt::win32::InitAssets();
 
 	setup_platform_game();
@@ -241,13 +64,7 @@ void blt::platform::GetPlatformInformation(lua_State * L)
 	#endif
 	lua_setfield(L, -2, "arch");
 
-	#if defined(GAME_PD2)
-		lua_pushstring(L, "pd2");
-	#elif defined(GAME_PDTH)
-		lua_pushstring(L, "pdth");
-	#elif defined(GAME_RAID)
-		lua_pushstring(L, "raid");
-	#endif
+	lua_pushstring(L, "raid");
 	lua_setfield(L, -2, "game");
 }
 
@@ -285,11 +102,11 @@ void blt::platform::lua::SetForcePCalls(bool state)
 	if (state)
 	{
 		luaCallDetour.Install(lua_call, blt::lua_functions::perform_lua_pcall);
-		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
+		PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
 	{
 		luaCallDetour.Remove();
-		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
+		PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
 	}
 }

@@ -43,14 +43,14 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 
 #define DECLARE_PASSTHROUGH(func)                                                                                                                 \
 	static subhook::Hook hook_##func;                                                                                                               \
-	void __fastcall stub_##func(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2) \
+	void stub_##func(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2) \
 	{                                                                                                                                               \
 		hook_load((try_open_t)func, hook_##func, this_, archive, type, name, u1, u2);                                                                 \
 	}
 
 #define DECLARE_PASSTHROUGH_ARRAY(id)                                                                                                           \
 	static subhook::Hook hook_##id;                                                                                                               \
-	void __fastcall stub_##id(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2) \
+	void stub_##id(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2) \
 	{                                                                                                                                             \
 		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);                                            \
 	}

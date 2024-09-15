@@ -89,9 +89,7 @@ namespace pd2hook
 	namespace { ::pd2hook::EventQueueRuntimeRegisterer<DataT> PD2HOOK_CONCAT(staticRegisterer, __COUNTER__); ::pd2hook::EventQueue<DataT>& Get##Name##Queue() { return ::pd2hook::EventQueue<DataT>::GetSingleton(); } }
 #define PD2HOOK_REGISTER_EVENTQUEUE_EASY(DataT) PD2HOOK_REGISTER_EVENTQUEUE(DataT, DataT)
 
-#ifdef _WIN32
 	#pragma region Implementation
-#endif
 
 	template<typename DataT>
 	EventQueue<DataT>::EventQueue()
@@ -156,9 +154,7 @@ namespace pd2hook
 		eventQueue.emplace_back(runFunction, std::move(data));
 	}
 
-#ifdef _WIN32
 	#pragma endregion
-#endif
 
 }
 

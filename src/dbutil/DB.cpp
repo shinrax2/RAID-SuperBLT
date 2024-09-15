@@ -11,10 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef _WIN32
-#include <time.h>
-#endif
-
 using namespace blt::db;
 using blt::idstring;
 
@@ -25,7 +21,6 @@ using FileMap = std::map<std::pair<idstring, idstring>, DslFile*>&;
 
 static uint64_t monotonicTimeMicros()
 {
-#ifdef _WIN32
 	// https://docs.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps
 	LARGE_INTEGER StartingTime;
 	LARGE_INTEGER Frequency;
@@ -36,12 +31,6 @@ static uint64_t monotonicTimeMicros()
 	StartingTime.QuadPart *= 1000000;
 	StartingTime.QuadPart /= Frequency.QuadPart;
 	return StartingTime.QuadPart;
-#else
-	// TODO test, this may be wrong
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
-#endif
 }
 
 struct dsl_Vector
@@ -206,10 +195,8 @@ DieselDB::DieselDB()
 		MiniFile& mini = miniFiles[i];
 		//printf("File: %016llx.%016llx\n", mini.name, mini.type);
 
-#if defined(GAME_PD2) || defined(GAME_RAID) //PDTH seemingly stores something here.
 		assert(mini.zero_1 == 0);
 		assert(mini.zero_2 == 0);
-#endif
 
 		// Since the file IDs form a sequence of 1 upto the file count (though not in
 		// order), we can use those as indexes into our file list.
@@ -270,12 +257,9 @@ DieselDB::DieselDB()
 
 		if (package)
 			loadPackageHeader(headerPath, dataPath, filesList);
-#if defined(GAME_RAID) || defined(GAME_PDTH)
 		else
 			loadBundleHeader(headerPath, dataPath, filesList);
-#endif
 	}
-
 
 	// We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
 	uint64_t end_time = monotonicTimeMicros();
@@ -374,7 +358,6 @@ static void loadBundleHeader(std::string headerPath, std::string dataPath, FileL
 		fi->length = item.length;
 	}
 }
-
 
 DslFile* DieselDB::Find(idstring name, idstring ext)
 {

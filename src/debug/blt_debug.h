@@ -1,9 +1,6 @@
 #pragma once
 
-// Enable debug when on windows, until TODO it's ported over
-#ifdef _WIN32
 #define ENABLE_DEBUG
-#endif
 
 #ifdef ENABLE_DEBUG
 

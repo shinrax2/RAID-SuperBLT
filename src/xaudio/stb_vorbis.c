@@ -264,11 +264,7 @@
    #define alloca __builtin_alloca
    #endif
 #elif !defined(_MSC_VER)
-   #if __GNUC__
-      #define __forceinline inline
-   #else
-      #define __forceinline
-   #endif
+   #define __forceinline
 #endif
 
 #if STB_VORBIS_MAX_CHANNELS > 256

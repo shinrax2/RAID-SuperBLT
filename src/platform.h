@@ -5,15 +5,9 @@ namespace blt
 {
 #define idstring_none 0
 
-	// Avoid warnings in printf from using ULL on Linux, where long is 64-bit
-	// Also define some macros to use in printf, since this changes too
-#ifdef _WIN32
 #define IDPF "%016llx" // IDPF=IDstring PrintF
 	typedef unsigned long long idstring;
-#else
-#define IDPF "%016lx"
-	typedef unsigned long int idstring;
-#endif
+
 #define IDPFP IDPF "." IDPF
 
 	class idfile
@@ -56,12 +50,10 @@ namespace blt
 			void SetForcePCalls(bool);
 		};
 
-#ifdef _WIN32
 		namespace win32
 		{
 			void OpenConsole();
 			void* get_lua_func(const char* name);
 		};
-#endif
 	};
 };

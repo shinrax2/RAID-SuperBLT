@@ -143,7 +143,7 @@ class SignatureCacheDB
 	static const uint32_t BUFF_LEN = 1024;
 };
 
-MODULEINFO GetModuleInfo(string szModule)
+static MODULEINFO GetModuleInfo(string szModule)
 {
 	MODULEINFO modinfo = {0};
 	HMODULE hModule = GetModuleHandle(szModule.c_str());
@@ -171,7 +171,7 @@ static bool CheckSignature(const char* pattern, size_t patternLength, const char
 	return false;
 }
 
-size_t FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, size_t hint,
+static size_t FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, size_t hint,
                    bool* hintCorrect, size_t* hintOut)
 {
 	*hintOut = NULL;
@@ -235,12 +235,10 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	// all of them.
 	const char* pattern =
 		"\x48\x89\x54\x24\x10\x55\x53\x56\x57\x41\x54\x41\x56\x41\x57\x48\x8D"
-		"\x6C\x24\xE9\x48\x81\xEC\xF0\x00\x00\x00\x48\xC7\x44\x24\x58\xFE\xFF"
-		"\xFF\xFF\x49\x8B\xF1\x4D\x8B";
-	const char* mask = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-
-	// There should be four copies of this function
-	int target_count = 4;
+		"\x6C\x24\xE9\x48\x81\xEC\xE0\x00\x00\x00\x49";
+	const char* mask = "xxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	// There should be three copies of this function
+	int target_count = 3;
 
 	MODULEINFO mInfo = GetModuleInfo(module);
 	size_t base = (size_t)mInfo.lpBaseOfDll;
@@ -318,7 +316,7 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 std::vector<SignatureF>* allSignatures = NULL;
 
 SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask,
-                                 int offset, SignatureVR vr)
+                                 int offset)
 {
 	// lazy-init, container gets 'emptied' when initialized on compile.
 	if (!allSignatures)
@@ -326,7 +324,7 @@ SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char*
 		allSignatures = new std::vector<SignatureF>();
 	}
 
-	SignatureF ins = {funcname, signature, mask, offset, adress, vr};
+	SignatureF ins = {funcname, signature, mask, offset, adress};
 	allSignatures->push_back(ins);
 }
 
@@ -346,16 +344,10 @@ void SignatureSearch::Search()
 
 	string basename = filename;
 
-	// Check if the user is in VR (EXE ends with _vr)
-	// This is used to only load functions relevant to that version, as
-	//  there are a couple of functions that have different signatures in
-	//  VR as they do in the desktop binary.
-	bool is_in_vr = basename.rfind("_vr") == basename.length() - 3;
-
 	// Add the .exe back on
 	strcat_s(filename, MAX_PATH, ".exe");
 
-	unsigned long ms_start = GetTickCount();
+	unsigned long ms_start = GetTickCount64();
 	SignatureCacheDB cache(string("sigcache_") + basename + string(".db"));
 	PD2HOOK_LOG_LOG(string("Scanning for signatures in ") + string(filename));
 
@@ -363,14 +355,6 @@ void SignatureSearch::Search()
 	std::vector<SignatureF>::iterator it;
 	for (it = allSignatures->begin(); it < allSignatures->end(); it++)
 	{
-		// If the function is desktop-only and we're in VR (or vise-versa), skip it
-		// This *significantly* improves loading times - on my system it cut loading times
-		//  by ~2.5 seconds.
-		if (it->vr == (is_in_vr ? SignatureVR_Desktop : SignatureVR_VR))
-		{
-			continue;
-		}
-
 		string funcname = it->funcname;
 		size_t hint = cache.GetAddress(funcname);
 
@@ -409,7 +393,7 @@ void SignatureSearch::Search()
 	FindAssetLoadSignatures(filename, cache, &asset_cache_misses);
 	cacheMisses += asset_cache_misses;
 
-	unsigned long ms_end = GetTickCount();
+	unsigned long ms_end = GetTickCount64();
 
 	PD2HOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ") +
 	                to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses) +
