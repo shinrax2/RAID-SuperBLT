@@ -1,6 +1,5 @@
 # Visual Studio files
 /.vs
-/CMakeSettings.json
 /out
 
 # LibreSSL, since it's extracted from a tarball and not a git submodule
