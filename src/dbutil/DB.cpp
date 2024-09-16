@@ -11,10 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef _WIN32
-#include <time.h>
-#endif
-
 using namespace blt::db;
 using blt::idstring;
 
@@ -25,7 +21,6 @@ using FileMap = std::map<std::pair<idstring, idstring>, DslFile*>&;
 
 static uint64_t monotonicTimeMicros()
 {
-#ifdef _WIN32
 	// https://docs.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps
 	LARGE_INTEGER StartingTime;
 	LARGE_INTEGER Frequency;
@@ -36,20 +31,14 @@ static uint64_t monotonicTimeMicros()
 	StartingTime.QuadPart *= 1000000;
 	StartingTime.QuadPart /= Frequency.QuadPart;
 	return StartingTime.QuadPart;
-#else
-	// TODO test, this may be wrong
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
-#endif
 }
 
 struct dsl_Vector
 {
 	unsigned int size;
 	unsigned int capacity;
-	intptr_t contents_ptr;
 	void* allocator;
+	intptr_t contents_ptr;
 };
 
 static void skipVector(std::istream& in)
@@ -94,8 +83,8 @@ DieselDB* DieselDB::Instance()
 	return &instance;
 }
 
-static void loadPackageHeader(DieselBundle* bundle, FileList);
-static void loadBundleHeader(std::string filename, FileList);
+static void loadPackageHeader(std::string headerPath, std::string dataPath, FileList);
+static void loadBundleHeader(std::string headerPath, std::string dataPath, FileList);
 
 ////////////////////////
 ////// DSL FILE ////////
@@ -128,7 +117,43 @@ DieselDB::DieselDB()
 
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
-	in.open("assets/bundle_db.blb", std::ios::binary);
+
+	// "Future" proofing.
+	std::string blb_names[2] = {
+		"all",
+		"bundle_db"
+	};
+
+	std::string blb_suffix = ".blb";
+	std::string blb_path;
+
+	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
+	{
+		if (name.length() <= blb_suffix.size())
+			continue;
+		if (name.compare(name.size() - blb_suffix.size(), blb_suffix.size(), blb_suffix) != 0)
+			continue;
+
+		bool valid_name = false;
+		for (const std::string& blb_name : blb_names) {
+			if (name.compare(0, blb_name.size(), blb_name) == 0) {
+				valid_name = true;
+				break;
+			}
+		}
+
+		if (!valid_name)
+			continue;
+
+		blb_path = name;
+	}
+
+	if (blb_path.empty()) {
+		PD2HOOK_LOG_ERROR("No 'all.blb' or 'bundle_db.blb' found in 'assets' folder, not loading asset database!");
+		return;
+	}
+
+	in.open("assets/" + blb_path, std::ios::binary);
 
 	// Skip a pointer - vtable or allocator probably?
 	in.seekg(sizeof(void*), std::ios::cur);
@@ -137,8 +162,8 @@ DieselDB::DieselDB()
 	struct LanguageData
 	{
 		idstring name;
-		int id;
-		int padding; // Probably padding, at least - always zero
+		uint32_t id;
+		uint32_t padding; // Probably padding, at least - always zero
 	};
 	static_assert(sizeof(LanguageData) == 16);
 	std::map<int, idstring> languages;
@@ -149,16 +174,17 @@ DieselDB::DieselDB()
 
 	// Sortmap
 	in.seekg(sizeof(void*) * 2, std::ios::cur);
+	in.seekg(sizeof(void*), std::ios::cur);
 
 	// Files
 	struct MiniFile
 	{
 		idstring type;
 		idstring name;
-		int32_t langId;
-		int32_t zero_1;
-		int32_t fileId;
-		int32_t zero_2;
+		uint32_t langId;
+		uint32_t zero_1;
+		uint32_t fileId;
+		uint32_t zero_2;
 	};
 	static_assert(sizeof(MiniFile) == 32); // Same on 32 and 64 bit
 	std::vector<MiniFile> miniFiles = loadVector<MiniFile>(in, 0);
@@ -167,12 +193,18 @@ DieselDB::DieselDB()
 	for (size_t i = 0; i < miniFiles.size(); i++)
 	{
 		MiniFile& mini = miniFiles[i];
-		// printf("File: %016llx.%016llx\n", mini.name, mini.type);
+		//printf("File: %016llx.%016llx\n", mini.name, mini.type);
+
 		assert(mini.zero_1 == 0);
 		assert(mini.zero_2 == 0);
 
 		// Since the file IDs form a sequence of 1 upto the file count (though not in
 		// order), we can use those as indexes into our file list.
+
+		if (mini.fileId > filesList.size()) {
+			filesList.resize(mini.fileId);
+		}
+
 		DslFile& fi = filesList.at(mini.fileId - 1);
 
 		fi.name = mini.name;
@@ -199,10 +231,11 @@ DieselDB::DieselDB()
 		files[fi.Key()] = &fi;
 	}
 
-	// printf("File count: %ld\n", files.size());
+	//printf("File count: %ld\n", files.size());
 
 	// Load each of the bundle headers
 	std::string suffix = "_h.bundle";
+	std::string prefix = "all_";
 	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
 	{
 		if (name.length() <= suffix.size())
@@ -211,11 +244,10 @@ DieselDB::DieselDB()
 			continue;
 		if (name == "all_h.bundle")
 			continue; // all_h handling later
-		if (name.size() != 25)
-		{
-			PD2HOOK_LOG_WARN("Invalid bundle name '" + name + "' - ignoring");
-			continue;
-		}
+
+		bool package = true;
+		if (name.compare(0, prefix.size(), prefix) == 0)
+			package = false;
 
 		std::string headerPath = "assets/" + name;
 
@@ -223,14 +255,11 @@ DieselDB::DieselDB()
 		std::string dataPath = headerPath;
 		dataPath.erase(dataPath.end() - 9, dataPath.end() - 7);
 
-		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
-		auto* bundle = new DieselBundle();
-		bundle->headerPath = headerPath;
-		bundle->path = dataPath;
-		loadPackageHeader(bundle, filesList);
+		if (package)
+			loadPackageHeader(headerPath, dataPath, filesList);
+		else
+			loadBundleHeader(headerPath, dataPath, filesList);
 	}
-
-	loadBundleHeader("assets/all_h.bundle", filesList);
 
 	// We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
 	uint64_t end_time = monotonicTimeMicros();
@@ -242,8 +271,13 @@ DieselDB::DieselDB()
 	PD2HOOK_LOG_LOG(buff);
 }
 
-static void loadPackageHeader(DieselBundle* bundle, FileList files)
+static void loadPackageHeader(std::string headerPath, std::string dataPath, FileList files)
 {
+	// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
+	auto* bundle = new DieselBundle();
+	bundle->headerPath = headerPath;
+	bundle->path = dataPath;
+
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
 	in.open(bundle->headerPath, std::ios::binary);
@@ -278,11 +312,11 @@ static void loadPackageHeader(DieselBundle* bundle, FileList files)
 	// TODO set a length for the last file
 }
 
-static void loadBundleHeader(std::string filename, FileList files)
+static void loadBundleHeader(std::string headerPath, std::string dataPath, FileList files)
 {
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
-	in.open(filename, std::ios::binary);
+	in.open(headerPath, std::ios::binary);
 
 	// Skip an int, the length of the header
 	in.seekg(4, std::ios::cur);
@@ -290,15 +324,12 @@ static void loadBundleHeader(std::string filename, FileList files)
 	struct BundleInfo
 	{
 		intptr_t id;
-		intptr_t zero;
 		dsl_Vector vec;
+		intptr_t zero;
 		intptr_t one;
 	};
-#if defined(__x86_64__)
+
 	static_assert(sizeof(BundleInfo) == 48);
-#else
-	static_assert(sizeof(BundleInfo) == 28);
-#endif
 
 	struct ItemInfo
 	{
@@ -308,23 +339,23 @@ static void loadBundleHeader(std::string filename, FileList files)
 	};
 	static_assert(sizeof(ItemInfo) == 12); // True on 32/64 bit
 
-	for (BundleInfo bundle : loadVector<BundleInfo>(in, 4))
+	BundleInfo bundle = {0};
+	in.read((char*)&bundle, sizeof(bundle));
+
+	assert(bundle.zero == 0);
+	assert(bundle.one == 1);
+
+	// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
+	DieselBundle* dieselBundle = new DieselBundle();
+	dieselBundle->headerPath = headerPath;
+	dieselBundle->path = dataPath;
+
+	for (ItemInfo item : loadVector<ItemInfo>(in, 4, bundle.vec))
 	{
-		assert(bundle.zero == 0);
-		assert(bundle.one == 1);
-
-		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
-		DieselBundle* dieselBundle = new DieselBundle();
-		dieselBundle->headerPath = filename;
-		dieselBundle->path = "assets/all_" + std::to_string(bundle.id) + ".bundle";
-
-		for (ItemInfo item : loadVector<ItemInfo>(in, 4, bundle.vec))
-		{
-			DslFile* fi = &files.at(item.fileId - 1);
-			fi->bundle = dieselBundle;
-			fi->offset = item.offset;
-			fi->length = item.length;
-		}
+		DslFile* fi = &files.at(item.fileId - 1);
+		fi->bundle = dieselBundle;
+		fi->offset = item.offset;
+		fi->length = item.length;
 	}
 }
 

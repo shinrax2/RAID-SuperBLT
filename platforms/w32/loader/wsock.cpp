@@ -18,88 +18,93 @@
 // Or to generate the definition file, use
 //   awk 'BEGIN { print "EXPORTS" } { print $1 "=_WSOCK_EXPORT_" $1 " @" $4 } ' wsock.def.pre > wsock.def
 
-#define ALLFUNC(FUNC) \
-	FUNC(0,__WSAFDIsSet,151) \
-	FUNC(1,accept,1) \
-	FUNC(2,AcceptEx,1141) \
-	FUNC(3,bind,2) \
-	FUNC(4,closesocket,3) \
-	FUNC(5,connect,4) \
-	FUNC(6,dn_expand,1106) \
-	FUNC(7,EnumProtocolsA,1111) \
-	FUNC(8,EnumProtocolsW,1112) \
-	FUNC(9,GetAcceptExSockaddrs,1142) \
-	FUNC(10,GetAddressByNameA,1109) \
-	FUNC(11,GetAddressByNameW,1110) \
-	FUNC(12,gethostbyaddr,51) \
-	FUNC(13,gethostbyname,52) \
-	FUNC(14,gethostname,57) \
-	FUNC(15,GetNameByTypeA,1115) \
-	FUNC(16,GetNameByTypeW,1116) \
-	FUNC(17,getnetbyname,1101) \
-	FUNC(18,getpeername,5) \
-	FUNC(19,getprotobyname,53) \
-	FUNC(20,getprotobynumber,54) \
-	FUNC(21,getservbyname,55) \
-	FUNC(22,getservbyport,56) \
-	FUNC(23,GetServiceA,1119) \
-	FUNC(24,GetServiceW,1120) \
-	FUNC(25,getsockname,6) \
-	FUNC(26,getsockopt,7) \
-	FUNC(27,GetTypeByNameA,1113) \
-	FUNC(28,GetTypeByNameW,1114) \
-	FUNC(29,htonl,8) \
-	FUNC(30,htons,9) \
-	FUNC(31,inet_addr,10) \
-	FUNC(32,inet_network,1100) \
-	FUNC(33,inet_ntoa,11) \
-	FUNC(34,ioctlsocket,12) \
-	FUNC(35,listen,13) \
-	FUNC(36,MigrateWinsockConfiguration,24) \
-	FUNC(37,NPLoadNameSpaces,1130) \
-	FUNC(38,ntohl,14) \
-	FUNC(39,ntohs,15) \
-	FUNC(40,rcmd,1102) \
-	FUNC(41,recv,16) \
-	FUNC(42,recvfrom,17) \
-	FUNC(43,rexec,1103) \
-	FUNC(44,rresvport,1104) \
-	FUNC(45,s_perror,1108) \
-	FUNC(46,select,18) \
-	FUNC(47,send,19) \
-	FUNC(48,sendto,20) \
-	FUNC(49,sethostname,1105) \
-	FUNC(50,SetServiceA,1117) \
-	FUNC(51,SetServiceW,1118) \
-	FUNC(52,setsockopt,21) \
-	FUNC(53,shutdown,22) \
-	FUNC(54,socket,23) \
-	FUNC(55,TransmitFile,1140) \
-	FUNC(56,WEP,500) \
-	FUNC(57,WSAAsyncGetHostByAddr,102) \
-	FUNC(58,WSAAsyncGetHostByName,103) \
-	FUNC(59,WSAAsyncGetProtoByName,105) \
-	FUNC(60,WSAAsyncGetProtoByNumber,104) \
-	FUNC(61,WSAAsyncGetServByName,107) \
-	FUNC(62,WSAAsyncGetServByPort,106) \
-	FUNC(63,WSAAsyncSelect,101) \
-	FUNC(64,WSACancelAsyncRequest,108) \
-	FUNC(65,WSACancelBlockingCall,113) \
-	FUNC(66,WSACleanup,116) \
-	FUNC(67,WSAGetLastError,111) \
-	FUNC(68,WSAIsBlocking,114) \
-	FUNC(69,WSApSetPostRoutine,1000) \
-	FUNC(70,WSARecvEx,1107) \
-	FUNC(71,WSASetBlockingHook,109) \
-	FUNC(72,WSASetLastError,112) \
-	FUNC(73,WSAStartup,115) \
-	FUNC(74,WSAUnhookBlockingHook,110) \
-
-#define ALLFUNC_COUNT 75
+#define ALLFUNC(FUNC)                 \
+	FUNC(__WSAFDIsSet)                \
+	FUNC(accept)                      \
+	FUNC(AcceptEx)                    \
+	FUNC(bind)                        \
+	FUNC(closesocket)                 \
+	FUNC(connect)                     \
+	FUNC(dn_expand)                   \
+	FUNC(EnumProtocolsA)              \
+	FUNC(EnumProtocolsW)              \
+	FUNC(GetAcceptExSockaddrs)        \
+	FUNC(GetAddressByNameA)           \
+	FUNC(GetAddressByNameW)           \
+	FUNC(gethostbyaddr)               \
+	FUNC(gethostbyname)               \
+	FUNC(gethostname)                 \
+	FUNC(GetNameByTypeA)              \
+	FUNC(GetNameByTypeW)              \
+	FUNC(getnetbyname)                \
+	FUNC(getpeername)                 \
+	FUNC(getprotobyname)              \
+	FUNC(getprotobynumber)            \
+	FUNC(getservbyname)               \
+	FUNC(getservbyport)               \
+	FUNC(GetServiceA)                 \
+	FUNC(GetServiceW)                 \
+	FUNC(getsockname)                 \
+	FUNC(getsockopt)                  \
+	FUNC(GetTypeByNameA)              \
+	FUNC(GetTypeByNameW)              \
+	FUNC(htonl)                       \
+	FUNC(htons)                       \
+	FUNC(inet_addr)                   \
+	FUNC(inet_network)                \
+	FUNC(inet_ntoa)                   \
+	FUNC(ioctlsocket)                 \
+	FUNC(listen)                      \
+	FUNC(MigrateWinsockConfiguration) \
+	FUNC(NPLoadNameSpaces)            \
+	FUNC(ntohl)                       \
+	FUNC(ntohs)                       \
+	FUNC(rcmd)                        \
+	FUNC(recv)                        \
+	FUNC(recvfrom)                    \
+	FUNC(rexec)                       \
+	FUNC(rresvport)                   \
+	FUNC(s_perror)                    \
+	FUNC(select)                      \
+	FUNC(send)                        \
+	FUNC(sendto)                      \
+	FUNC(sethostname)                 \
+	FUNC(SetServiceA)                 \
+	FUNC(SetServiceW)                 \
+	FUNC(setsockopt)                  \
+	FUNC(shutdown)                    \
+	FUNC(socket)                      \
+	FUNC(TransmitFile)                \
+	FUNC(WEP)                         \
+	FUNC(WSAAsyncGetHostByAddr)       \
+	FUNC(WSAAsyncGetHostByName)       \
+	FUNC(WSAAsyncGetProtoByName)      \
+	FUNC(WSAAsyncGetProtoByNumber)    \
+	FUNC(WSAAsyncGetServByName)       \
+	FUNC(WSAAsyncGetServByPort)       \
+	FUNC(WSAAsyncSelect)              \
+	FUNC(WSACancelAsyncRequest)       \
+	FUNC(WSACancelBlockingCall)       \
+	FUNC(WSACleanup)                  \
+	FUNC(WSAGetLastError)             \
+	FUNC(WSAIsBlocking)               \
+	FUNC(WSApSetPostRoutine)          \
+	FUNC(WSARecvEx)                   \
+	FUNC(WSASetBlockingHook)          \
+	FUNC(WSASetLastError)             \
+	FUNC(WSAStartup)                  \
+	FUNC(WSAUnhookBlockingHook)       \
 
 #pragma endregion
 
-FARPROC p[ALLFUNC_COUNT] = { 0 };
+// For some reason PhysX explodes if you store these in an array on 64-bit! I have no idea why, but it's fine if we use
+// a struct, so...
+struct farproc_dll
+{
+#define STRUCT(name) FARPROC o##name;
+	ALLFUNC(STRUCT)
+#undef STRUCT
+} farproc;
 
 namespace pd2hook
 {
@@ -146,7 +151,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		State->hL = hL;
 
 		// Load the addresses for all the functions
-#define REGISTER(num, name, ordinal) p[num] = GetProcAddress(hL, #name);
+#define REGISTER(name) farproc.o##name = GetProcAddress(hL, #name);
 		ALLFUNC(REGISTER);
 #undef REGISTER
 
@@ -170,16 +175,35 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 	return 1;
 }
 
-#define DEF_STUB(num, name, ordinal) \
-extern "C" __declspec(naked) void __stdcall _WSOCK_EXPORT_ ## name() \
-{ \
-	__asm \
-	{ \
-		jmp p[num * 4] \
-	} \
-};\
+extern "C"
+{
+	FARPROC PA = 0;
 
-ALLFUNC(DEF_STUB)
-#undef DEF_STUB
+#if defined(_M_AMD64)
+	int jumpToPA();
+
+	#define DEF_STUB(name) \
+	void _WSOCK_EXPORT_##name() \
+	{ \
+		PA = farproc.o##name; \
+		jumpToPA(); \
+	}; \
+
+	ALLFUNC(DEF_STUB)
+	#undef DEF_STUB
+
+#else
+	#define DEF_STUB(name) \
+	extern "C" __declspec(naked) void __stdcall _WSOCK_EXPORT_##name() { \
+		__asm { \
+			jmp farproc.o##name \
+		} \
+	}; \
+
+	ALLFUNC(DEF_STUB)
+	#undef DEF_STUB
+
+#endif
+}
 
 #endif

@@ -5,11 +5,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-
-#ifdef _WIN32
 #include <windows.h>
-#endif
-
 #include <platform.h>
 #include "lua.h"
 
@@ -181,8 +177,6 @@ namespace pd2hook
 #define PD2HOOK_TRACE_FUNC_MSG(msg)
 #endif
 
-#ifdef _WIN32
-
 #define PD2HOOK_LOG_LEVEL(msg, level, file, line, ...) do { \
 	unsigned int color = 0; \
 	for (auto colour_i : {__VA_ARGS__}) { \
@@ -199,19 +193,6 @@ namespace pd2hook
 		writer << msg; \
 		writer.write(logger); \
 	}} while (false)
-
-#elif __GNUC__
-
-// TODO UNIX text colouring
-#define PD2HOOK_LOG_LEVEL(msg, level, file, line, ...) do { \
-	auto& logger = pd2hook::Logging::Logger::Instance(); \
-	if(level >= logger.getLoggingLevel()) { \
-		pd2hook::Logging::LogWriter writer(file, line, level); \
-		writer << msg; \
-		writer.write(logger); \
-	}} while (false)
-
-#endif
 
 #define PD2HOOK_LOG_FUNC(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_FUNC, __FILE__, 0, FOREGROUND_BLUE, FOREGROUND_GREEN, FOREGROUND_INTENSITY)
 #define PD2HOOK_LOG_LOG(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_LOG, __FILE__, __LINE__, FOREGROUND_BLUE, FOREGROUND_GREEN, FOREGROUND_INTENSITY)

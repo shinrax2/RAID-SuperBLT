@@ -299,12 +299,8 @@ static void wrenLoadAssetContents(WrenVM* vm)
 	}
 	catch (const std::ios::failure& ex)
 	{
-#ifdef _WIN32
 		char err_buff[128];
 		strerror_s(err_buff, sizeof(err_buff), errno);
-#else
-		const char* err_buff = strerror(errno);
-#endif
 		std::string msg =
 			std::string("Failed to read asset - IO error: ") + std::string(err_buff) + " " + std::string(ex.what());
 		wrenSetSlotString(vm, 0, msg.c_str());
@@ -350,13 +346,9 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			         asset_file.name, asset_file.ext);
 			PD2HOOK_LOG_ERROR(buff);
 
-#ifdef _WIN32
 			MessageBox(nullptr, "Failed to load hooked file - file not found. See log for more information.",
 			           "Wren Error", MB_OK);
 			ExitProcess(1);
-#else
-			abort();
-#endif
 		}
 
 		*out_datastore = ds;
@@ -377,13 +369,9 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			         bundle_item.name, bundle_item.ext, asset_file.name, asset_file.ext);
 			PD2HOOK_LOG_ERROR(buff);
 
-#ifdef _WIN32
 			MessageBox(nullptr, "Failed to load hooked asset - file not found. See log for more information.",
 			           "Wren Error", MB_OK);
 			ExitProcess(1);
-#else
-			abort();
-#endif
 		}
 
 		BLTAbstractDataStore* ds = DieselDB::Instance()->Open(file->bundle);
@@ -437,12 +425,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			         asset_file.name, asset_file.ext);
 			PD2HOOK_LOG_ERROR(buff);
 
-#ifdef _WIN32
 			MessageBox(nullptr, "Failed to load Wren-based asset - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
-#else
-			abort();
-#endif
 		}
 
 		// Get the wrapper, and make sure it's valid
@@ -455,12 +439,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			         "Wren load_file function return invalid class or null - for asset " IDPFP " ptr %p",
 			         asset_file.name, asset_file.ext, ff);
 			PD2HOOK_LOG_ERROR(buff);
-#ifdef _WIN32
 			MessageBox(nullptr, "Failed to load Wren-based asset - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
-#else
-			abort();
-#endif
 		}
 
 		// Now load it's value
@@ -482,12 +462,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		{
 			// Should never happen
 			PD2HOOK_LOG_ERROR("No output contents set for DBForeignFile");
-#ifdef _WIN32
 			MessageBox(nullptr, "Failed to load Wren-based asset - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
-#else
-			abort();
-#endif
 		}
 	}
 	else

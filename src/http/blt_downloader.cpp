@@ -1,7 +1,3 @@
-// TODO GNU+Linux support
-
-#ifdef _WIN32
-
 #include "http.h"
 #include "util/util.h"
 #include <curl/curl.h>
@@ -91,10 +87,8 @@ void pd2hook::download_blt()
 	DeleteFile(OUT_FILE_NAME);
 
 	SetConsoleTextAttribute(hStdout, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	printf("Installation complete. Please restart PAYDAY 2.\n");
+	printf("Installation complete. Please restart the game.\n");
 
-	MessageBox(0, "The installation has finished.\nPlease restart PAYDAY 2.", "BLT Downloader", MB_OK);
+	MessageBox(0, "The installation has finished.\nPlease restart the game.", "SuperBLT Downloader", MB_OK);
 	exit(0);
 }
-
-#endif

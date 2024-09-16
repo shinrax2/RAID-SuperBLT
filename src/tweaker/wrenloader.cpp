@@ -185,9 +185,7 @@ static void internal_warn_bad_mod(WrenVM* vm)
 	// it in a bug report for whatever reason.
 	PD2HOOK_LOG_ERROR(message.c_str());
 
-#ifdef _WIN32
 	MessageBoxA(0, message.c_str(), "SuperBLT: Failed to load Wren mod", MB_OK);
-#endif
 }
 
 static WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* class_name)
@@ -505,12 +503,8 @@ WrenVM* pd2hook::wren::get_wren_vm()
 		{
 			PD2HOOK_LOG_ERROR("Wren init failed: compile or runtime error!");
 
-#ifdef _WIN32
 			MessageBox(nullptr, "Failed to initialise the Wren system - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
-#else
-			abort();
-#endif
 		}
 	}
 

@@ -5,7 +5,6 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <atlstr.h>
 #include <sstream>
 #include <fstream>
 #include <map>
@@ -72,47 +71,17 @@ namespace pd2hook
 		return 1;
 	}
 
-	static void startVR()
-	{
-		char exe[] = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\payday2_win32_release_vr.exe";
-		LPSTR args = GetCommandLineA(); // Leave the original EXE name in there. PD2 doesn't seem to care. Was: "payday2_win32_release_vr.exe";
-		PD2HOOK_LOG_LOG("Exec: Starting " + string(exe));
-		Sleep(1000);
-
-		// additional information
-		STARTUPINFOA si;
-		PROCESS_INFORMATION pi;
-
-		// set the size of the structures
-		ZeroMemory(&si, sizeof(si));
-		si.cb = sizeof(si);
-		ZeroMemory(&pi, sizeof(pi));
-
-		// start the program up
-		CreateProcessA
-		(
-		    exe,   // the path
-		    args,                // Command line
-		    NULL,                   // Process handle not inheritable
-		    NULL,                   // Thread handle not inheritable
-		    FALSE,                  // Set handle inheritance to FALSE
-		    CREATE_NEW_CONSOLE,     // Opens file in a separate console
-		    NULL,           // Use parent's environment block
-		    NULL,           // Use parent's starting directory
-		    &si,            // Pointer to STARTUPINFO structure
-		    &pi           // Pointer to PROCESS_INFORMATION structure
-		);
-		// Close process and thread handles.
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-
-		// Quit now
-		ExitProcess(0);
-	}
-
 	bool DebugConnection::IsLoaded()
 	{
 		return connection != NULL;
+	}
+
+	static std::string LPWSTRtoString(const LPWSTR wstr)
+	{
+		int count = WideCharToMultiByte(CP_UTF8, 0, wstr, wcslen(wstr), NULL, 0, NULL, NULL);
+		std::string str(count, 0);
+		WideCharToMultiByte(CP_UTF8, 0, wstr, -1, &str[0], count, NULL, NULL);
+		return str;
 	}
 
 	void DebugConnection::Initialize()
@@ -145,12 +114,12 @@ namespace pd2hook
 					break;
 				}
 
-				string params = CW2A(szArglist[i + 1]);
+				string params = LPWSTRtoString(szArglist[i + 1]);
 				ConnectFromParameters(params);
 
 				// PD2HOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
 			}
-			else if (!StrCmpW(L"--debug-lua-param", szArglist[i]))
+			else if (!lstrcmpW(L"--debug-lua-param", szArglist[i]))
 			{
 				if (i >= nArgs - 2)
 				{
@@ -158,8 +127,8 @@ namespace pd2hook
 					break;
 				}
 
-				string name = CW2A(szArglist[i + 1]);
-				string value = CW2A(szArglist[i + 2]);
+				string name = LPWSTRtoString(szArglist[i + 1]);
+				string value = LPWSTRtoString(szArglist[i + 2]);
 				parameters[name] = value;
 			}
 		}
@@ -237,7 +206,7 @@ namespace pd2hook
 	{
 		lua_State* L = (lua_State*)state;
 
-		luaL_Reg vrLib[] =
+		luaL_Reg debuggerLib[] =
 		{
 			{ "is_loaded", luaF_isloaded },
 			{ "send_message", luaF_send_message },
@@ -245,7 +214,7 @@ namespace pd2hook
 			{ "get_parameter", luaF_get_param },
 			{ NULL, NULL }
 		};
-		luaL_openlib(L, "blt_debugger", vrLib, 0);
+		luaL_openlib(L, "blt_debugger", debuggerLib, 0);
 	}
 
 	void DebugConnection::Log(std::string message)
@@ -491,7 +460,7 @@ return true
 			APPLY;
 		case MCGT_StartVR:
 			// Relaunch to VR
-			startVR();
+			throw "VR is not supported.";
 			APPLY;
 		case MCGT_LuaMessage:
 			// Read an arbitary string to pass to Lua

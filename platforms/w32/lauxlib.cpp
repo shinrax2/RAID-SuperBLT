@@ -93,6 +93,8 @@ int lj_obj_equal(cTValue *o1, cTValue *o2);
 
 // Note we have to implement lua_rawequal ourselves, since it's
 // never used in PD2 and thus is eaten by the linker.
+// 
+// From what I can tell it technically exists in RAID, but it's not really worth making a bunch of exceptions when this works.
 int lua_rawequal(lua_State *L, int idx1, int idx2) {
 	cTValue *tv1 = (TValue*)index2adr(L, idx1);
 	cTValue *tv2 = (TValue*)index2adr(L, idx2);

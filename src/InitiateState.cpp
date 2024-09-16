@@ -29,12 +29,12 @@ namespace pd2hook
 {
 
 	std::list<lua_State*> activeStates;
-	void add_active_state(lua_State* L)
+	static void add_active_state(lua_State* L)
 	{
 		activeStates.push_back(L);
 	}
 
-	void remove_active_state(lua_State* L)
+	static void remove_active_state(lua_State* L)
 	{
 		activeStates.remove(L);
 	}
@@ -54,7 +54,7 @@ namespace pd2hook
 
 	// Not tracking the error count here so it can automatically be reset to 0 whenever the Lua state is deleted and re-created (e.g.
 	// when transitioning to / from the menu to a level)
-	void NotifyErrorOverlay(lua_State* L, const char* message)
+	static void NotifyErrorOverlay(lua_State* L, const char* message)
 	{
 		lua_getglobal(L, "NotifyErrorOverlay");
 		if (lua_isfunction(L, -1))
@@ -87,7 +87,7 @@ namespace pd2hook
 	}
 
 	// TODO deduplicate with that in LuaAsyncIO
-	void handled_pcall(lua_State *L, int nargs, int nresults)
+	static void handled_pcall(lua_State* L, int nargs, int nresults)
 	{
 		int err = lua_pcall(L, nargs, nresults, 0);
 		if (err == LUA_ERRRUN)
@@ -97,13 +97,13 @@ namespace pd2hook
 		}
 	}
 
-	int luaF_ispcallforced(lua_State* L)
+	static int luaF_ispcallforced(lua_State* L)
 	{
 		lua_pushboolean(L, blt::platform::lua::GetForcePCalls());
 		return 1;
 	}
 
-	int luaF_forcepcalls(lua_State* L)
+	static int luaF_forcepcalls(lua_State* L)
 	{
 		int args = lua_gettop(L);	// Number of arguments
 		if (args < 1)
@@ -116,35 +116,7 @@ namespace pd2hook
 		return 0;
 	}
 
-	bool vrMode = false;
-
-	int luaF_getvrstate(lua_State* L)
-	{
-		lua_pushboolean(L, vrMode);
-		return 1;
-	}
-
-	/* // TODO enable me
-	int luaF_isvrhookloaded(lua_State* L) {
-		lua_pushboolean(L, VRManager::GetInstance()->IsLoaded());
-		return 1;
-	}
-
-	int luaF_gethmdbrand(lua_State* L) {
-		std::string hmd = VRManager::GetInstance()->GetHMDBrand();
-		lua_pushstring(L, hmd.c_str());
-		return 1;
-	}
-
-	int luaF_getbuttonstate(lua_State* L) {
-		int id = lua_tonumber(L, -1);
-		lua_remove(L, -1);
-		lua_pushinteger(L, VRManager::GetInstance()->GetButtonsStatus(id));
-		return 1;
-	}
-	*/
-
-	int luaH_getcontents(lua_State* L, bool files)
+	static int luaH_getcontents(lua_State* L, bool files)
 	{
 		size_t len;
 		const char* dirc = lua_tolstring(L, 1, &len);
@@ -179,17 +151,17 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_getdir(lua_State* L)
+	static int luaF_getdir(lua_State* L)
 	{
 		return luaH_getcontents(L, true);
 	}
 
-	int luaF_getfiles(lua_State* L)
+	static int luaF_getfiles(lua_State* L)
 	{
 		return luaH_getcontents(L, false);
 	}
 
-	int luaF_directoryExists(lua_State* L)
+	static int luaF_directoryExists(lua_State* L)
 	{
 		size_t len;
 		const char* dirc = lua_tolstring(L, 1, &len);
@@ -198,7 +170,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_fileExists(lua_State* L)
+	static int luaF_fileExists(lua_State* L)
 	{
 		size_t len;
 		const char* dirc = lua_tolstring(L, 1, &len);
@@ -207,7 +179,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_unzipfile(lua_State* L)
+	static int luaF_unzipfile(lua_State* L)
 	{
 		size_t len;
 		const char* archivePath = lua_tolstring(L, 1, &len);
@@ -218,7 +190,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_removeDirectory(lua_State* L)
+	static int luaF_removeDirectory(lua_State* L)
 	{
 		size_t len;
 		const char* directory = lua_tolstring(L, 1, &len);
@@ -227,7 +199,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_pcall(lua_State* L)
+	static int luaF_pcall(lua_State* L)
 	{
 		int args = lua_gettop(L) - 1;
 
@@ -261,7 +233,7 @@ namespace pd2hook
 		return lua_gettop(L);
 	}
 
-	int luaF_pcall_proper(lua_State* L)
+	static int luaF_pcall_proper(lua_State* L)
 	{
 		luaL_checkany(L, 1);
 		int status = lua_pcall(L, lua_gettop(L) - 1, LUA_MULTRET, 0);
@@ -270,7 +242,7 @@ namespace pd2hook
 		return lua_gettop(L); // return status + all results
 	}
 
-	int luaF_xpcall(lua_State *L)
+	static int luaF_xpcall(lua_State* L)
 	{
 		// Args: func, err, ...
 
@@ -288,7 +260,7 @@ namespace pd2hook
 		return lua_gettop(L);  // return entire stack - status, possible err + all results
 	}
 
-	int luaF_dofile(lua_State* L)
+	static int luaF_dofile(lua_State* L)
 	{
 		size_t length = 0;
 		const char* filename = lua_tolstring(L, 1, &length);
@@ -330,20 +302,13 @@ namespace pd2hook
 
 	struct lua_http_data
 	{
-		int funcRef
-#ifdef __GNUC__
-		// Prevent crashes on GNU+Linux when compiled with Clang due to alignment issues surrounding SSE
-		// See https://github.com/blt4linux/blt4l/pull/90
-		__attribute__((aligned(16))) // Why, Clang, Why! Using misaligned floating point ops for ints!
-#endif
-		;
-
+		int funcRef;
 		int progressRef;
 		int requestIdentifier;
 		lua_State* L;
 	};
 
-	void return_lua_http(HTTPItem* httpItem)
+	static void return_lua_http(HTTPItem* httpItem)
 	{
 		lua_http_data* ourData = (lua_http_data*)httpItem->data;
 		if (!check_active_state(ourData->L))
@@ -382,7 +347,7 @@ namespace pd2hook
 		delete ourData;
 	}
 
-	void progress_lua_http(void* data, long progress, long total)
+	static void progress_lua_http(void* data, long progress, long total)
 	{
 		lua_http_data* ourData = (lua_http_data*)data;
 
@@ -399,7 +364,7 @@ namespace pd2hook
 		lua_pcall(ourData->L, 3, 0, 0);
 	}
 
-	void call_hash_result(lua_State *L, int ref, std::string filename, std::string result)
+	static void call_hash_result(lua_State* L, int ref, std::string filename, std::string result)
 	{
 		if (!check_active_state(L))
 		{
@@ -414,7 +379,7 @@ namespace pd2hook
 		luaL_unref(L, LUA_REGISTRYINDEX, ref);
 	}
 
-	int luaF_directoryhash(lua_State* L)
+	static int luaF_directoryhash(lua_State* L)
 	{
 		size_t length = 0;
 		const char* filename = lua_tolstring(L, 1, &length);
@@ -441,7 +406,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_filehash(lua_State* L)
+	static int luaF_filehash(lua_State* L)
 	{
 		size_t l = 0;
 		const char * filename = lua_tolstring(L, 1, &l);
@@ -469,7 +434,7 @@ namespace pd2hook
 
 	static int HTTPReqIdent = 0;
 
-	int luaF_dohttpreq(lua_State* L)
+	static int luaF_dohttpreq(lua_State* L)
 	{
 		int args = lua_gettop(L);
 		int progressReference = 0;
@@ -508,14 +473,14 @@ namespace pd2hook
 		return 1;
 	}
 
-	/*int luaF_createconsole(lua_State* L) // TODO reenable
+	/*static int luaF_createconsole(lua_State* L) // TODO reenable
 	{
 		if (gbl_mConsole) return 0;
 		gbl_mConsole = new CConsole();
 		return 0;
 	}
 
-	int luaF_destroyconsole(lua_State* L)
+	static int luaF_destroyconsole(lua_State* L)
 	{
 		if (!gbl_mConsole) return 0;
 		delete gbl_mConsole;
@@ -523,7 +488,7 @@ namespace pd2hook
 		return 0;
 	}*/
 
-	int luaF_print(lua_State* L)
+	static int luaF_print(lua_State* L)
 	{
 		int top = lua_gettop(L);
 		std::stringstream stream;
@@ -546,7 +511,7 @@ namespace pd2hook
 		return 0;
 	}
 
-	int luaF_moveDirectory(lua_State * L)
+	static int luaF_moveDirectory(lua_State* L)
 	{
 		size_t lf = 0;
 		const char * fromStr = lua_tolstring(L, 1, &lf);
@@ -558,7 +523,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_createDirectory(lua_State * L)
+	static int luaF_createDirectory(lua_State* L)
 	{
 		const char *path = lua_tostring(L, 1);
 		bool success = Util::CreateDirectorySingle(path);
@@ -566,7 +531,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	void build_xml_tree(lua_State *L, mxml_node_t *node)
+	static void build_xml_tree(lua_State* L, mxml_node_t* node)
 	{
 		// Create the main table
 		lua_newtable(L);
@@ -609,7 +574,7 @@ namespace pd2hook
 		mxml_last_error = error;
 	}
 
-	int luaF_parsexml(lua_State * L)
+	static int luaF_parsexml(lua_State* L)
 	{
 		const char *xml = lua_tostring(L, 1);
 
@@ -654,7 +619,7 @@ namespace pd2hook
 	}
 
 	// Basically the same thing as lua_topointer
-	int luaF_structid(lua_State * L)
+	static int luaF_structid(lua_State* L)
 	{
 		if (lua_gettop(L) != 1)
 		{
@@ -697,7 +662,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_ignoretweak(lua_State* L)
+	static int luaF_ignoretweak(lua_State* L)
 	{
 		blt::idfile file;
 
@@ -709,7 +674,7 @@ namespace pd2hook
 		return 0;
 	}
 
-	int luaF_load_native(lua_State* L)
+	static int luaF_load_native(lua_State* L)
 	{
 		std::string file(lua_tostring(L, 1));
 
@@ -742,7 +707,7 @@ namespace pd2hook
 		}
 	}
 
-	int luaF_blt_info(lua_State* L)
+	static int luaF_blt_info(lua_State* L)
 	{
 		lua_newtable(L);
 
@@ -751,21 +716,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	void load_vr_globals(lua_State *L)
-	{
-		luaL_Reg vrLib[] =
-		{
-			{ "getvrstate", luaF_getvrstate },
-			/*{ "isvrhookloaded", luaF_isvrhookloaded }, // TODO enable me
-			{ "gethmdbrand", luaF_gethmdbrand },
-			{ "getbuttonstate", luaF_getbuttonstate },*/
-			{ NULL, NULL }
-		};
-		luaL_openlib(L, "blt_vr", vrLib, 0);
-		lua_pop(L, 1);
-	}
-
-	int luaF_sd_identify(lua_State *L)
+	static int luaF_sd_identify(lua_State* L)
 	{
 		size_t len;
 		const char *data = lua_tolstring(L, 1, &len);
@@ -780,7 +731,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_sd_recode(lua_State *L)
+	static int luaF_sd_recode(lua_State* L)
 	{
 		size_t len;
 		const char *data = lua_tolstring(L, 1, &len);
@@ -801,7 +752,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	void load_scriptdata_library(lua_State *L)
+	static void load_scriptdata_library(lua_State* L)
 	{
 		luaL_Reg items[] =
 		{
@@ -816,7 +767,7 @@ namespace pd2hook
 
 	int updates = 0;
 
-	void luaF_close(lua_State* L)
+	static void luaF_close(lua_State* L)
 	{
 		remove_active_state(L);
 		lua_close(L);
@@ -830,10 +781,6 @@ namespace pd2hook
 #endif
 
 		blt::platform::InitPlatform();
-
-		// Start loading the DB concurrently, so (hopefully) it's done by the time we first use it
-		std::thread db_loader([]() { blt::db::DieselDB::Instance(); });
-		db_loader.detach();
 	}
 
 	void DestroyStates()
@@ -897,11 +844,10 @@ namespace blt
 			{
 				setup_check_done = true;
 
-#ifdef _WIN32 // TODO GNU+Linux support
 				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base")))
 				{
-					int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
-					                        "This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
+					int result = MessageBox(NULL, "Do you want to download the Diesel SuperBLT basemod?\n"
+					                        "This is required for using mods", "SuperBLT 'mods/base' folder missing", MB_YESNO);
 					if (result == IDYES) download_blt();
 
 					return;
@@ -910,13 +856,12 @@ namespace blt
 				if (!Util::DirectoryExists("mods/base/wren"))
 				{
 					int result = MessageBoxA(NULL, "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
-					                         "Please delete your 'mods/base' folder, and run PAYDAY 2 again to automatically download a compatible version",
+					                         "Please delete your 'mods/base' folder, and run the game again to automatically download a compatible version",
 					                         "BLT basemod outdated", MB_OK);
 
 					exit(1);
 					return;
 				}
-#endif
 			}
 
 			lua_pushcclosure(L, luaF_print, 0);
@@ -986,11 +931,6 @@ namespace blt
 
 			lua_pop(L, 1); // pop the BLT library
 
-			if (vrMode)
-			{
-				load_vr_globals(L);
-			}
-
 #ifdef ENABLE_DEBUG
 			DebugConnection::AddGlobals(L);
 #endif
@@ -1031,7 +971,7 @@ namespace blt
 			remove_active_state(L);
 		}
 
-		void update(lua_State *L)
+		void update()
 		{
 			if (updates == 0)
 			{
@@ -1043,13 +983,16 @@ namespace blt
 				EventQueueMaster::GetSingleton().ProcessEvents();
 			}
 
+			for (lua_State*& state : activeStates)
+			{
 #ifdef ENABLE_DEBUG
-			DebugConnection::Update(L);
+				DebugConnection::Update(state);
 #endif
 
-			for (plugins::Plugin *plugin : plugins::GetPlugins())
-			{
-				plugin->Update(L);
+				for (plugins::Plugin *plugin : plugins::GetPlugins())
+				{
+					plugin->Update(state);
+				}
 			}
 
 			updates++;

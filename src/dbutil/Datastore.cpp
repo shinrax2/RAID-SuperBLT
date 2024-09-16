@@ -6,12 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
 #include <io.h>
 #define lseek64 _lseeki64
-#else
-#include <unistd.h>
-#endif
 
 // BLTAbstractDataStore
 
@@ -38,11 +34,7 @@ uint64_t BLTAbstractDataStore::state()
 
 BLTFileDataStore* BLTFileDataStore::Open(std::string filePath)
 {
-	int flags = O_RDONLY;
-#ifdef _WIN32
-	// Windows Wart - suppress text file conversion
-	flags |= O_BINARY;
-#endif
+	int flags = O_RDONLY | O_BINARY;
 	int fd = open(filePath.c_str(), flags);
 
 	// Make sure the file opened correctly

@@ -2,10 +2,7 @@
 #include <lua.h>
 #include <string>
 #include <list>
-
-#ifdef WIN32
 #include <windows.h>
-#endif
 
 namespace blt
 {
