@@ -1,4 +1,5 @@
-# RAID-SuperBLT
+# RAID-SuperBLT ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/RAIDModding/RAID-SuperBLT/create_build.yml)
+
 An open-source Lua hook for RAID: World War II, designed and created for ease of use for both players and modders.
 
 This is an unofficial continuation of the BLT and SuperBLT mod loader for PAYDAY 2, with additional features aimed at allowing things
