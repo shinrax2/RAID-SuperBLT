@@ -1,0 +1,68 @@
+name: Create SBLT Build
+
+on:
+  push:
+    paths:
+      - src/**
+  pull_request:
+    paths:
+      - src/**
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: "Configure choco cache"
+      run: choco config set cacheLocation ./.choco-cache
+
+    - uses: actions/cache@v4
+      with:
+        path: ./.choco-cache
+        key: choco-cache
+
+    - name: Install Python3 and CMake
+      run: |
+        choco install -y python3
+        choco install -y cmake
+      shell: powershell
+
+    - name: Set environment paths
+      run: |
+         $env:Path += ';C:\Program Files\CMake\bin'
+      shell: powershell
+
+    - name: Initialize and update Git submodules
+      run: |
+        git submodule init
+        git submodule update
+      shell: bash
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+      # Step 5: Build the project
+    - name: Build with CMake and MSBuild
+      run: |
+        mkdir build
+        cd build
+        cmake .. -A x64 -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release
+        msbuild SuperBLT.sln /t:Build /p:Configuration=Release
+      shell: powershell
+
+      # Step 6: Upload build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build Artifacts
+        path: |
+          build/Release/IPHLPAPI.dll
+          build/Release/WSOCK32.dll
