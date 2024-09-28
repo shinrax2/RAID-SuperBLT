@@ -146,8 +146,8 @@ namespace pd2hook
 			{
 				logger.log(str());
 
-				//if (needsFlush)
-				logger.flush();
+				if (needsFlush)
+					logger.flush();
 			}
 
 		private:
