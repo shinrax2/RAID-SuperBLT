@@ -86,6 +86,6 @@ void load_lua_utils(lua_State *L)
 	};
 
 	lua_newtable(L);
-	luaL_openlib(L, nullptr, vmLib, 0);
+	luaL_register(L, nullptr, vmLib);
 	lua_setfield(L, -2, "vm");
 }

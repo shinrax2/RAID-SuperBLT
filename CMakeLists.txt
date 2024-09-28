@@ -62,11 +62,7 @@ file(GLOB_RECURSE wren_sources
 )
 add_library(wren STATIC ${wren_sources})
 target_include_directories(wren PRIVATE lib/wren/src/optional lib/wren/src/vm)
-if(MSVC)
-	target_compile_options(wren PRIVATE -D_CRT_SECURE_NO_WARNINGS)
-else()
-	target_compile_options(wren PRIVATE -std=c99 -Wall -fPIC)
-endif()
+target_compile_options(wren PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 target_include_directories(wren PUBLIC lib/wren/src/include)
 
 add_library(subhook STATIC lib/subhook/subhook.c)
@@ -110,14 +106,12 @@ target_compile_options(SuperBLT PRIVATE
 )
 
 # General optimisation breaks calls to certain lua functions, so replace it.
-if(MSVC)
-	# We statically link to reduce dependencies
-	foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-		if(${flag_var} MATCHES "/O2")
-			string(REGEX REPLACE "/O2" "/Od /Oi /Ot /Oy /Ob2 /GF /Gy" ${flag_var} "${${flag_var}}")
-		endif(${flag_var} MATCHES "/O2")
-	endforeach(flag_var)
-endif(MSVC)
+# We statically link to reduce dependencies
+foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+	if(${flag_var} MATCHES "/O2")
+		string(REGEX REPLACE "/O2" "/Od /Oi /Ot /Oy /Ob2 /GF /Gy" ${flag_var} "${${flag_var}}")
+	endif(${flag_var} MATCHES "/O2")
+endforeach(flag_var)
 
 # Link against libraries
 target_link_libraries(SuperBLT ws2_32.lib)
@@ -200,6 +194,11 @@ option(CMAKE_USE_WINSSL "" ON)
 add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
 target_link_libraries(libcurl crypto ssl)
 target_link_libraries(SuperBLT libcurl)
+
+#### LuaJIT ####
+
+add_subdirectory(src/luajit EXCLUDE_FROM_ALL)
+target_link_libraries(SuperBLT lua51)
 
 ###############################################################################
 ## loader binary (this generates a seperate target for both Windows loaders) ##
