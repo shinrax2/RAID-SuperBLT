@@ -258,6 +258,6 @@ void pd2hook::tweaker::lua_io::register_lua_functions(lua_State* L)
 	};
 
 	lua_newtable(L);
-	luaL_openlib(L, nullptr, vmLib, 0);
+	luaL_register(L, nullptr, vmLib);
 	lua_setfield(L, -2, "wren_io");
 }

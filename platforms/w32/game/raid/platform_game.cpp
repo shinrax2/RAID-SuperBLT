@@ -26,13 +26,13 @@ static void init_idstring_pointers()
 	blt::platform::last_loaded_ext = (blt::idstring*)tmp;
 }
 
-static int luaL_newstate_new(void* thislol, char no, char freakin, int clue)
+static int luaL_newstate_new(void* _this, char a, char b, int c)
 {
 	subhook::ScopedHookRemove scoped_remove(&newStateDetour);
 
-	int ret = luaL_newstate(thislol, no, freakin, clue);
+	int ret = luaL_newstate_exe(_this, a, b, c);
 
-	lua_State* L = (lua_State*)*((void**)thislol);
+	lua_State* L = (lua_State*)*((void**)_this);
 	printf("Lua State: %p\n", (void*)L);
 	if (!L) return ret;
 
@@ -41,7 +41,7 @@ static int luaL_newstate_new(void* thislol, char no, char freakin, int clue)
 	return ret;
 }
 
-static void* application_update_new(void* thislol, int* a, int* b)
+static void* application_update_new(void* _this, int* a, int* b)
 {
 	subhook::ScopedHookRemove scoped_remove(&applicationUpdateDetour);
 
@@ -50,7 +50,7 @@ static void* application_update_new(void* thislol, int* a, int* b)
 		blt::lua_functions::update();
 	}
 
-	return application_update(thislol, a, b);
+	return application_update(_this, a, b);
 }
 
 static void lua_close_new(lua_State* L)
@@ -105,8 +105,8 @@ static void setup_platform_game()
 	main_thread_id = std::this_thread::get_id();
 
 	applicationUpdateDetour.Install(application_update, application_update_new, subhook::HookOptions::HookOption64BitOffset);
-	newStateDetour.Install(luaL_newstate, luaL_newstate_new, subhook::HookOptions::HookOption64BitOffset);
-	luaCloseDetour.Install(lua_close, lua_close_new, subhook::HookOptions::HookOption64BitOffset);
+	newStateDetour.Install(luaL_newstate_exe, luaL_newstate_new, subhook::HookOptions::HookOption64BitOffset);
+	luaCloseDetour.Install(lua_close_exe, lua_close_new, subhook::HookOptions::HookOption64BitOffset);
 
 	setup_xml_function_addresses();
 	node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookOptions::HookOption64BitOffset);

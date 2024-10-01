@@ -761,7 +761,7 @@ namespace pd2hook
 			{ NULL, NULL }
 		};
 		lua_newtable(L); // create the scriptdata table
-		luaL_openlib(L, nullptr, items, 0); // name is null, so register everything onto the table on top of the stack
+		luaL_register(L, nullptr, items); // name is null, so register everything onto the table on top of the stack
 		lua_setfield(L, -2, "scriptdata"); // save it into the blt table
 	}
 
@@ -885,7 +885,7 @@ namespace blt
 				{ "DestroyConsole", luaF_destroyconsole },*/
 				{ NULL, NULL }
 			};
-			luaL_openlib(L, "console", consoleLib, 0);
+			luaL_register(L, "console", consoleLib);
 			lua_pop(L, 1);
 
 			luaL_Reg fileLib[] =
@@ -901,7 +901,7 @@ namespace blt
 				{ "CreateDirectory", luaF_createDirectory },
 				{ NULL, NULL }
 			};
-			luaL_openlib(L, "file", fileLib, 0);
+			luaL_register(L, "file", fileLib);
 			lua_pop(L, 1);
 
 			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
@@ -921,7 +921,7 @@ namespace blt
 
 				{ NULL, NULL }
 			};
-			luaL_openlib(L, "blt", bltLib, 0);
+			luaL_register(L, "blt", bltLib);
 
 			load_scriptdata_library(L);
 			load_lua_utils(L);

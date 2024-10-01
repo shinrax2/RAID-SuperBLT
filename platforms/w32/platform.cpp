@@ -18,16 +18,22 @@ blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::
 
 void blt::platform::InitPlatform()
 {
+	ifstream infiledebug("mods/debugger.txt");
+	if (infiledebug.good())
+	{
+		MessageBoxA(NULL, "Debug Me", "Debug Me", MB_OK);
+	}
+
 	// Set up logging first, so we can see messages from the signature search process
 #ifdef INJECTABLE_BLT
 	gbl_mConsole = new CConsole();
 #else
-	ifstream infile("mods/developer.txt");
+	ifstream infileconsole("mods/developer.txt");
 	string debug_mode;
-	if (infile.good())
+	if (infileconsole.good())
 	{
 		debug_mode = "post"; // default value
-		infile >> debug_mode;
+		infileconsole >> debug_mode;
 	}
 	else
 	{
@@ -101,7 +107,7 @@ void blt::platform::lua::SetForcePCalls(bool state)
 
 	if (state)
 	{
-		luaCallDetour.Install(lua_call, blt::lua_functions::perform_lua_pcall);
+		luaCallDetour.Install(lua_call_exe, blt::lua_functions::perform_lua_pcall);
 		PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
