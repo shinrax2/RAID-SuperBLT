@@ -354,7 +354,6 @@ extern "C"
 {
 	FARPROC PA = 0;
 
-#if defined(_M_AMD64)
 	int jumpToPA();
 
 	#define DEF_STUB(name, symbol, symbol_num) \
@@ -366,20 +365,6 @@ extern "C"
 
 	ALLFUNC(DEF_STUB, @)
 	#undef DEF_STUB
-
-#else
-	#define DEF_STUB(name, symbol, symbol_num) \
-	extern "C" __declspec(naked) void __stdcall _IPHP_EXPORT_##name() \
-	{ \
-		__asm { \
-			jmp farproc.o##name \
-		} \
-	}; \
-
-	ALLFUNC(DEF_STUB, @)
-	#undef DEF_STUB
-
-#endif
 }
 
 #endif

@@ -63,11 +63,7 @@ void blt::platform::GetPlatformInformation(lua_State * L)
 	lua_pushstring(L, "mswindows");
 	lua_setfield(L, -2, "platform");
 
-	#if defined(_M_AMD64)
-		lua_pushstring(L, "x86-64");
-	#else
-		lua_pushstring(L, "x86");
-	#endif
+	lua_pushstring(L, "x86-64");
 	lua_setfield(L, -2, "arch");
 
 	lua_pushstring(L, "raid");
