@@ -106,12 +106,12 @@ static void setup_platform_game()
 {
 	main_thread_id = std::this_thread::get_id();
 
-	applicationUpdateDetour.Install(application_update, application_update_new, subhook::HookOptions::HookOption64BitOffset);
-	newStateDetour.Install(ctor_lua_Alloc, ctor_lua_Alloc_new, subhook::HookOptions::HookOption64BitOffset);
-	luaCloseDetour.Install(lua_close_exe, lua_close_new, subhook::HookOptions::HookOption64BitOffset);
+	applicationUpdateDetour.Install(application_update, application_update_new, subhook::HookFlags::HookFlag64BitOffset);
+	newStateDetour.Install(ctor_lua_Alloc, ctor_lua_Alloc_new, subhook::HookFlags::HookFlag64BitOffset);
+	luaCloseDetour.Install(lua_close_exe, lua_close_new, subhook::HookFlags::HookFlag64BitOffset);
 
 	setup_xml_function_addresses();
-	node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookOptions::HookOption64BitOffset);
+	node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookFlags::HookFlag64BitOffset);
 
 	init_idstring_pointers();
 }
