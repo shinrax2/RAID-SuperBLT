@@ -86,7 +86,7 @@ set(wren_src_files
 	wren/LuaInterface_001.wren
 	wren/Environment_001.wren
 	wren/Utils_001.wren
-	)
+)
 add_custom_command(
 	OUTPUT wren_generated_src.c gen/wren_generated_src.h
 	COMMAND ${Python3_EXECUTABLE} wren/generate.py ${CMAKE_CURRENT_BINARY_DIR} ${wren_src_files}
@@ -145,21 +145,21 @@ endfunction()
 
 # Note that libressl must be downloaded seperately, since it requires some pre-configuration that
 # is inconvenient on Windows. Here's the download URL:
-# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.7.3.tar.gz
-set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.7.3)
+# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.8.0.tar.gz
+set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.8.0)
 set(LSSL_TARBALL ${LSSL_SRCDIR}.tar.gz)
 if(NOT EXISTS ${LSSL_TARBALL})
 	# TODO move this to my (ZNix's) server, in case the paths ever change
 	message("Downloading LibreSSL")
-	file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.7.3.tar.gz" ${LSSL_TARBALL}
+	file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.8.0.tar.gz" ${LSSL_TARBALL}
 		#TIMEOUT 60  # seconds
-		EXPECTED_HASH SHA256=7948c856a90c825bd7268b6f85674a8dcd254bae42e221781b24e3f8dc335db3
+		EXPECTED_HASH SHA256=12531c1ec808c5c6abeb311899664b0cfed04d4648f456dc959bb93c5f21acac
 		TLS_VERIFY ON
 	)
 endif()
 if(NOT EXISTS ${LSSL_SRCDIR})
 	message("Extracting LibreSSL")
-	file(ARCHIVE_EXTRACT INPUT ${LSSL_TARBALL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/ PATTERNS libressl-3.7.3)
+	file(ARCHIVE_EXTRACT INPUT ${LSSL_TARBALL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/ PATTERNS libressl-3.8.0)
 endif()
 
 ######
@@ -181,7 +181,7 @@ target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
 target_link_libraries(SuperBLT OpenAL)
 # target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
-add_subdirectory(lib/sys/libressl-3.7.3 EXCLUDE_FROM_ALL)
+add_subdirectory(lib/sys/libressl-3.8.0 EXCLUDE_FROM_ALL)
 target_include_directories(SuperBLT PRIVATE ${LSSL_SRCDIR}/include) # Required for latest version of LibreSSL
 target_link_libraries(SuperBLT crypto)
 
