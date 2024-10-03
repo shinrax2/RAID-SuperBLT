@@ -11,8 +11,8 @@ enable_language(ASM_MASM)
 ## misc. definitions ##########################################################
 ###############################################################################
 
-# Use CXX 17
-set(CMAKE_CXX_STANDARD 17)
+# Use CXX 20
+set(CMAKE_CXX_STANDARD 20)
 
 # Enable XAudio
 add_definitions(-DENABLE_XAUDIO)
