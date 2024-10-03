@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(SuperBLT)
 
 # Allow us to attach the winmm.lib dependency to OpenAL on Windows
-cmake_policy(SET CMP0079 NEW) # no OpenAL anymore, still need?
+cmake_policy(SET CMP0079 NEW)
 
 enable_language(ASM_MASM)
 
@@ -170,6 +170,13 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build as static, set by SBLT's buildscript
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
 target_link_libraries(SuperBLT zlibstatic)
+
+# Unfortunately cmake doesn't have namespacing, so we have to set stuff here
+set(LIBTYPE STATIC)
+add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
+target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
+target_link_libraries(SuperBLT OpenAL)
+# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
 add_subdirectory(lib/sys/libressl-3.8.0 EXCLUDE_FROM_ALL)
 target_include_directories(SuperBLT PRIVATE ${LSSL_SRCDIR}/include) # Required for latest version of LibreSSL
