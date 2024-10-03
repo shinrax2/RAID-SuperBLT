@@ -186,19 +186,21 @@ target_include_directories(SuperBLT PRIVATE ${LSSL_SRCDIR}/include) # Required f
 target_link_libraries(SuperBLT crypto)
 
 #### CURL ####
+set(CURL_USE_SCHANNEL ON) # Use Windows SSPI for HTTPS
 # Turn off all the crap we don't want
-option(HTTP_ONLY "" ON)
-option(CURL_DISABLE_CRYPTO_AUTH "" ON)
-
-# Use WinSSL rather than our static-linked copy of LibreSSL so we can use the
-# default Windows certificate store without any hassle
-option(CMAKE_USE_WINSSL "" ON)
+set(CURL_DISABLE_INSTALL ON)
+set(HTTP_ONLY ON) # disable all protocols, but http(s) and ws(s)
+set(ENABLE_UNIX_SOCKETS OFF) # disable unit-socket support [ http(s):// ]
+set(CURL_DISABLE_NEGOTIATE_AUTH ON) # included in SSPI
+set(CURL_DISABLE_KERBEROS_AUTH ON) # included in SSPI
+set(CURL_DISABLE_NTLM ON) # included in SSPI
+set(CURL_DISABLE_WEBSOCKETS ON) # disable websocket support [ ws(s):// ]
 
 # TODO enable zlib
+set(CURL_USE_LIBPSL OFF) # TODO: enable this too
 
 add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
-target_link_libraries(libcurl crypto ssl)
-target_link_libraries(SuperBLT libcurl)
+target_link_libraries(SuperBLT libcurl_static)
 
 #### LuaJIT ####
 
