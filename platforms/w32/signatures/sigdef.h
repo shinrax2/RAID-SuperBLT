@@ -35,8 +35,8 @@
 
 extern "C"
 {
-	#include <../lib/luajit/src/lauxlib.h>
-	#include <../lib/luajit/src/lua.h>
+	#include <lauxlib.h>
+	#include <lua.h>
 }
 
 #include "signatures/sigdef_game.h"
