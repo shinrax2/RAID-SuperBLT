@@ -5,9 +5,9 @@
 
 #include "XAudioInternal.h"
 
-namespace pd2hook
+namespace raidhook
 {
-	using namespace pd2hook::xaudio;
+	using namespace raidhook::xaudio;
 
 	static void set_vector_property(lua_State *L, ALenum type)
 	{

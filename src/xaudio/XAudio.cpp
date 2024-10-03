@@ -5,7 +5,7 @@
 
 #include "XAudioInternal.h"
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace xaudio
 	{
@@ -83,7 +83,7 @@ namespace pd2hook
 		}
 		catch (string msg)
 		{
-			PD2HOOK_LOG_ERROR("Exception while loading XAudio API: " + msg);
+			RAIDHOOK_LOG_ERROR("Exception while loading XAudio API: " + msg);
 			lua_pushboolean(L, false);
 			return 1;
 		}
@@ -139,12 +139,12 @@ namespace pd2hook
 
 		alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
-		PD2HOOK_LOG_LOG("Loaded OpenAL XAudio API");
+		RAIDHOOK_LOG_LOG("Loaded OpenAL XAudio API");
 	}
 
 	XAudio::~XAudio()
 	{
-		PD2HOOK_LOG_LOG("Closing OpenAL XAudio API");
+		RAIDHOOK_LOG_LOG("Closing OpenAL XAudio API");
 
 		// Delete all sources
 		reset_cleanup();
@@ -166,14 +166,6 @@ namespace pd2hook
 
 		// Close the OpenAL context/device
 		alcMakeContextCurrent(NULL);
-
-		// HACK it seems PD2 will happily kill off the OpenAL thread, along with all the
-		// others when it's exiting. Calling alcDestroyContext will post a message to this
-		// now-dead thread and wait forever for a message to come back.
-		// Thus don't stop OpenAL.
-		// See https://gitlab.com/znixian/payday2-superblt/-/issues/72
-		// alcDestroyContext(ctx);
-		// alcCloseDevice(dev);
 	}
 
 	XAudio* XAudio::GetXAudioInstance()

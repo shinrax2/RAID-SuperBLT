@@ -25,7 +25,8 @@ using namespace std;
 
 #define XAERR(str) luaL_error(L, "XAudio Error at %s:%d : %s", __FILE__, __LINE__, string(str).c_str()); throw "luaL_error returned."
 #define ALERR { \
-	if(!xaudio::is_setup) PD2HOOK_LOG_WARN("XAudio Warning: blt.xaudio.setup() has not been called!"); \
+	if (!xaudio::is_setup)                                                            \
+			RAIDHOOK_LOG_WARN("XAudio Warning: blt.xaudio.setup() has not been called!"); \
 	ALenum error; \
 	if ((error = alGetError()) != AL_NO_ERROR) { \
 		XAERR("alErr : " + to_string(error)); \
@@ -61,7 +62,7 @@ int klass ## _Close(lua_State *L) { \
 	return 0; \
 }
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace xasource
 	{

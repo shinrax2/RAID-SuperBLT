@@ -6,7 +6,7 @@
 #include "XAudioInternal.h"
 #include "stb_vorbis.h"
 
-namespace pd2hook
+namespace raidhook
 {
 	using namespace xaudio;
 

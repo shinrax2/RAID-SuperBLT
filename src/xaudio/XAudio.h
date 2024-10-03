@@ -4,7 +4,7 @@
 
 #include <AL/alc.h>
 
-namespace pd2hook
+namespace raidhook
 {
 
 	class XAudio

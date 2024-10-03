@@ -5,7 +5,7 @@
 
 #include "XAudioInternal.h"
 
-namespace pd2hook
+namespace raidhook
 {
 	using namespace xaudio;
 	using namespace xasource;
