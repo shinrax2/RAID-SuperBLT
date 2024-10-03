@@ -10,6 +10,7 @@
 #include "threading/queue.h"
 #include "http/http.h"
 #include "debug/blt_debug.h"
+#include "xaudio/XAudio.h"
 #include "tweaker/xmltweaker.h"
 #include "tweaker/wren_lua_interface.h"
 #include "plugins/plugins.h"
@@ -931,6 +932,9 @@ namespace blt
 
 #ifdef ENABLE_DEBUG
 			DebugConnection::AddGlobals(L);
+#endif
+#ifdef ENABLE_XAUDIO
+			XAudio::Register(L);
 #endif
 
 			for (plugins::Plugin *plugin : plugins::GetPlugins())
