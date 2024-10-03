@@ -56,9 +56,14 @@ target_compile_options(mxml PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 target_include_directories(mxml PUBLIC lib/mxml)
 
 file(GLOB_RECURSE wren_sources
-	lib/wren/src/include/wren.h # Public source file
-		lib/wren/src/vm/*.c lib/wren/src/vm/*.h # Core VM files
-		lib/wren/src/optional/*.c lib/wren/src/optional/*.h # Optional components (Meta and Random)
+	# Public source file
+	lib/wren/src/include/wren.h 
+	# Core VM files
+	lib/wren/src/vm/*.c
+	lib/wren/src/vm/*.h
+	# Optional components (Meta and Random)
+	lib/wren/src/optional/*.c
+	lib/wren/src/optional/*.h
 )
 add_library(wren STATIC ${wren_sources})
 target_include_directories(wren PRIVATE lib/wren/src/optional lib/wren/src/vm)
