@@ -5,7 +5,7 @@
 #include <memory>
 #include <functional>
 
-namespace pd2hook::scriptdata::tools
+namespace raidhook::scriptdata::tools
 {
 	// Represents a single block of data to be written somewhere in the file
 	class write_block

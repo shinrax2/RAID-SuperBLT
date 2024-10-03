@@ -85,7 +85,7 @@ static void get_mod_directory_at_depth(WrenVM* vm)
 	get_mod_directory_impl(vm, depth);
 }
 
-WrenForeignMethodFn pd2hook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm, const char* module,
+WrenForeignMethodFn raidhook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm, const char* module,
                                                                      const char* className, bool isStatic,
                                                                      const char* signature)
 {

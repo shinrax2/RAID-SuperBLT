@@ -6,14 +6,12 @@
 using namespace std;
 using namespace blt::plugins;
 
-// Don't use these funcdefs when porting to GNU+Linux, as it doesn't need
-// any kind of getter function because the PD2 binary isn't stripped
 typedef void*(*lua_access_func_t)(const char*);
 typedef void(*init_func_t)(lua_access_func_t get_lua_func_by_name);
 
-static void pd2_log(const char* message, int level, const char* file, int line)
+static void raid_log(const char* message, int level, const char* file, int line)
 {
-	using LT = pd2hook::Logging::LogType;
+	using LT = raidhook::Logging::LogType;
 
 	char buffer[256];
 	sprintf_s(buffer, sizeof(buffer), "ExtModDLL %s", file);
@@ -23,29 +21,29 @@ static void pd2_log(const char* message, int level, const char* file, int line)
 	case LT::LOGGING_FUNC:
 	case LT::LOGGING_LOG:
 	case LT::LOGGING_LUA:
-		PD2HOOK_LOG_LEVEL(message, (LT)level, buffer, line, FOREGROUND_RED, FOREGROUND_BLUE, FOREGROUND_INTENSITY);
+		RAIDHOOK_LOG_LEVEL(message, (LT)level, buffer, line, FOREGROUND_RED, FOREGROUND_BLUE, FOREGROUND_INTENSITY);
 		break;
 	case LT::LOGGING_WARN:
-		PD2HOOK_LOG_LEVEL(message, (LT)level, buffer, line, FOREGROUND_RED, FOREGROUND_GREEN, FOREGROUND_INTENSITY);
+		RAIDHOOK_LOG_LEVEL(message, (LT)level, buffer, line, FOREGROUND_RED, FOREGROUND_GREEN, FOREGROUND_INTENSITY);
 		break;
 	case LT::LOGGING_ERROR:
-		PD2HOOK_LOG_LEVEL(message, (LT)level, buffer, line, FOREGROUND_RED, FOREGROUND_INTENSITY);
+		RAIDHOOK_LOG_LEVEL(message, (LT)level, buffer, line, FOREGROUND_RED, FOREGROUND_INTENSITY);
 		break;
 	}
 }
 
 static bool is_active_state(lua_State *L)
 {
-	return pd2hook::check_active_state(L);
+	return raidhook::check_active_state(L);
 }
 
 static void * get_func(const char* name)
 {
 	string str = name;
 
-	if (str == "pd2_log")
+	if (str == "raid_log")
 	{
-		return &pd2_log;
+		return &raid_log;
 	}
 	else if (str == "is_active_state")
 	{

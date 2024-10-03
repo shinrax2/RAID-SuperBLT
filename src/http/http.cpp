@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <thread>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace
 	{
@@ -29,19 +29,19 @@ namespace pd2hook
 
 	using HTTPProgressNotificationPtr = std::unique_ptr<HTTPProgressNotification>;
 	using HTTPItemPtr = std::unique_ptr<HTTPItem>;
-	PD2HOOK_REGISTER_EVENTQUEUE(HTTPProgressNotificationPtr, HTTPProgressNotification)
-	PD2HOOK_REGISTER_EVENTQUEUE(HTTPItemPtr, HTTPItem)
+	RAIDHOOK_REGISTER_EVENTQUEUE(HTTPProgressNotificationPtr, HTTPProgressNotification)
+	RAIDHOOK_REGISTER_EVENTQUEUE(HTTPItemPtr, HTTPItem)
 
 	HTTPManager::HTTPManager()
 	{
 		// Curl Init
 		curl_global_init(CURL_GLOBAL_ALL);
-		PD2HOOK_LOG_LOG("CURL_INITD");
+		RAIDHOOK_LOG_LOG("CURL_INITD");
 	}
 
 	HTTPManager::~HTTPManager()
 	{
-		PD2HOOK_LOG_LOG("CURL CLOSED");
+		RAIDHOOK_LOG_LOG("CURL CLOSED");
 		curl_global_cleanup();
 
 		std::for_each(threadList.begin(), threadList.end(), [](const std::unique_ptr<std::thread>& t)
@@ -86,14 +86,14 @@ namespace pd2hook
 
 	void run_http_progress_event(std::unique_ptr<HTTPProgressNotification> ourNotify)
 	{
-		PD2HOOK_TRACE_FUNC;
+		RAIDHOOK_TRACE_FUNC;
 		HTTPItem* ourItem = ourNotify->ourItem;
 		ourItem->progress(ourItem->data, ourNotify->byteProgress, ourNotify->byteTotal);
 	}
 
 	int http_progress_call(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 	{
-		PD2HOOK_TRACE_FUNC;
+		RAIDHOOK_TRACE_FUNC;
 		HTTPItem* ourItem = (HTTPItem*)clientp;
 		if (!ourItem->progress) return 0;
 		if (dltotal == 0 || dlnow == 0) return 0;
@@ -113,13 +113,13 @@ namespace pd2hook
 
 	void run_http_event(std::unique_ptr<HTTPItem> ourItem)
 	{
-		PD2HOOK_TRACE_FUNC;
+		RAIDHOOK_TRACE_FUNC;
 		ourItem->call(ourItem.get());
 	}
 
 	void launch_thread_http(HTTPItem *raw_item)
 	{
-		PD2HOOK_TRACE_FUNC;
+		RAIDHOOK_TRACE_FUNC;
 		std::unique_ptr<HTTPItem> item(raw_item);
 		CURL *curl;
 		curl = curl_easy_init();
@@ -156,7 +156,7 @@ namespace pd2hook
 
 	void HTTPManager::LaunchHTTPRequest(std::unique_ptr<HTTPItem> callback)
 	{
-		PD2HOOK_TRACE_FUNC;
+		RAIDHOOK_TRACE_FUNC;
 		// This shit's gonna end eventually, how many threads are people going to launch?
 		// Probably a lot.
 		// I'll manage them I guess, but I've no idea when to tell them to join which I believe is part of the constructor.

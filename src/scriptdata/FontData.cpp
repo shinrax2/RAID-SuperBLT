@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <sstream>
 
-using namespace pd2hook::scriptdata::font;
-using namespace pd2hook::scriptdata::tools;
+using namespace raidhook::scriptdata::font;
+using namespace raidhook::scriptdata::tools;
 
 typedef uint32_t ptr_t;
 

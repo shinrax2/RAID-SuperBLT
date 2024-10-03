@@ -55,7 +55,7 @@ class DBTargetFile
 
 		if (wren_loader_obj)
 		{
-			wrenReleaseHandle(pd2hook::wren::get_wren_vm(), wren_loader_obj);
+			wrenReleaseHandle(raidhook::wren::get_wren_vm(), wren_loader_obj);
 			wren_loader_obj = nullptr;
 		}
 	}
@@ -109,7 +109,7 @@ class DBAssetHook
 
 static std::map<blt::idfile, std::shared_ptr<DBTargetFile>> overriddenFiles;
 
-WrenForeignMethodFn pd2hook::tweaker::dbhook::bind_dbhook_method(WrenVM* vm, const char* module,
+WrenForeignMethodFn raidhook::tweaker::dbhook::bind_dbhook_method(WrenVM* vm, const char* module,
                                                                  const char* class_name_s, bool is_static,
                                                                  const char* signature_c)
 {
@@ -168,7 +168,7 @@ WrenForeignMethodFn pd2hook::tweaker::dbhook::bind_dbhook_method(WrenVM* vm, con
 	return nullptr;
 }
 
-WrenForeignClassMethods pd2hook::tweaker::dbhook::bind_dbhook_class([[maybe_unused]] WrenVM* vm, const char* module,
+WrenForeignClassMethods raidhook::tweaker::dbhook::bind_dbhook_class([[maybe_unused]] WrenVM* vm, const char* module,
                                                                     const char* class_name)
 {
 	// Since we're using our own factory methods, this should never be called
@@ -207,7 +207,7 @@ static blt::idstring parseHash(std::string value)
 			memset(buff, 0, sizeof(buff));
 			snprintf(buff, sizeof(buff) - 1, "[wren] Invalid hash value '%s': Parse errno %d %s", value.c_str(), errno,
 			         strerror(errno));
-			PD2HOOK_LOG_ERROR(buff);
+			RAIDHOOK_LOG_ERROR(buff);
 			abort();
 		}
 		if (endPtr != value.c_str() + 17)
@@ -215,7 +215,7 @@ static blt::idstring parseHash(std::string value)
 			char buff[1024];
 			memset(buff, 0, sizeof(buff));
 			snprintf(buff, sizeof(buff) - 1, "[wren] Invalid hash value '%s': Not a valid ID literal", value.c_str());
-			PD2HOOK_LOG_ERROR(buff);
+			RAIDHOOK_LOG_ERROR(buff);
 			abort();
 		}
 		return id;
@@ -239,7 +239,7 @@ static void wrenRegisterAssetHook(WrenVM* vm)
 		char buff[1024];
 		memset(buff, 0, sizeof(buff));
 		snprintf(buff, sizeof(buff) - 1, "[wren] Duplicate asset registration for %s.%s", name_str, ext_str);
-		PD2HOOK_LOG_ERROR(buff);
+		RAIDHOOK_LOG_ERROR(buff);
 		abort();
 	}
 
@@ -308,7 +308,7 @@ static void wrenLoadAssetContents(WrenVM* vm)
 	}
 }
 
-bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore,
+bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore,
                                                int64_t* out_pos, int64_t* out_len, std::string& out_name,
                                                bool fallback_mode)
 {
@@ -344,7 +344,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			memset(buff, 0, sizeof(buff));
 			snprintf(buff, sizeof(buff) - 1, "Failed to open hooked file '%s' while loading " IDPFP, filename.c_str(),
 			         asset_file.name, asset_file.ext);
-			PD2HOOK_LOG_ERROR(buff);
+			RAIDHOOK_LOG_ERROR(buff);
 
 			MessageBox(nullptr, "Failed to load hooked file - file not found. See log for more information.",
 			           "Wren Error", MB_OK);
@@ -358,7 +358,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	auto load_bundle_item = [&](blt::idfile bundle_item) {
 		DslFile* file = DieselDB::Instance()->Find(bundle_item.name, bundle_item.ext);
 
-		// Abort if the file isn't found - most likely this would lead to a crash anyway since the PD2 version
+		// Abort if the file isn't found - most likely this would lead to a crash anyway since the RAID version
 		// of this asset probably isn't loaded (otherwise why would you hook it?), this just makes it obvious
 		// what happened.
 		if (!file)
@@ -367,7 +367,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			memset(buff, 0, sizeof(buff));
 			snprintf(buff, sizeof(buff) - 1, "Failed to open hooked asset file " IDPFP " while loading " IDPFP,
 			         bundle_item.name, bundle_item.ext, asset_file.name, asset_file.ext);
-			PD2HOOK_LOG_ERROR(buff);
+			RAIDHOOK_LOG_ERROR(buff);
 
 			MessageBox(nullptr, "Failed to load hooked asset - file not found. See log for more information.",
 			           "Wren Error", MB_OK);
@@ -395,8 +395,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	}
 	else if (target.wren_loader_obj)
 	{
-		auto lock = pd2hook::wren::lock_wren_vm();
-		WrenVM* vm = pd2hook::wren::get_wren_vm();
+		auto lock = raidhook::wren::lock_wren_vm();
+		WrenVM* vm = raidhook::wren::get_wren_vm();
 
 		// Probably not ideal to have it as a static, but hey it works fine and we only ever make one Wren context
 		static WrenHandle* callHandle = wrenMakeCallHandle(vm, "load_file(_,_)");
@@ -423,7 +423,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			memset(buff, 0, sizeof(buff));
 			snprintf(buff, sizeof(buff) - 1, "Wren asset load failed for " IDPFP ": compile or runtime error!",
 			         asset_file.name, asset_file.ext);
-			PD2HOOK_LOG_ERROR(buff);
+			RAIDHOOK_LOG_ERROR(buff);
 
 			MessageBox(nullptr, "Failed to load Wren-based asset - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
@@ -438,7 +438,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			snprintf(buff, sizeof(buff) - 1,
 			         "Wren load_file function return invalid class or null - for asset " IDPFP " ptr %p",
 			         asset_file.name, asset_file.ext, ff);
-			PD2HOOK_LOG_ERROR(buff);
+			RAIDHOOK_LOG_ERROR(buff);
 			MessageBox(nullptr, "Failed to load Wren-based asset - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
 		}
@@ -461,7 +461,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		else
 		{
 			// Should never happen
-			PD2HOOK_LOG_ERROR("No output contents set for DBForeignFile");
+			RAIDHOOK_LOG_ERROR("No output contents set for DBForeignFile");
 			MessageBox(nullptr, "Failed to load Wren-based asset - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
 		}

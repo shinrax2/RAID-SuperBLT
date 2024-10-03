@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <openssl/evp.h>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace Util
 	{
@@ -72,8 +72,8 @@ namespace pd2hook
 
 		void RecurseDirectoryPaths(std::vector<std::string>& paths, std::string directory, bool ignore_versioning)
 		{
-			std::vector<std::string> dirs = pd2hook::Util::GetDirectoryContents(directory, true);
-			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(directory);
+			std::vector<std::string> dirs = raidhook::Util::GetDirectoryContents(directory, true);
+			std::vector<std::string> files = raidhook::Util::GetDirectoryContents(directory);
 			for (auto it = files.begin(); it < files.end(); it++)
 			{
 				std::string fpath = directory + *it;
@@ -113,7 +113,7 @@ namespace pd2hook
 
 			for (auto it = paths.begin(); it < paths.end(); it++)
 			{
-				std::string hashstr = sha256(pd2hook::Util::GetFileContents(*it));
+				std::string hashstr = sha256(raidhook::Util::GetFileContents(*it));
 				hashconcat += hashstr;
 			}
 
@@ -123,7 +123,7 @@ namespace pd2hook
 		std::string GetFileHash(std::string file)
 		{
 			// This has to be hashed twice otherwise it won't be the same hash if we're checking against a file uploaded to the server
-			std::string hash = sha256(pd2hook::Util::GetFileContents(file));
+			std::string hash = sha256(raidhook::Util::GetFileContents(file));
 			return sha256(hash);
 		}
 

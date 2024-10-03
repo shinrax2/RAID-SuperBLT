@@ -113,7 +113,7 @@ std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
 DieselDB::DieselDB()
 {
 	uint64_t start_time = monotonicTimeMicros();
-	PD2HOOK_LOG_LOG("Start loading DB info");
+	RAIDHOOK_LOG_LOG("Start loading DB info");
 
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
@@ -127,7 +127,7 @@ DieselDB::DieselDB()
 	std::string blb_suffix = ".blb";
 	std::string blb_path;
 
-	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
+	for (const std::string& name : raidhook::Util::GetDirectoryContents("assets"))
 	{
 		if (name.length() <= blb_suffix.size())
 			continue;
@@ -149,7 +149,7 @@ DieselDB::DieselDB()
 	}
 
 	if (blb_path.empty()) {
-		PD2HOOK_LOG_ERROR("No 'all.blb' or 'bundle_db.blb' found in 'assets' folder, not loading asset database!");
+		RAIDHOOK_LOG_ERROR("No 'all.blb' or 'bundle_db.blb' found in 'assets' folder, not loading asset database!");
 		return;
 	}
 
@@ -236,7 +236,7 @@ DieselDB::DieselDB()
 	// Load each of the bundle headers
 	std::string suffix = "_h.bundle";
 	std::string prefix = "all_";
-	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
+	for (const std::string& name : raidhook::Util::GetDirectoryContents("assets"))
 	{
 		if (name.length() <= suffix.size())
 			continue;
@@ -268,7 +268,7 @@ DieselDB::DieselDB()
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff) - 1, "Finished loading DB info: %zd files in %d ms", filesList.size(),
 	         (int)(end_time - start_time) / 1000);
-	PD2HOOK_LOG_LOG(buff);
+	RAIDHOOK_LOG_LOG(buff);
 }
 
 static void loadPackageHeader(std::string headerPath, std::string dataPath, FileList files)
@@ -378,6 +378,7 @@ BLTAbstractDataStore* DieselDB::Open(DieselBundle* bundle)
 	// pretty much what the Linux version of PD2 seems to do internally. The
 	// problem here is that the data store is reference counted by dsl::Archive, so
 	// caching it will be somewhat difficult.
+	// TODO: there is no raid linux binary tho, what now?
 	BLTFileDataStore* fds = BLTFileDataStore::Open(bundle->path);
 	return fds;
 }

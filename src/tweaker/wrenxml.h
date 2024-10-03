@@ -7,7 +7,7 @@
 
 #include <wren.hpp>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace tweaker
 	{

@@ -106,7 +106,7 @@ struct farproc_dll
 #undef STRUCT
 } farproc;
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace
 	{
@@ -135,7 +135,7 @@ namespace pd2hook
 
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 {
-	using namespace pd2hook;
+	using namespace raidhook;
 
 	if (reason == DLL_PROCESS_ATTACH)
 	{

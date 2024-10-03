@@ -23,8 +23,7 @@
 #include <list>
 #include <fstream>
 
-// Code taken from LuaJIT 2.1.0-beta2
-namespace pd2hook
+namespace raidhook
 {
 
 	std::list<lua_State*> activeStates;
@@ -92,7 +91,7 @@ namespace pd2hook
 		if (err == LUA_ERRRUN)
 		{
 			size_t len;
-			PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
+			RAIDHOOK_LOG_LOG(lua_tolstring(L, -1, &len));
 		}
 	}
 
@@ -107,7 +106,7 @@ namespace pd2hook
 		int args = lua_gettop(L);	// Number of arguments
 		if (args < 1)
 		{
-			PD2HOOK_LOG_WARN("blt.forcepcalls(): Called with no arguments, ignoring request");
+			RAIDHOOK_LOG_WARN("blt.forcepcalls(): Called with no arguments, ignoring request");
 			return 0;
 		}
 
@@ -184,7 +183,7 @@ namespace pd2hook
 		const char* archivePath = lua_tolstring(L, 1, &len);
 		const char* extractPath = lua_tolstring(L, 2, &len);
 
-		bool retVal = pd2hook::ExtractZIPArchive(archivePath, extractPath);
+		bool retVal = raidhook::ExtractZIPArchive(archivePath, extractPath);
 		lua_pushboolean(L, retVal);
 		return 1;
 	}
@@ -216,7 +215,7 @@ namespace pd2hook
 		if (result == LUA_ERRRUN)
 		{
 			size_t len;
-			PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+			RAIDHOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 			// This call pops the error message off the stack
 			lua_pop(L, 1);
 			return 0;
@@ -268,7 +267,7 @@ namespace pd2hook
 		{
 			size_t len;
 			//		Logging::Log(filename, Logging::LOGGING_ERROR);
-			PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+			RAIDHOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 		}
 		else
 		{
@@ -288,7 +287,7 @@ namespace pd2hook
 			{
 				size_t len;
 				//			Logging::Log(filename, Logging::LOGGING_ERROR);
-				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+				RAIDHOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 				// This call pops the error message off the stack
 				lua_pop(L, 1);
 			}
@@ -447,7 +446,7 @@ namespace pd2hook
 		const char* url_c = lua_tolstring(L, 1, &len);
 		std::string url = std::string(url_c, len);
 
-		PD2HOOK_LOG_LOG("HTTP request to " << std::string(url_c, len));
+		RAIDHOOK_LOG_LOG("HTTP request to " << std::string(url_c, len));
 
 		lua_http_data* ourData = new lua_http_data();
 		ourData->funcRef = functionReference;
@@ -505,7 +504,7 @@ namespace pd2hook
 				stream << (str ? str : lua_typename(L, lua_type(L, i + 1)));
 			}
 		}
-		PD2HOOK_LOG_LUA(stream.str());
+		RAIDHOOK_LOG_LUA(stream.str());
 
 		return 0;
 	}
@@ -583,9 +582,9 @@ namespace pd2hook
 
 		if (mxml_last_error)
 		{
-			PD2HOOK_LOG_ERROR("Could not parse XML: Error and original file below");
-			PD2HOOK_LOG_ERROR(mxml_last_error);
-			PD2HOOK_LOG_ERROR(xml);
+			RAIDHOOK_LOG_ERROR("Could not parse XML: Error and original file below");
+			RAIDHOOK_LOG_ERROR(mxml_last_error);
+			RAIDHOOK_LOG_ERROR(xml);
 
 			mxml_last_error = NULL;
 
@@ -606,8 +605,8 @@ namespace pd2hook
 		}
 		else
 		{
-			PD2HOOK_LOG_ERROR("Parsed XML does not contain any nodes");
-			PD2HOOK_LOG_ERROR(xml);
+			RAIDHOOK_LOG_ERROR("Parsed XML does not contain any nodes");
+			RAIDHOOK_LOG_ERROR(xml);
 
 			lua_pushnil(L);
 		}
@@ -720,7 +719,7 @@ namespace pd2hook
 		size_t len;
 		const char *data = lua_tolstring(L, 1, &len);
 
-		bool is32bit = pd2hook::scriptdata::determine_is_32bit(len, (const uint8_t*) data);
+		bool is32bit = raidhook::scriptdata::determine_is_32bit(len, (const uint8_t*)data);
 
 		lua_newtable(L);
 
@@ -744,7 +743,7 @@ namespace pd2hook
 		bool is32bit = lua_toboolean(L, -1);
 		lua_pop(L, 1);
 
-		pd2hook::scriptdata::ScriptData sd(len, (const uint8_t*) data);
+		raidhook::scriptdata::ScriptData sd(len, (const uint8_t*)data);
 		std::string out = sd.GetRoot()->Serialise(is32bit);
 
 		lua_pushlstring(L, out.c_str(), out.length());
@@ -789,7 +788,7 @@ namespace pd2hook
 
 }
 
-using namespace pd2hook;
+using namespace raidhook;
 
 namespace blt
 {
@@ -818,7 +817,7 @@ namespace blt
 			{
 				size_t len;
 				const char* message = lua_tolstring(L, -1, &len);
-				PD2HOOK_LOG_ERROR(message);
+				RAIDHOOK_LOG_ERROR(message);
 				NotifyErrorOverlay(L, message);
 				// This call pops the error message off the stack
 				lua_pop(L, 1);
@@ -926,7 +925,7 @@ namespace blt
 			load_lua_utils(L);
 			load_lua_asset_db(L);
 			load_lua_async_io(L);
-			pd2hook::tweaker::lua_io::register_lua_functions(L);
+			raidhook::tweaker::lua_io::register_lua_functions(L);
 
 			lua_pop(L, 1); // pop the BLT library
 
@@ -940,13 +939,13 @@ namespace blt
 			}
 
 			int result;
-			PD2HOOK_LOG_LOG("Initiating Hook");
+			RAIDHOOK_LOG_LOG("Initiating Hook");
 
 			result = luaL_loadfilex(L, "mods/base/base.lua", nullptr);
 			if (result == LUA_ERRSYNTAX)
 			{
 				size_t len;
-				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+				RAIDHOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 				return;
 			}
 			
@@ -954,8 +953,8 @@ namespace blt
 			if (result != 0)
 			{
 				size_t len;
-				PD2HOOK_LOG_ERROR("Failed initializing the basemod:");
-				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+				RAIDHOOK_LOG_ERROR("Failed initializing the basemod:");
+				RAIDHOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 				abort();
 			}
 
@@ -971,7 +970,7 @@ namespace blt
 		{
 			if (updates == 0)
 			{
-				PD2HOOK_LOG_LOG("Checking for updates");
+				RAIDHOOK_LOG_LOG("Checking for updates");
 			}
 
 			if (updates > 1)

@@ -8,7 +8,7 @@
 #include <list>
 #include <memory>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace
 	{
@@ -143,7 +143,7 @@ namespace pd2hook
 				std::ofstream outFile(finalWritePath.c_str(), std::ios::binary);
 				if (!outFile)
 				{
-					PD2HOOK_LOG_WARN(std::string("Failed to extract file: ") + finalWritePath);
+					RAIDHOOK_LOG_WARN(std::string("Failed to extract file: ") + finalWritePath);
 					return false;
 				}
 
@@ -166,7 +166,7 @@ namespace pd2hook
 			}
 		}
 
-		PD2HOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
+		RAIDHOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
 
 		bool result = true;
 		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)

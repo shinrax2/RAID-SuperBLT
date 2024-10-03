@@ -11,13 +11,13 @@ struct HashInfo
 	lua_State *L;
 	int ref;
 	string filename;
-	pd2hook::Util::DirectoryHashFunction hasher;
-	pd2hook::Util::HashResultReceiver callback;
+	raidhook::Util::DirectoryHashFunction hasher;
+	raidhook::Util::HashResultReceiver callback;
 
 	string result;
 };
 
-PD2HOOK_REGISTER_EVENTQUEUE(HashInfo, HashResult)
+RAIDHOOK_REGISTER_EVENTQUEUE(HashInfo, HashResult)
 
 class AsyncHashManager
 {
@@ -62,7 +62,8 @@ static void run_async(HashInfo info)
 	GetHashResultQueue().AddToQueue(done, info);
 }
 
-void pd2hook::Util::RunAsyncHash(lua_State *L, int ref, string filename, DirectoryHashFunction hasher, HashResultReceiver callback)
+void raidhook::Util::RunAsyncHash(lua_State* L, int ref, string filename, DirectoryHashFunction hasher,
+                                  HashResultReceiver callback)
 {
 	HashInfo info;
 

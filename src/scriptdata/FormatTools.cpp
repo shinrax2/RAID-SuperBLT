@@ -1,6 +1,6 @@
 #include "FormatTools.h"
 
-namespace pd2hook::scriptdata::tools
+namespace raidhook::scriptdata::tools
 {
 
 	std::ostream &write_block::seek(uint32_t pos)

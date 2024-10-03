@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace Util
 	{
@@ -36,8 +36,8 @@ namespace pd2hook
 
 		bool RemoveFilesAndDirectory(const std::string& path)
 		{
-			std::vector<std::string> dirs = pd2hook::Util::GetDirectoryContents(path, true);
-			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(path);
+			std::vector<std::string> dirs = raidhook::Util::GetDirectoryContents(path, true);
+			std::vector<std::string> files = raidhook::Util::GetDirectoryContents(path);
 			bool failed = false;
 
 			for (auto it = files.begin(); it < files.end(); it++)
@@ -52,13 +52,13 @@ namespace pd2hook
 					continue;
 
 				// dont follow symlinks, just delete them as a file, recurse on normal directories
-				if (pd2hook::Util::IsSymlink(path + "/" + *it))
+				if (raidhook::Util::IsSymlink(path + "/" + *it))
 				{
 					failed = remove((path + "/" + *it).c_str());
 				}
 				else
 				{
-					failed = pd2hook::Util::RemoveFilesAndDirectory(path + "/" + *it) == 0;
+					failed = raidhook::Util::RemoveFilesAndDirectory(path + "/" + *it) == 0;
 				}
 				if (failed)
 					return false;

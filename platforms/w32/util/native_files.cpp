@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace Util
 	{
@@ -41,7 +41,7 @@ namespace pd2hook
 			StringCchLength(fPath, MAX_PATH, &length_of_arg);
 			if (length_of_arg>MAX_PATH - 3)
 			{
-				PD2HOOK_THROW_IO_MSG("Path too long");
+				RAIDHOOK_THROW_IO_MSG("Path too long");
 			}
 			StringCchCopy(szDir, MAX_PATH, fPath);
 			StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
@@ -49,7 +49,7 @@ namespace pd2hook
 			hFind = FindFirstFile(szDir, &ffd);
 			if (hFind == INVALID_HANDLE_VALUE)
 			{
-				PD2HOOK_THROW_IO_MSG("FindFirstFile() failed");
+				RAIDHOOK_THROW_IO_MSG("FindFirstFile() failed");
 			}
 			do
 			{
@@ -65,7 +65,7 @@ namespace pd2hook
 			dwError = GetLastError();
 			if (dwError != ERROR_NO_MORE_FILES)
 			{
-				PD2HOOK_THROW_IO_MSG("FindNextFile() failed");
+				RAIDHOOK_THROW_IO_MSG("FindNextFile() failed");
 			}
 			FindClose(hFind);
 			return files;
@@ -130,7 +130,7 @@ namespace pd2hook
 			bool success = MoveFileEx(path.c_str(), destination.c_str(), MOVEFILE_WRITE_THROUGH);
 			if (!success)
 			{
-				PD2HOOK_LOG_LOG("MoveFileEx failed with error " << GetLastError());
+				RAIDHOOK_LOG_LOG("MoveFileEx failed with error " << GetLastError());
 			}
 			return success;
 		}

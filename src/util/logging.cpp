@@ -8,7 +8,7 @@
 
 #include <mutex>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace Logging
 	{

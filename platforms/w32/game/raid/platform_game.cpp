@@ -78,7 +78,7 @@ extern "C"
 	{
 		subhook::ScopedHookRemove scoped_remove(&node_from_xmlDetour);
 
-		char* modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
+		char* modded = raidhook::tweaker::tweak_raid_xml(data, *len);
 		int modLen = *len;
 
 		if (modded != data)
@@ -90,7 +90,7 @@ extern "C"
 		do_xmlload_invoke(node, modded, &modLen);
 		//edit_node_from_xml_hook(true);
 
-		pd2hook::tweaker::free_tweaked_pd2_xml(modded);
+		raidhook::tweaker::free_tweaked_raid_xml(modded);
 	}
 
 	static void setup_xml_function_addresses()

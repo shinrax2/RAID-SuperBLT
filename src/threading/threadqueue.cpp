@@ -1,7 +1,7 @@
 #include "threading/queue.h"
 #include "util/util.h"
 
-namespace pd2hook
+namespace raidhook
 {
 	EventQueueMaster& EventQueueMaster::GetSingleton()
 	{

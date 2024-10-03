@@ -31,7 +31,7 @@ class SignatureCacheDB
 		std::ifstream infile(filename, std::ios::binary);
 		if (!infile.good())
 		{
-			PD2HOOK_LOG_WARN("Could not open signature cache file");
+			RAIDHOOK_LOG_WARN("Could not open signature cache file");
 			return;
 		}
 
@@ -43,7 +43,7 @@ class SignatureCacheDB
 		{
 			// Using a differnt revision, can't safely use it.
 			// Not a big deal, just search properly for signatures this time.
-			PD2HOOK_LOG_WARN("Discarding signature cache data, different revision");
+			RAIDHOOK_LOG_WARN("Discarding signature cache data, different revision");
 			return;
 		}
 
@@ -56,7 +56,7 @@ class SignatureCacheDB
 			READ_BIN(length);
 			if (length > BUFF_LEN)
 			{
-				PD2HOOK_LOG_ERROR("Cannot read long signature name!");
+				RAIDHOOK_LOG_ERROR("Cannot read long signature name!");
 				locations.clear();
 				return;
 			}
@@ -91,7 +91,7 @@ class SignatureCacheDB
 		if (name.length() > BUFF_LEN)
 		{
 			string msg = "Cannot write long signature name!";
-			PD2HOOK_LOG_ERROR(msg);
+			RAIDHOOK_LOG_ERROR(msg);
 			throw msg;
 		}
 		locations[name] = address;
@@ -102,7 +102,7 @@ class SignatureCacheDB
 		std::ofstream outfile(filename, std::ios::binary);
 		if (!outfile.good())
 		{
-			PD2HOOK_LOG_ERROR("Could not open signature cachefile for saving");
+			RAIDHOOK_LOG_ERROR("Could not open signature cachefile for saving");
 			return;
 		}
 
@@ -114,7 +114,7 @@ class SignatureCacheDB
 		uint32_t count = locations.size();
 		WRITE_BIN(count);
 
-		PD2HOOK_LOG_LOG(string("Saving ") + to_string(count) + string(" signatures"));
+		RAIDHOOK_LOG_LOG(string("Saving ") + to_string(count) + string(" signatures"));
 
 		for (auto const& sig : locations)
 		{
@@ -130,7 +130,7 @@ class SignatureCacheDB
 			WRITE_BIN(address);
 		}
 
-		PD2HOOK_LOG_LOG("Done saving signatures");
+		RAIDHOOK_LOG_LOG("Done saving signatures");
 
 #undef READ_BIN
 	}
@@ -209,7 +209,7 @@ static size_t FindPattern(char* module, const char* funcname, const char* patter
 				{
 					string err = string("Found duplicate signature for ") + string(funcname) + string(" at ") +
 								 to_string(result) + string(",") + to_string(addr);
-					PD2HOOK_LOG_WARN(err);
+					RAIDHOOK_LOG_WARN(err);
 					hintOut = NULL; // Don't cache sigs with errors
 				}
 			}
@@ -220,7 +220,7 @@ static size_t FindPattern(char* module, const char* funcname, const char* patter
 			return result;
 		}
 	}
-	PD2HOOK_LOG_WARN(string("Failed to locate function ") + string(funcname));
+	RAIDHOOK_LOG_WARN(string("Failed to locate function ") + string(funcname));
 	return NULL;
 }
 
@@ -288,7 +288,7 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 		// Some games (PDTH) have very similar try_open signatures, so double check here.
 		if (result == (size_t)try_open_property_match_resolver)
 		{
-			PD2HOOK_LOG_LOG(string("Asset loading signature (") + hex_address.str() +
+			RAIDHOOK_LOG_LOG(string("Asset loading signature (") + hex_address.str() +
 			                string(") matched 'try_open_property_match_resolver' (") + hex_address.str() +
 			                string(") ignoring..."));
 
@@ -298,18 +298,18 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 		cache.UpdateAddress("asset_load_signatures_id_" + to_string(results.size()), i);
 		results.push_back((void*)result);
 		
-		PD2HOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") + hex_address.str());
+		RAIDHOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") + hex_address.str());
 	}
 
 	cache.UpdateAddress("asset_load_signatures_count", results.size());
 
 	if (target_count < results.size())
 	{
-		PD2HOOK_LOG_WARN(string("Failed to locate enough instances of the asset loading function:"));
+		RAIDHOOK_LOG_WARN(string("Failed to locate enough instances of the asset loading function:"));
 	}
 	else if (target_count > results.size())
 	{
-		PD2HOOK_LOG_WARN(string("Located too many instances of the asset loading function:"));
+		RAIDHOOK_LOG_WARN(string("Located too many instances of the asset loading function:"));
 	}
 }
 
@@ -349,7 +349,7 @@ void SignatureSearch::Search()
 
 	unsigned long ms_start = GetTickCount64();
 	SignatureCacheDB cache(string("sigcache_") + basename + string(".db"));
-	PD2HOOK_LOG_LOG(string("Scanning for signatures in ") + string(filename));
+	RAIDHOOK_LOG_LOG(string("Scanning for signatures in ") + string(filename));
 
 	int cacheMisses = 0;
 	std::vector<SignatureF>::iterator it;
@@ -370,11 +370,11 @@ void SignatureSearch::Search()
 		}
 		else if (hint == -1 && addr != NULL)
 		{
-			PD2HOOK_LOG_LOG(string("Sigcache hit failed for function ") + funcname);
+			RAIDHOOK_LOG_LOG(string("Sigcache hit failed for function ") + funcname);
 		}
 		else if (!hintCorrect)
 		{
-			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " +
+			RAIDHOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " +
 			                 to_string(hintOut) + ")!");
 		}
 
@@ -386,7 +386,7 @@ void SignatureSearch::Search()
 
 		std::stringstream hex_address;
 		hex_address << "0x" << std::hex << addr;
-		PD2HOOK_LOG_LOG(funcname + ": " + hex_address.str());
+		RAIDHOOK_LOG_LOG(funcname + ": " + hex_address.str());
 	}
 
 	int asset_cache_misses = 0;
@@ -395,13 +395,13 @@ void SignatureSearch::Search()
 
 	unsigned long ms_end = GetTickCount64();
 
-	PD2HOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ") +
+	RAIDHOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ") +
 	                to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses) +
 	                string(" cache misses"));
 
 	if (cacheMisses > 0)
 	{
-		PD2HOOK_LOG_LOG("Saving signature cache");
+		RAIDHOOK_LOG_LOG("Saving signature cache");
 		cache.Save();
 	}
 }

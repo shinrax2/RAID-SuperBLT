@@ -9,7 +9,7 @@
 #include <string>
 
 using namespace std;
-using namespace pd2hook;
+using namespace raidhook;
 
 static CConsole* console = NULL;
 blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
@@ -108,11 +108,11 @@ void blt::platform::lua::SetForcePCalls(bool state)
 	if (state)
 	{
 		luaCallDetour.Install(lua_call_exe, blt::lua_functions::perform_lua_pcall);
-		PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
+		RAIDHOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
 	{
 		luaCallDetour.Remove();
-		PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
+		RAIDHOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
 	}
 }

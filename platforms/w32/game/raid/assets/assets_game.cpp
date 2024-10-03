@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <synchapi.h>
 
-using pd2hook::tweaker::dbhook::hook_asset_load;
+using raidhook::tweaker::dbhook::hook_asset_load;
 
 // A wrapper class to store strings in the format that PAYDAY 2 does
 // Since Microsoft might (and it seems they have) change their string class, we
@@ -24,7 +24,7 @@ class PDString
 	}
 
   private:
-	// The data layout that mirrors PD2's string, must be 24 bytes
+	// The data layout that mirrors RAID's string, must be 24 bytes
 	const char* data;
 	uint8_t padding[12]{};
 	int len;

@@ -16,7 +16,7 @@
 #include <utility>
 #include <map>
 
-using pd2hook::tweaker::dbhook::hook_asset_load;
+using raidhook::tweaker::dbhook::hook_asset_load;
 
 #define HOOK_OPTION subhook::HookOptions::HookOptionsNone
 #include "assets/assets_game.cpp"

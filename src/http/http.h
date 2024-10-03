@@ -8,7 +8,7 @@
 #include <memory>
 #include <map>
 
-namespace pd2hook
+namespace raidhook
 {
 
 	void download_blt();

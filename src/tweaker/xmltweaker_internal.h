@@ -4,7 +4,7 @@
 #include "xmltweaker.h"
 #include <string>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace tweaker
 	{
@@ -15,4 +15,4 @@ namespace pd2hook
 		 */
 		const char* transform_file(const char* contents);
 	}; // namespace tweaker
-}; // namespace pd2hook
+}; // namespace raidhook
