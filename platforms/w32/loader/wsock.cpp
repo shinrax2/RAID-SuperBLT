@@ -1,9 +1,10 @@
 #ifdef BLT_USE_WSOCK
 
 #define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
 #include "InitState.h"
 #include "util/util.h"
+#include <filesystem>
+#include <windows.h>
 
 #include <memory>
 
@@ -93,7 +94,7 @@
 	FUNC(WSASetBlockingHook)          \
 	FUNC(WSASetLastError)             \
 	FUNC(WSAStartup)                  \
-	FUNC(WSAUnhookBlockingHook)       \
+	FUNC(WSAUnhookBlockingHook)
 
 #pragma endregion
 
@@ -118,7 +119,7 @@ namespace raidhook
 
 		struct DllStateDestroyer
 		{
-			void operator()(DllState *state)
+			void operator()(DllState* state)
 			{
 				DestroyStates();
 
@@ -130,21 +131,25 @@ namespace raidhook
 		};
 
 		std::unique_ptr<DllState, DllStateDestroyer> State;
-	}
-}
+	} // namespace
+} // namespace raidhook
 
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 {
 	using namespace raidhook;
 
+	static HINSTANCE hLDebugger = 0;
+
 	if (reason == DLL_PROCESS_ATTACH)
 	{
+		DisableThreadLibraryCalls(hInst);
 		char bufd[200];
 		GetSystemDirectory(bufd, 200);
 		strcat_s(bufd, "\\WSOCK32.dll");
 
 		HMODULE hL = LoadLibrary(bufd);
-		if (!hL) return false;
+		if (!hL)
+			return false;
 
 		State.reset(new DllState());
 		State->hLThis = hInst;
@@ -158,18 +163,26 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		// Make sure the other DLL (IPHLPAPI.dll) doesn't exist
 		if (Util::GetFileType("IPHLPAPI.dll") == Util::FileType_File)
 		{
-			MessageBoxA(NULL, "You have both SuperBLT DLLs installed - IPHLPAPI.dll and \nWSOCK32.dll. "
+			MessageBoxA(NULL,
+			            "You have both SuperBLT DLLs installed - IPHLPAPI.dll and \nWSOCK32.dll. "
 			            "Please delete one (preferrably, delete IPHLPAPI.dll). Currently, the WSOCK32.dll loader will\n"
-			            "be deactivated until IPHLPAPI.dll is removed.", "Both SuperBLT DLLs installed!", MB_OK);
+			            "be deactivated until IPHLPAPI.dll is removed.",
+			            "Both SuperBLT DLLs installed!", MB_OK);
 			return 1;
 		}
 
-		InitiateStates();
+		// load DieselLuaDebugger even before us, if installed. but only if their own loader isnt installed
+		if (std::filesystem::exists("DieselLuaDebugger.dll") && !std::filesystem::exists("VERSION.dll"))
+			hLDebugger = LoadLibrary("DieselLuaDebugger.dll");
 
+		InitiateStates();
 	}
 	if (reason == DLL_PROCESS_DETACH)
 	{
 		State.reset();
+
+		if (hLDebugger != 0)
+			FreeLibrary(hLDebugger);
 	}
 
 	return 1;
@@ -181,15 +194,15 @@ extern "C"
 
 	int jumpToPA();
 
-	#define DEF_STUB(name) \
+#define DEF_STUB(name)          \
 	void _WSOCK_EXPORT_##name() \
-	{ \
-		PA = farproc.o##name; \
-		jumpToPA(); \
-	}; \
+	{                           \
+		PA = farproc.o##name;   \
+		jumpToPA();             \
+	};
 
 	ALLFUNC(DEF_STUB)
-	#undef DEF_STUB
+#undef DEF_STUB
 }
 
 #endif

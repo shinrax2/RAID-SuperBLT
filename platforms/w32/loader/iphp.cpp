@@ -1,9 +1,10 @@
 #ifdef BLT_USE_IPHLPAPI
 
 #define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
 #include "InitState.h"
 #include "util/util.h"
+#include <filesystem>
+#include <windows.h>
 
 #include <memory>
 
@@ -259,27 +260,27 @@
 	FUNC(SetTcpEntry)                                  \
 	FUNC(SetUnicastIpAddressEntry)                     \
 	FUNC(UnenableRouter)                               \
-	FUNC(_PfAddFiltersToInterface, ##AT,24)                  \
-	FUNC(_PfAddGlobalFilterToInterface, ##AT,8)              \
-	FUNC(_PfBindInterfaceToIPAddress, ##AT,12)               \
-	FUNC(_PfBindInterfaceToIndex, ##AT,16)                   \
-	FUNC(_PfCreateInterface, ##AT,24)                        \
-	FUNC(_PfDeleteInterface, ##AT,4)                         \
-	FUNC(_PfDeleteLog, ##AT,0)                               \
-	FUNC(_PfGetInterfaceStatistics, ##AT,16)                 \
-	FUNC(_PfMakeLog, ##AT,4)                                 \
-	FUNC(_PfRebindFilters, ##AT,8)                           \
-	FUNC(_PfRemoveFilterHandles, ##AT,12)                    \
-	FUNC(_PfRemoveFiltersFromInterface, ##AT,20)             \
-	FUNC(_PfRemoveGlobalFilterFromInterface, ##AT,8)         \
-	FUNC(_PfSetLogBuffer, ##AT,28)                           \
-	FUNC(_PfTestPacket, ##AT,20)                          \
-	FUNC(_PfUnBindInterface, ##AT,4)                      \
+	FUNC(_PfAddFiltersToInterface, ##AT, 24)           \
+	FUNC(_PfAddGlobalFilterToInterface, ##AT, 8)       \
+	FUNC(_PfBindInterfaceToIPAddress, ##AT, 12)        \
+	FUNC(_PfBindInterfaceToIndex, ##AT, 16)            \
+	FUNC(_PfCreateInterface, ##AT, 24)                 \
+	FUNC(_PfDeleteInterface, ##AT, 4)                  \
+	FUNC(_PfDeleteLog, ##AT, 0)                        \
+	FUNC(_PfGetInterfaceStatistics, ##AT, 16)          \
+	FUNC(_PfMakeLog, ##AT, 4)                          \
+	FUNC(_PfRebindFilters, ##AT, 8)                    \
+	FUNC(_PfRemoveFilterHandles, ##AT, 12)             \
+	FUNC(_PfRemoveFiltersFromInterface, ##AT, 20)      \
+	FUNC(_PfRemoveGlobalFilterFromInterface, ##AT, 8)  \
+	FUNC(_PfSetLogBuffer, ##AT, 28)                    \
+	FUNC(_PfTestPacket, ##AT, 20)                      \
+	FUNC(_PfUnBindInterface, ##AT, 4)                  \
 	FUNC(do_echo_rep)                                  \
 	FUNC(do_echo_req)                                  \
 	FUNC(if_indextoname)                               \
 	FUNC(if_nametoindex)                               \
-	FUNC(register_icmp)                                \
+	FUNC(register_icmp)
 
 #pragma endregion
 
@@ -302,7 +303,7 @@ namespace raidhook
 
 		struct DllStateDestroyer
 		{
-			void operator()(DllState *state)
+			void operator()(DllState* state)
 			{
 				DestroyStates();
 
@@ -314,12 +315,14 @@ namespace raidhook
 		};
 
 		std::unique_ptr<DllState, DllStateDestroyer> State;
-	}
-}
+	} // namespace
+} // namespace raidhook
 
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 {
 	using namespace raidhook;
+
+	static HINSTANCE hLDebugger = 0;
 
 	if (reason == DLL_PROCESS_ATTACH)
 	{
@@ -328,23 +331,30 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		strcat_s(bufd, "\\IPHLPAPI.dll");
 
 		HMODULE hL = LoadLibrary(bufd);
-		if (!hL) return false;
+		if (!hL)
+			return false;
 
 		State.reset(new DllState());
 		State->hLThis = hInst;
 		State->hL = hL;
 
 		// Load the addresses for all the functions
-#define REGISTER(name, symbol, symbol_num) farproc.o##name = GetProcAddress(hL, #name#symbol#symbol_num);
+#define REGISTER(name, symbol, symbol_num) farproc.o##name = GetProcAddress(hL, #name #symbol #symbol_num);
 		ALLFUNC(REGISTER, @);
 #undef REGISTER
 
-		InitiateStates();
+		// load DieselLuaDebugger even before us, if installed. but only if their own loader isnt installed
+		if (std::filesystem::exists("DieselLuaDebugger.dll") && !std::filesystem::exists("VERSION.dll"))
+			hLDebugger = LoadLibrary("DieselLuaDebugger.dll");
 
+		InitiateStates();
 	}
 	if (reason == DLL_PROCESS_DETACH)
 	{
 		State.reset();
+
+		if (hLDebugger != 0)
+			FreeLibrary(hLDebugger);
 	}
 
 	return 1;
@@ -356,15 +366,15 @@ extern "C"
 
 	int jumpToPA();
 
-	#define DEF_STUB(name, symbol, symbol_num) \
-	void _IPHP_EXPORT_##name() \
-	{ \
-		PA = farproc.o##name; \
-		jumpToPA(); \
-	}; \
+#define DEF_STUB(name, symbol, symbol_num) \
+	void _IPHP_EXPORT_##name()             \
+	{                                      \
+		PA = farproc.o##name;              \
+		jumpToPA();                        \
+	};
 
 	ALLFUNC(DEF_STUB, @)
-	#undef DEF_STUB
+#undef DEF_STUB
 }
 
 #endif
