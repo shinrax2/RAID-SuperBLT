@@ -44,7 +44,6 @@ namespace raidhook
 
 		void LaunchHTTPRequest(std::unique_ptr<HTTPItem> callback);
 	private:
-		std::unique_ptr<std::mutex[]> openssl_locks;
 		std::list<std::unique_ptr<std::thread>> threadList;
 	};
 }

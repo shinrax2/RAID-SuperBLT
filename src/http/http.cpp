@@ -1,5 +1,4 @@
 #include <curl/curl.h>
-#include <openssl/crypto.h>
 #include "http/http.h"
 #include "threading/queue.h"
 #include "util/util.h"

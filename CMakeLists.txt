@@ -139,40 +139,14 @@ target_link_libraries(SuperBLT mxml)
 target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
-# Disable all the install targets, otherwise it causes errors when we add dependencies to curl
-function(install)
-endfunction()
-
-# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
-# is inconvenient on Windows. Here's the download URL:
-# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.8.0.tar.gz
-set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.8.0)
-set(LSSL_TARBALL ${LSSL_SRCDIR}.tar.gz)
-if(NOT EXISTS ${LSSL_TARBALL})
-	# TODO move this to my (ZNix's) server, in case the paths ever change
-	message("Downloading LibreSSL")
-	file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.8.0.tar.gz" ${LSSL_TARBALL}
-		#TIMEOUT 60  # seconds
-		EXPECTED_HASH SHA256=12531c1ec808c5c6abeb311899664b0cfed04d4648f456dc959bb93c5f21acac
-		TLS_VERIFY ON
-	)
-endif()
-if(NOT EXISTS ${LSSL_SRCDIR})
-	message("Extracting LibreSSL")
-	file(ARCHIVE_EXTRACT INPUT ${LSSL_TARBALL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/ PATTERNS libressl-3.8.0)
-endif()
-
-######
-###### Dependency stuff
-######
-
-# Required to build LibreSSL and curl as static libraries
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build as static, set by SBLT's buildscript")
+#### zlib ####
 
 # # zlib requires an old version of cmake before target_include_directories was added
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
 target_link_libraries(SuperBLT zlibstatic)
+
+#### OpenAL ####
 
 # Unfortunately cmake doesn't have namespacing, so we have to set stuff here
 set(LIBTYPE STATIC)
@@ -181,12 +155,18 @@ target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
 target_link_libraries(SuperBLT OpenAL)
 # target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
-add_subdirectory(lib/sys/libressl-3.8.0 EXCLUDE_FROM_ALL)
-target_include_directories(SuperBLT PRIVATE ${LSSL_SRCDIR}/include) # Required for latest version of LibreSSL
-target_link_libraries(SuperBLT crypto)
-
 #### CURL ####
-set(CURL_USE_SCHANNEL ON) # Use Windows SSPI for HTTPS
+
+# Required to build curl as static
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build as static, set by SBLT's buildscript")
+
+# Disable all the install targets, otherwise it causes errors when we add dependencies to curl
+function(install)
+endfunction()
+
+# Use Windows SSPI for HTTPS
+set(CURL_USE_SCHANNEL ON)
+
 # Turn off all the crap we don't want
 set(CURL_DISABLE_INSTALL ON)
 set(HTTP_ONLY ON) # disable all protocols, but http(s) and ws(s)
