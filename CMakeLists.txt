@@ -151,6 +151,10 @@ endfunction()
 # Use Windows SSPI for HTTPS
 set(CURL_USE_SCHANNEL ON)
 
+# link curl against our static zlib
+set(ZLIB_LIBRARY zlibstatic)
+set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
+
 # Turn off all the crap we don't want
 set(CURL_DISABLE_INSTALL ON)
 set(HTTP_ONLY ON) # disable all protocols, but http(s) and ws(s)
@@ -160,8 +164,7 @@ set(CURL_DISABLE_KERBEROS_AUTH ON) # included in SSPI
 set(CURL_DISABLE_NTLM ON) # included in SSPI
 set(CURL_DISABLE_WEBSOCKETS ON) # disable websocket support [ ws(s):// ]
 
-# TODO enable zlib
-set(CURL_USE_LIBPSL OFF) # TODO: enable this too
+set(CURL_USE_LIBPSL OFF) # TODO: include https://github.com/rockdaboot/libpsl
 
 add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
 target_link_libraries(SuperBLT libcurl_static)
