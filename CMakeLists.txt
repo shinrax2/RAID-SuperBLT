@@ -95,8 +95,7 @@ list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/wren_generated_src.c)
 ## Base (non-platform-specific) part of SuperBLT ##############################
 ###############################################################################
 
-add_library(SuperBLT STATIC ${sources} ${win32_sources} platforms/w32/platform_xml.asm)
-set_property(SOURCE platforms/w32/platform_xml.asm PROPERTY LANGUAGE ASM_MASM)
+add_library(SuperBLT STATIC ${sources} ${win32_sources})
 
 target_compile_options(SuperBLT PRIVATE
 	-DAL_LIBTYPE_STATIC
@@ -157,7 +156,7 @@ set(CURL_DISABLE_KERBEROS_AUTH ON) # included in SSPI
 set(CURL_DISABLE_NTLM ON) # included in SSPI
 set(CURL_DISABLE_WEBSOCKETS ON) # disable websocket support [ ws(s):// ]
 
-# link libcurl against our included zlib, to enable it's libz features
+# link curl against our included static zlib, to enable it's libz features
 set(ZLIB_LIBRARY ${zlib_BINARY_DIR}/${CMAKE_CFG_INTDIR}/zlibstatic.lib)
 set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
 
@@ -184,7 +183,6 @@ endmacro()
 Add_Loader("IPHLPAPI" ${win32_loader_path}/loader.asm ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def src/Resource.rc)
 Add_Loader("WSOCK32" ${win32_loader_path}/loader.asm ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def src/Resource.rc)
 
-set_property(SOURCE ${win32_loader_path}/loader.asm PROPERTY LANGUAGE ASM_MASM)
 set_property(SOURCE ${win32_loader_path}/loader.asm PROPERTY LANGUAGE ASM_MASM)
 
 target_compile_options(IPHLPAPI PRIVATE -DBLT_USE_IPHLPAPI)

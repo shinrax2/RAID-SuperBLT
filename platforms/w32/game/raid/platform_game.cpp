@@ -63,43 +63,21 @@ static void lua_close_new(lua_State* L)
 	lua_close(L);
 }
 
-//////////// Start of XML tweaking stuff
-
-extern "C"
+static void node_from_xml_new(void* node, char* data, int* len)
 {
-	static void node_from_xml_new_fastcall(void* node, char* data, int* len);
+	subhook::ScopedHookRemove scoped_remove(&node_from_xmlDetour);
 
-	void (*NFXNF)(void* node, char* data, int* len);
-	node_from_xmlptr NFX;
+	char* modded = raidhook::tweaker::tweak_raid_xml(data, *len);
+	int modLen = *len;
 
-	void node_from_xml_new();
-
-	void do_xmlload_invoke(void* node, char* data, int* len);
-
-	static void node_from_xml_new_fastcall(void* node, char* data, int* len)
+	if (modded != data)
 	{
-		subhook::ScopedHookRemove scoped_remove(&node_from_xmlDetour);
-
-		char* modded = raidhook::tweaker::tweak_raid_xml(data, *len);
-		int modLen = *len;
-
-		if (modded != data)
-		{
-			modLen = strlen(modded);
-		}
-
-		//edit_node_from_xml_hook(false);
-		do_xmlload_invoke(node, modded, &modLen);
-		//edit_node_from_xml_hook(true);
-
-		raidhook::tweaker::free_tweaked_raid_xml(modded);
+		modLen = strlen(modded);
 	}
 
-	static void setup_xml_function_addresses()
-	{
-		NFXNF = &node_from_xml_new_fastcall;
-		NFX = node_from_xml;
-	}
+	node_from_xml(node, modded, &modLen);
+
+	raidhook::tweaker::free_tweaked_raid_xml(modded);
 }
 
 static void setup_platform_game()
@@ -109,8 +87,6 @@ static void setup_platform_game()
 	applicationUpdateDetour.Install(application_update, application_update_new, subhook::HookFlags::HookFlag64BitOffset);
 	newStateDetour.Install(ctor_lua_Alloc, ctor_lua_Alloc_new, subhook::HookFlags::HookFlag64BitOffset);
 	luaCloseDetour.Install(lua_close_exe, lua_close_new, subhook::HookFlags::HookFlag64BitOffset);
-
-	setup_xml_function_addresses();
 	node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookFlags::HookFlag64BitOffset);
 
 	init_idstring_pointers();
