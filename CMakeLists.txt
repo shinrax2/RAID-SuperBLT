@@ -145,16 +145,8 @@ target_link_libraries(SuperBLT zlibstatic)
 # Required to build curl as static
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build as static, set by SBLT's buildscript")
 
-# Disable all the install targets, otherwise it causes errors when we add dependencies to curl
-function(install)
-endfunction()
-
 # Use Windows SSPI for HTTPS
 set(CURL_USE_SCHANNEL ON)
-
-# link curl against our static zlib
-set(ZLIB_LIBRARY zlibstatic)
-set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
 
 # Turn off all the crap we don't want
 set(CURL_DISABLE_INSTALL ON)
