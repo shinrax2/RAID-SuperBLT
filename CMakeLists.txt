@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.18)
 
 project(SuperBLT)
 
-# Allow us to attach the winmm.lib dependency to OpenAL on Windows
+# Allowed us to attach the winmm.lib dependency to OpenAL on Windows
+# do we still want this?
 cmake_policy(SET CMP0079 NEW)
 
 enable_language(ASM_MASM)
@@ -13,9 +14,6 @@ enable_language(ASM_MASM)
 
 # Use CXX 20
 set(CMAKE_CXX_STANDARD 20)
-
-# Enable XAudio
-add_definitions(-DENABLE_XAUDIO)
 
 ###############################################################################
 ## file globbing ##############################################################
@@ -145,15 +143,6 @@ target_link_libraries(SuperBLT subhook)
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
 target_link_libraries(SuperBLT zlibstatic)
-
-#### OpenAL ####
-
-# Unfortunately cmake doesn't have namespacing, so we have to set stuff here
-set(LIBTYPE STATIC)
-add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
-target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
-target_link_libraries(SuperBLT OpenAL)
-# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
 #### CURL ####
 

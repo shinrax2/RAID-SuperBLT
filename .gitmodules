@@ -11,9 +11,6 @@
 	path = lib/sys/zlib
 	ignore = all # Changes are made by cmake
 	url = https://github.com/madler/zlib.git
-[submodule "lib/sys/openalsoft"]
-	path = lib/sys/openalsoft
-	url = https://github.com/kcat/openal-soft.git
 [submodule "lib/sys/curl"]
 	path = lib/sys/curl
 	url = https://github.com/curl/curl.git
