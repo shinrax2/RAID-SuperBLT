@@ -9,7 +9,6 @@
 	url = https://github.com/Zeex/subhook.git
 [submodule "lib/sys/zlib"]
 	path = lib/sys/zlib
-	ignore = all # Changes are made by cmake
 	url = https://github.com/madler/zlib.git
 [submodule "lib/sys/curl"]
 	path = lib/sys/curl

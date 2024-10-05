@@ -135,6 +135,7 @@ target_link_libraries(SuperBLT subhook)
 #### zlib ####
 
 # # zlib requires an old version of cmake before target_include_directories was added
+set(RENAME_ZCONF OFF)
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
 target_link_libraries(SuperBLT zlibstatic)
