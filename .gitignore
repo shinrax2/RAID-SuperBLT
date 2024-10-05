@@ -7,3 +7,6 @@
 
 # Swap files
 .*.swp
+
+# tmp file
+/src/Resource.aps

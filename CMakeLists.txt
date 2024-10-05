@@ -112,6 +112,9 @@ foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE C
 	endif(${flag_var} MATCHES "/O2")
 endforeach(flag_var)
 
+# Link against libraries
+target_link_libraries(SuperBLT version.lib)
+
 # Allow both SuperBLT and the loaders access to the headers
 target_include_directories(SuperBLT PUBLIC src)
 
@@ -178,8 +181,8 @@ macro(Add_Loader library_name)
 	target_link_libraries(${library_name} LINK_PRIVATE SuperBLT)
 endmacro()
 
-Add_Loader("IPHLPAPI" ${win32_loader_path}/loader.asm ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def)
-Add_Loader("WSOCK32" ${win32_loader_path}/loader.asm ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def)
+Add_Loader("IPHLPAPI" ${win32_loader_path}/loader.asm ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def src/Resource.rc)
+Add_Loader("WSOCK32" ${win32_loader_path}/loader.asm ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def src/Resource.rc)
 
 set_property(SOURCE ${win32_loader_path}/loader.asm PROPERTY LANGUAGE ASM_MASM)
 set_property(SOURCE ${win32_loader_path}/loader.asm PROPERTY LANGUAGE ASM_MASM)
