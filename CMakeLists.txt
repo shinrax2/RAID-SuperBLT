@@ -16,26 +16,9 @@ set(CMAKE_CXX_STANDARD 20)
 ###############################################################################
 
 # these instructions search the directory tree when cmake is
-# invoked and put all files that match the pattern in the variables
-# `sources` and `data`
+# invoked and put all files that match the pattern in the variable
+# `sources`
 file(GLOB_RECURSE	sources		src/*.cpp src/*.c src/*.h)
-
-set(				win32_all_game_path			platforms/w32/game)
-set(				win32_game_path				${win32_all_game_path}/raid)
-file(GLOB_RECURSE	all_game_win32_sources	${win32_all_game_path}/*.cpp ${win32_all_game_path}/*.h)
-file(GLOB_RECURSE	game_win32_sources		${win32_game_path}/*.cpp ${win32_game_path}/*.h)
-# Only Payday 2 has a linux build at the moment so we don't really need game specific stuff for it. 
-
-file(GLOB_RECURSE	win32_sources		platforms/w32/*.cpp platforms/w32/*.h)
-set(				win32_loader_path	platforms/w32/loader)
-
-file(GLOB_RECURSE	win32_loaders		${win32_loader_path}/*.cpp)
-list(REMOVE_ITEM	win32_sources		${win32_loaders})
-list(REMOVE_ITEM	win32_sources		${all_game_win32_sources})
-list(APPEND			win32_sources		${game_win32_sources})
-
-# you can use set(sources src/main.cpp) etc if you don't want to
-# use globing to find files automatically
 
 ###############################################################################
 ## target definitions #########################################################
@@ -95,7 +78,7 @@ list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/wren_generated_src.c)
 ## Base (non-platform-specific) part of SuperBLT ##############################
 ###############################################################################
 
-add_library(SuperBLT STATIC ${sources} ${win32_sources})
+add_library(SuperBLT STATIC ${sources})
 
 target_compile_options(SuperBLT PRIVATE
 	-DCURL_STATICLIB
@@ -118,9 +101,6 @@ target_include_directories(SuperBLT PUBLIC src)
 
 # Make the generated wren header available
 target_include_directories(SuperBLT PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
-
-# Give access to game specific platforms
-target_include_directories(SuperBLT PUBLIC ${win32_game_path})
 
 ###############################################################################
 ## dependencies ###############################################################
@@ -179,10 +159,10 @@ macro(Add_Loader library_name)
 	target_link_libraries(${library_name} LINK_PRIVATE SuperBLT)
 endmacro()
 
-Add_Loader("IPHLPAPI" ${win32_loader_path}/loader.asm ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def src/Resource.rc)
-Add_Loader("WSOCK32" ${win32_loader_path}/loader.asm ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def src/Resource.rc)
+Add_Loader("IPHLPAPI" loader/loader.asm loader/iphp.cpp loader/iphp.def src/Resource.rc)
+Add_Loader("WSOCK32" loader/loader.asm loader/wsock.cpp loader/wsock.def src/Resource.rc)
 
-set_property(SOURCE ${win32_loader_path}/loader.asm PROPERTY LANGUAGE ASM_MASM)
+set_property(SOURCE loader/loader.asm PROPERTY LANGUAGE ASM_MASM)
 
 target_compile_options(IPHLPAPI PRIVATE -DBLT_USE_IPHLPAPI)
 target_compile_options(WSOCK32 PRIVATE -DBLT_USE_WSOCK)
