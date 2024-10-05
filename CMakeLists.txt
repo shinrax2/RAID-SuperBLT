@@ -98,7 +98,6 @@ list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/wren_generated_src.c)
 add_library(SuperBLT STATIC ${sources} ${win32_sources})
 
 target_compile_options(SuperBLT PRIVATE
-	-DAL_LIBTYPE_STATIC
 	-DCURL_STATICLIB
 	-DSUBHOOK_STATIC
 )
