@@ -2,15 +2,11 @@ cmake_minimum_required(VERSION 3.18)
 
 project(SuperBLT)
 
-# Allowed us to attach the winmm.lib dependency to OpenAL on Windows
-# do we still want this?
-cmake_policy(SET CMP0079 NEW)
-
-enable_language(ASM_MASM)
-
 ###############################################################################
 ## misc. definitions ##########################################################
 ###############################################################################
+
+enable_language(ASM_MASM)
 
 # Use CXX 20
 set(CMAKE_CXX_STANDARD 20)
@@ -115,10 +111,6 @@ foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE C
 		string(REGEX REPLACE "/O2" "/Od /Oi /Ot /Oy /Ob2 /GF /Gy" ${flag_var} "${${flag_var}}")
 	endif(${flag_var} MATCHES "/O2")
 endforeach(flag_var)
-
-# Link against libraries
-target_link_libraries(SuperBLT ws2_32.lib)
-target_link_libraries(SuperBLT crypt32.lib)
 
 # Allow both SuperBLT and the loaders access to the headers
 target_include_directories(SuperBLT PUBLIC src)
