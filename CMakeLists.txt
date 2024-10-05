@@ -157,6 +157,10 @@ set(CURL_DISABLE_KERBEROS_AUTH ON) # included in SSPI
 set(CURL_DISABLE_NTLM ON) # included in SSPI
 set(CURL_DISABLE_WEBSOCKETS ON) # disable websocket support [ ws(s):// ]
 
+# link libcurl against our included zlib, to enable it's libz features
+set(ZLIB_LIBRARY ${zlib_BINARY_DIR}/${CMAKE_CFG_INTDIR}/zlibstatic.lib)
+set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
+
 set(CURL_USE_LIBPSL OFF) # TODO: include https://github.com/rockdaboot/libpsl
 
 add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
