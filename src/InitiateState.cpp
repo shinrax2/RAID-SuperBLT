@@ -905,7 +905,7 @@ namespace blt
 
 				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base")))
 				{
-					int result = MessageBox(NULL, "Do you want to download the Diesel SuperBLT basemod?\n"
+					int result = MessageBox(NULL, "Do you want to download the RAID SuperBLT basemod?\n"
 					                        "This is required for using mods", "SuperBLT 'mods/base' folder missing", MB_YESNO);
 					if (result == IDYES) download_blt();
 
