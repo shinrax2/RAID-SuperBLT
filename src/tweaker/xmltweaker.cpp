@@ -10,12 +10,12 @@
 #include <wren.hpp>
 
 using namespace std;
-using namespace pd2hook;
+using namespace raidhook;
 using namespace tweaker;
 using blt::idstring;
 using blt::idfile;
 
-bool pd2hook::tweaker::tweaker_enabled = true;
+bool raidhook::tweaker::tweaker_enabled = true;
 
 static unordered_set<char*> buffers;
 static set<idfile> ignored_files;
@@ -24,7 +24,7 @@ static set<idfile> ignored_files;
 // once, nothing should happen as a file from the filesystem is being loaded.
 idfile last_parsed;
 
-char* tweaker::tweak_pd2_xml(char* text, int text_length)
+char* tweaker::tweak_raid_xml(char* text, int text_length)
 {
 	if (!tweaker_enabled)
 	{
@@ -91,7 +91,7 @@ char* tweaker::tweak_pd2_xml(char* text, int text_length)
 	return (char*)buffer;
 }
 
-void tweaker::free_tweaked_pd2_xml(char* text)
+void tweaker::free_tweaked_raid_xml(char* text)
 {
 	if (buffers.erase(text))
 	{
@@ -99,7 +99,7 @@ void tweaker::free_tweaked_pd2_xml(char* text)
 	}
 }
 
-void pd2hook::tweaker::ignore_file(idfile file)
+void raidhook::tweaker::ignore_file(idfile file)
 {
 	ignored_files.insert(file);
 }

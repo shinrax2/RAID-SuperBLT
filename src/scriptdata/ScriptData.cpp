@@ -14,7 +14,7 @@
 
 #include "util/util.h"
 
-namespace pd2hook::scriptdata
+namespace raidhook::scriptdata
 {
 	using namespace tools;
 
@@ -426,7 +426,7 @@ namespace pd2hook::scriptdata
 			});
 			writePtr(out, is32, 0); // contents
 
-			writePtr(out, is32, 0 /* 0xDEADBEEF */); // allocator (overwritten, value doesn't matter for PD2, tool thinks it's 32-bit if this is zero, so write an easily identifiable value here)
+			writePtr(out, is32, 0 /* 0xDEADBEEF */); // allocator (overwritten, value doesn't matter for RAID, tool thinks it's 32-bit if this is zero, so write an easily identifiable value here)
 
 			// Write out the contents
 			for(const SItem* item : items)
@@ -435,13 +435,13 @@ namespace pd2hook::scriptdata
 			}
 		};
 
-		//PD2HOOK_LOG_LOG("S:0");
+		//RAIDHOOK_LOG_LOG("S:0");
 		auto timer = std::chrono::high_resolution_clock::now();
 		auto printtime = [&timer](std::string name) {
 			auto now = std::chrono::high_resolution_clock::now();
 			long time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer).count();
 			std::string str = name + " : " + std::to_string(time_ms);
-			//PD2HOOK_LOG_LOG(str.c_str());
+			//RAIDHOOK_LOG_LOG(str.c_str());
 			timer = now;
 		};
 

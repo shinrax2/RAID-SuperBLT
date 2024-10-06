@@ -6,7 +6,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
-static const char *DOWNLOAD_URL = "https://sblt-update.znix.xyz/pd2update/download/get.php?src=dll&id=payday2blt";
+static const char *DOWNLOAD_URL = "https://api.modworkshop.net/mods/49758/download";
 static const char *OUT_FILE_NAME = "blt_basemod_download.zip";
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
@@ -15,7 +15,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 	return written;
 }
 
-void pd2hook::download_blt()
+void raidhook::download_blt()
 {
 	blt::platform::win32::OpenConsole();
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -79,7 +79,7 @@ void pd2hook::download_blt()
 	printf("Download done. Installing...\n");
 
 	CreateDirectory("mods", NULL);
-	pd2hook::ExtractZIPArchive(OUT_FILE_NAME, "mods");
+	raidhook::ExtractZIPArchive(OUT_FILE_NAME, "mods");
 
 	SetConsoleTextAttribute(hStdout, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 	printf("Cleaning up...\n");

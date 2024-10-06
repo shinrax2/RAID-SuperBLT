@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace pd2hook::scriptdata::font
+namespace raidhook::scriptdata::font
 {
 
 #pragma pack(push,1)

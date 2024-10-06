@@ -38,7 +38,7 @@ static std::queue<IOTask> task_list;
 static std::condition_variable condition_var;
 static int thread_count;
 
-PD2HOOK_REGISTER_EVENTQUEUE(IOCompletion, Completions);
+RAIDHOOK_REGISTER_EVENTQUEUE(IOCompletion, Completions);
 
 // TODO deduplicate with that in InitiateState
 static void handled_pcall(lua_State* L, int nargs, int nresults)
@@ -47,7 +47,7 @@ static void handled_pcall(lua_State* L, int nargs, int nresults)
 	if (err == LUA_ERRRUN)
 	{
 		std::string msg = std::string("Failed to make async IO call: ") + lua_tostring(L, -1);
-		PD2HOOK_LOG_ERROR(msg.c_str());
+		RAIDHOOK_LOG_ERROR(msg.c_str());
 		lua_pop(L, 1);
 	}
 }
@@ -59,7 +59,7 @@ static void invoke_on_update(lua_State* L, std::function<void()> func)
 	// NOLINTNEXTLINE(performance-unnecessary-value-param)
 	GetCompletionsQueue().AddToQueue(
 		[](IOCompletion completion) {
-			if (!pd2hook::check_active_state(completion.L))
+			if (!raidhook::check_active_state(completion.L))
 				return;
 
 			int old_top = lua_gettop(completion.L);
@@ -71,7 +71,7 @@ static void invoke_on_update(lua_State* L, std::function<void()> func)
 				char buff[128];
 				snprintf(buff, sizeof(buff) - 1, "Lua stack size deviation for async invoke_on_update: %d vs %d\n",
 			             old_top, new_top);
-				PD2HOOK_LOG_ERROR(buff);
+				RAIDHOOK_LOG_ERROR(buff);
 				abort();
 			}
 		},
@@ -83,7 +83,7 @@ static void start_task_thread()
 {
 	thread_count++;
 
-	PD2HOOK_LOG_LOG("Starting async IO thread");
+	RAIDHOOK_LOG_LOG("Starting async IO thread");
 
 	std::thread thread([]() {
 		while (true)
@@ -105,7 +105,7 @@ static void start_task_thread()
 			task.func();
 		}
 
-		PD2HOOK_LOG_LOG("Exiting async IO thread");
+		RAIDHOOK_LOG_LOG("Exiting async IO thread");
 
 		{
 			std::lock_guard guard(task_mutex);

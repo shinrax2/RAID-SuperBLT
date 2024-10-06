@@ -6,39 +6,30 @@ This is an unofficial continuation of the BLT and SuperBLT mod loader for PAYDAY
 not possible in standard Lua, such as patching XML files that are loaded directly by the engine or playing
 3D sounds.
 
-This is the developer repository and should only be used if you know what you're doing (or running GNU+Linux, as explained below). If you don't, visit the website at [SuperBLT.znix.xyz](https://superblt.znix.xyz/) for an up-to-date drag-drop install.
-The Lua component of the BLT, which controls mod loading, can be found in its own repository, [GitHub: RAIDModding/RAID-SuperBLT-Lua]([https://gitlab.com/znixian/payday2-superblt-lua](https://github.com/RAIDModding/RAID-SuperBLT-Lua)).
+This is the developer repository and should only be used if you know what you're doing. If you don't, visit the website at [modworkshop.net: RAID-SuperBLT](https://modworkshop.net/mod/49744) for an up-to-date drag-drop install.
+The Lua component of the BLT, which controls mod loading, can be found in its own repository, [GitHub: RAIDModding/RAID-SuperBLT-Lua](https://github.com/RAIDModding/RAID-SuperBLT-Lua).
 
 ## Download
-Visit ![GitHub Latest Release](https://github.com/RAIDModding/RAID-SuperBLT/releases/latest) to get the latest stable download. 
+Visit ![modworkshop.net: RAID-SuperBLT](https://modworkshop.net/mod/49744) to get the latest stable download. 
 
 ## Documentation
 Documentation for the original BLT can be found on the [GitHub Wiki](https://github.com/JamesWilko/Payday-2-BLT/wiki) for the project.
 
-Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz).
+Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz). (ignore everything related to XAudio! We don't have that in RAID.)
 
 ## Development
 
 How to contribute to SuperBLT:
 
-SuperBLT uses the CMake build system. This can generate various build files,
-including GNU Makefiles and MSVC Project/Solution files, from which the program can
-be built.
-
-SuperBLT depends on two sets of libraries: those commonly available (such as OpenSSL
-and ZLib) which you are expected to install via your package manager (GNU+Linux) or
-by downloading and compiling (Windows).
-
-It also has libraries that are very small projects, rarely available in package managers,
-and are included as git submodules. CMake automatically adds these targets,
-so you don't need to make any special efforts to use them.
-
-### Windows
-
 First, clone this repository and pull all required projects and repositories into one folder (Note: You **NEED** to do this, otherwise you'll get runtime and compile errors):
 
 ```
 git clone --recursive https://github.com/RAIDModding/RAID-SuperBLT.git
+```
+
+if you cloned without `--recursive`, do this in the root of your repo:
+```
+git submodule update --init --recursive
 ```
 
 You can use Visual Studio or the command line to generate the files and build SuperBLT.

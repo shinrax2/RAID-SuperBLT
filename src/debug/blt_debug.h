@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace pd2hook
+namespace raidhook
 {
 	class DebugConnection
 	{

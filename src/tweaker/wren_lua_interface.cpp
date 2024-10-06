@@ -62,7 +62,7 @@ static void wren_register_object(WrenVM* vm)
 	}
 }
 
-WrenForeignMethodFn pd2hook::tweaker::lua_io::bind_wren_lua_method(WrenVM* vm, const char* module,
+WrenForeignMethodFn raidhook::tweaker::lua_io::bind_wren_lua_method(WrenVM* vm, const char* module,
                                                                    const char* class_name, bool is_static,
                                                                    const char* signature)
 {
@@ -198,8 +198,8 @@ static int wren_lua_invoke(lua_State* L)
 
 	// Invoke the Wren function under the only-wren-can-run lock
 	{
-		auto lock = pd2hook::wren::lock_wren_vm();
-		WrenVM* vm = pd2hook::wren::get_wren_vm();
+		auto lock = raidhook::wren::lock_wren_vm();
+		WrenVM* vm = raidhook::wren::get_wren_vm();
 
 		if (!vm)
 			luaL_error(L, "Wren runtime unavailable - check for Wren-related errors in the log");
@@ -250,7 +250,7 @@ static int wren_lua_invoke(lua_State* L)
 	return 1;
 }
 
-void pd2hook::tweaker::lua_io::register_lua_functions(lua_State* L)
+void raidhook::tweaker::lua_io::register_lua_functions(lua_State* L)
 {
 	luaL_Reg vmLib[] = {
 		{"invoke", &wren_lua_invoke},

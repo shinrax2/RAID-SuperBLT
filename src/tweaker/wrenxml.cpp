@@ -6,13 +6,13 @@
 #include <util/util.h>
 
 using namespace std;
-using namespace pd2hook::tweaker;
+using namespace raidhook::tweaker;
 using namespace wrenxml;
 
 const char *MODULE = "base/native";
 
 #define WXML_ERR(err) { \
-	PD2HOOK_LOG_ERROR(err); \
+	RAIDHOOK_LOG_ERROR(err); \
 	string str = err; \
 	wrenSetSlotString(vm, 0, str.c_str()); \
 	wrenAbortFiber(vm, 0); \
@@ -68,7 +68,7 @@ mxmlToAllocStringSafe(
 	if ((s = (char*)malloc(bytes + 1)) == NULL)
 	{
 		const char *message = "[WREN/WXML] XML.string: Cannot allocate enough space for XML string";
-		PD2HOOK_LOG_ERROR(message);
+		RAIDHOOK_LOG_ERROR(message);
 		MessageBox(0, message, "SuperBLT OutOfMemory", MB_OK);
 		exit(1);
 	}
@@ -87,9 +87,9 @@ static char *mxml_last_error = NULL;
 
 static void handle_mxml_error_crash(const char* error)
 {
-	PD2HOOK_LOG_ERROR("Could not parse XML: Error and original file below");
-	PD2HOOK_LOG_ERROR(error);
-	PD2HOOK_LOG_ERROR(last_loaded_xml);
+	RAIDHOOK_LOG_ERROR("Could not parse XML: Error and original file below");
+	RAIDHOOK_LOG_ERROR(error);
+	RAIDHOOK_LOG_ERROR(last_loaded_xml);
 
 	const char *message = "[WREN/WXML] XML parse error - see mods/logs for details";
 	MessageBox(0, message, "XML Parse Error", MB_OK);

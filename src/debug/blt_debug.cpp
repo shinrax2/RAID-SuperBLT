@@ -32,7 +32,7 @@ enum MessageType
 	MSGT_LuaMesage
 };
 
-namespace pd2hook
+namespace raidhook
 {
 	static DebugConnection* connection = NULL;
 	static std::map<string, string> parameters;
@@ -90,12 +90,12 @@ namespace pd2hook
 		int nArgs;
 		int i;
 
-		PD2HOOK_LOG_LOG("Command line: " + string(GetCommandLineA()));
+		RAIDHOOK_LOG_LOG("Command line: " + string(GetCommandLineA()));
 
 		szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
 		if (NULL == szArglist)
 		{
-			PD2HOOK_LOG_WARN("Debug: Could not read command line!");
+			RAIDHOOK_LOG_WARN("Debug: Could not read command line!");
 			return;
 		}
 
@@ -110,20 +110,20 @@ namespace pd2hook
 			{
 				if (i == nArgs - 1)
 				{
-					PD2HOOK_LOG_WARN("Debug: --debug-params supplied as last parameter!");
+					RAIDHOOK_LOG_WARN("Debug: --debug-params supplied as last parameter!");
 					break;
 				}
 
 				string params = LPWSTRtoString(szArglist[i + 1]);
 				ConnectFromParameters(params);
 
-				// PD2HOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
+				// RAIDHOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
 			}
 			else if (!lstrcmpW(L"--debug-lua-param", szArglist[i]))
 			{
 				if (i >= nArgs - 2)
 				{
-					PD2HOOK_LOG_WARN("Debug: --debug-lua-param requires two further arguments!");
+					RAIDHOOK_LOG_WARN("Debug: --debug-lua-param requires two further arguments!");
 					break;
 				}
 
@@ -188,7 +188,7 @@ namespace pd2hook
 			}
 			else
 			{
-				PD2HOOK_LOG_WARN("Debug message received, blt_debugger.lua_msg_callback missing");
+				RAIDHOOK_LOG_WARN("Debug message received, blt_debugger.lua_msg_callback missing");
 
 				// Since we're not calling the function, remove the value ourselves
 				lua_remove(L, -1);
@@ -261,7 +261,7 @@ namespace pd2hook
 
 	DebugConnection::DebugConnection(string host, int port, string key)
 	{
-		PD2HOOK_LOG_LOG("Connecting to " + host + " on " + to_string(port));
+		RAIDHOOK_LOG_LOG("Connecting to " + host + " on " + to_string(port));
 		WSADATA wsaData;
 		int iResult;
 
@@ -332,7 +332,7 @@ namespace pd2hook
 			throw string("Unable to connect to server!");
 		}
 
-		PD2HOOK_LOG_LOG("Connected to debugging server");
+		RAIDHOOK_LOG_LOG("Connected to debugging server");
 
 		// Send an initial buffer
 		stringstream data;
@@ -350,7 +350,7 @@ namespace pd2hook
 			throw msg;
 		}
 
-		PD2HOOK_LOG_LOG("Sent Debug AUTH");
+		RAIDHOOK_LOG_LOG("Sent Debug AUTH");
 
 		// Process the connection message
 		ReadMessage(1);
@@ -507,7 +507,7 @@ return true
 		}
 		catch (string msg)
 		{
-			PD2HOOK_LOG_ERROR("While initializing debug connection: " + msg);
+			RAIDHOOK_LOG_ERROR("While initializing debug connection: " + msg);
 		}
 	}
 

@@ -39,7 +39,7 @@ namespace blt
 				}
 			}
 
-			PD2HOOK_LOG_LOG(string("Loading binary extension ") + file);
+			RAIDHOOK_LOG_LOG(string("Loading binary extension ") + file);
 
 			try
 			{
@@ -119,7 +119,7 @@ namespace blt
 
 			if(developer)
 			{
-				PD2HOOK_LOG_WARN("Loading development plugin! This should never occur ourside a development enviornment");
+				RAIDHOOK_LOG_WARN("Loading development plugin! This should never occur ourside a development enviornment");
 			}
 
 			setup_state = (setup_state_func_t) ResolveSymbol("SuperBLT_Plugin_Init_State");

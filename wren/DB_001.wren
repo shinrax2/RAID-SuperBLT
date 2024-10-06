@@ -67,7 +67,7 @@ foreign class DBAssetHook {
 	// Note: this function may be called many, many times for the same file! If you're doing something
 	//  slow (such as building the contents of a file to pass into DBForeignFile.from_string) you may
 	//  want to consider caching it.
-	// Note: Since Wren is not thread-safe, we have to lock it while running any Wren code. Thus PD2
+	// Note: Since Wren is not thread-safe, we have to lock it while running any Wren code. Thus RAID
 	//  cannot load multiple files using this method in parallel. This generally shouldn't be a major
 	//  issue, but it's one of many reasons you should use plain_file or direct_bundle over this
 	//  if possible.
@@ -86,7 +86,7 @@ foreign class DBForeignFile {
 	//  prefix yourself).
 	foreign static of_file(filename)
 
-	// Wrap an existing asset in PD2's database. The name and ext arguments follow the same automatic
+	// Wrap an existing asset in RAID's database. The name and ext arguments follow the same automatic
 	//  hashing rules as DBManager.register_asset_hook
 	foreign static of_asset(name, ext)
 

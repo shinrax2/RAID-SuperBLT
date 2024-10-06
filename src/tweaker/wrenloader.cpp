@@ -24,8 +24,8 @@ extern "C"
 
 #include "wren_generated_src.h"
 
-using namespace pd2hook;
-using namespace pd2hook::tweaker;
+using namespace raidhook;
+using namespace raidhook::tweaker;
 using namespace std;
 
 struct ModData
@@ -40,13 +40,13 @@ static void err([[maybe_unused]] WrenVM* vm, [[maybe_unused]] WrenErrorType type
 {
 	if (module == nullptr)
 		module = "<unknown>";
-	PD2HOOK_LOG_LOG(string("[WREN ERR] ") + string(module) + ":" + to_string(line) + " ] " + message);
+	RAIDHOOK_LOG_LOG(string("[WREN ERR] ") + string(module) + ":" + to_string(line) + " ] " + message);
 }
 
 static void log(WrenVM* vm)
 {
 	const char* text = wrenGetSlotString(vm, 1);
-	PD2HOOK_LOG_LOG(string("[WREN] ") + text);
+	RAIDHOOK_LOG_LOG(string("[WREN] ") + text);
 }
 
 static string file_to_string(ifstream& in)
@@ -99,7 +99,7 @@ void io_read(WrenVM* vm)
 	ifstream handle(file);
 	if (!handle.good())
 	{
-		PD2HOOK_LOG_ERROR("Wren IO.read: Could not load file " + file);
+		RAIDHOOK_LOG_ERROR("Wren IO.read: Could not load file " + file);
 		exit(1);
 	}
 
@@ -141,7 +141,7 @@ static void io_has_native_module(WrenVM* vm)
 
 static void internal_set_tweaker_enabled(WrenVM* vm)
 {
-	pd2hook::tweaker::tweaker_enabled = wrenGetSlotBool(vm, 1);
+	raidhook::tweaker::tweaker_enabled = wrenGetSlotBool(vm, 1);
 }
 
 static void internal_register_mod_v1(WrenVM* vm)
@@ -183,7 +183,7 @@ static void internal_warn_bad_mod(WrenVM* vm)
 
 	// Always log, even on Windows, so a mod author can track it down if the user doesn't mention
 	// it in a bug report for whatever reason.
-	PD2HOOK_LOG_ERROR(message.c_str());
+	RAIDHOOK_LOG_ERROR(message.c_str());
 
 	MessageBoxA(0, message.c_str(), "SuperBLT: Failed to load Wren mod", MB_OK);
 }
@@ -447,7 +447,7 @@ static WrenLoadModuleResult getModulePath([[maybe_unused]] WrenVM* vm, const cha
 		{
 			str.replace(pos, 8, "cont");
 		}
-		PD2HOOK_LOG_WARN("Patching around an old use of the variable name 'continue'. Please update your basemod.");
+		RAIDHOOK_LOG_WARN("Patching around an old use of the variable name 'continue'. Please update your basemod.");
 	}
 
 	size_t length = str.length() + 1;
@@ -460,13 +460,13 @@ static WrenLoadModuleResult getModulePath([[maybe_unused]] WrenVM* vm, const cha
 	return result;
 }
 
-std::lock_guard<std::recursive_mutex> pd2hook::wren::lock_wren_vm()
+std::lock_guard<std::recursive_mutex> raidhook::wren::lock_wren_vm()
 {
 	static std::recursive_mutex vm_mutex;
 	return std::lock_guard<std::recursive_mutex>(vm_mutex);
 }
 
-WrenVM* pd2hook::wren::get_wren_vm()
+WrenVM* raidhook::wren::get_wren_vm()
 {
 	auto lock = lock_wren_vm();
 
@@ -481,7 +481,7 @@ WrenVM* pd2hook::wren::get_wren_vm()
 			Util::FileType ftyp = Util::GetFileType("mods/base/wren/base.wren");
 			if (ftyp == Util::FileType_None)
 			{
-				PD2HOOK_LOG_WARN("Wren base file not found, Wren VM disabled - the basemod may be corrupted");
+				RAIDHOOK_LOG_WARN("Wren base file not found, Wren VM disabled - the basemod may be corrupted");
 				available = false;
 			}
 		}
@@ -501,7 +501,7 @@ WrenVM* pd2hook::wren::get_wren_vm()
 		WrenInterpretResult result = wrenInterpret(vm, "__root", R"!( import "base/base" )!");
 		if (result == WREN_RESULT_COMPILE_ERROR || result == WREN_RESULT_RUNTIME_ERROR)
 		{
-			PD2HOOK_LOG_ERROR("Wren init failed: compile or runtime error!");
+			RAIDHOOK_LOG_ERROR("Wren init failed: compile or runtime error!");
 
 			MessageBox(nullptr, "Failed to initialise the Wren system - see the log for details", "Wren Error", MB_OK);
 			ExitProcess(1);
@@ -513,8 +513,8 @@ WrenVM* pd2hook::wren::get_wren_vm()
 
 const char* tweaker::transform_file(const char* text)
 {
-	auto lock = pd2hook::wren::lock_wren_vm();
-	WrenVM* vm = pd2hook::wren::get_wren_vm();
+	auto lock = raidhook::wren::lock_wren_vm();
+	WrenVM* vm = raidhook::wren::get_wren_vm();
 
 	// If the Wren runtime is unavailable, obviously we can't apply any tweaks
 	if (!vm)
@@ -542,12 +542,12 @@ const char* tweaker::transform_file(const char* text)
 	WrenInterpretResult result2 = wrenCall(vm, sig);
 	if (result2 == WREN_RESULT_COMPILE_ERROR)
 	{
-		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
+		RAIDHOOK_LOG_ERROR("Wren tweak file failed: compile error!");
 		return text;
 	}
 	else if (result2 == WREN_RESULT_RUNTIME_ERROR)
 	{
-		PD2HOOK_LOG_ERROR("Wren tweak file failed: runtime error!");
+		RAIDHOOK_LOG_ERROR("Wren tweak file failed: runtime error!");
 		return text;
 	}
 

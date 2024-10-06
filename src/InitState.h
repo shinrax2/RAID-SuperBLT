@@ -1,7 +1,7 @@
 #ifndef __INIT_STATE__
 #define __INIT_STATE__
 
-namespace pd2hook
+namespace raidhook
 {
 	void InitiateStates();
 	void DestroyStates();

@@ -1,26 +1,26 @@
 #include "util.h"
-#include <iostream>
+#include <algorithm>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <openssl/evp.h>
 
-namespace pd2hook
+namespace raidhook
 {
 	namespace Util
 	{
 
-		Exception::Exception(const char *file, int line) :
-			mFile(file), mLine(line)
-		{}
+		Exception::Exception(const char* file, int line) : mFile(file), mLine(line)
+		{
+		}
 
-		Exception::Exception(std::string msg, const char *file, int line) :
-			mFile(file), mLine(line), mMsg(std::move(msg))
-		{}
+		Exception::Exception(std::string msg, const char* file, int line)
+			: mFile(file), mLine(line), mMsg(std::move(msg))
+		{
+		}
 
-		const char *Exception::what() const throw()
+		const char* Exception::what() const throw()
 		{
 			if (!mMsg.empty())
 			{
@@ -30,7 +30,7 @@ namespace pd2hook
 			return std::exception::what();
 		}
 
-		const char *Exception::exceptionName() const
+		const char* Exception::exceptionName() const
 		{
 			return "An exception";
 		}
@@ -40,10 +40,7 @@ namespace pd2hook
 			os << exceptionName() << " occurred @ (" << mFile << ':' << mLine << "). " << what();
 		}
 
-		// from https://stackoverflow.com/a/62605880/11871110
-		// Updated sha256 functions to use latest OpenSSL/LibreSSL
-		
-		//helper function to print the digest bytes as a hex string
+		// helper function to print the digest bytes as a hex string
 		std::string bytes_to_hex_string(const std::vector<uint8_t>& bytes)
 		{
 			std::ostringstream stream;
@@ -54,26 +51,55 @@ namespace pd2hook
 			return stream.str();
 		}
 
-		//perform the SHA3-512 hash
+		// Perform SHA-256 hash using Windows CNG API
 		std::string sha256(const std::string& input)
 		{
-			uint32_t digest_length = 32;
-			const EVP_MD* algorithm = EVP_sha256();
-			uint8_t* digest = static_cast<uint8_t*>(OPENSSL_malloc(digest_length));
-			EVP_MD_CTX* context = EVP_MD_CTX_new();
-			EVP_DigestInit_ex(context, algorithm, nullptr);
-			EVP_DigestUpdate(context, input.c_str(), input.size());
-			EVP_DigestFinal_ex(context, digest, &digest_length);
-			EVP_MD_CTX_destroy(context);
-			std::string output = bytes_to_hex_string(std::vector<uint8_t>(digest, digest + digest_length));
-			OPENSSL_free(digest);
-			return output;
+			BCRYPT_ALG_HANDLE hAlgorithm = nullptr;
+			BCRYPT_HASH_HANDLE hHash = nullptr;
+			NTSTATUS status;
+			DWORD hashObjectLength = 0, resultLength = 0;
+			DWORD hashLength = 32;
+			std::vector<uint8_t> hash(hashLength);
+			std::vector<uint8_t> hashObject;
+
+			status = BCryptOpenAlgorithmProvider(&hAlgorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0);
+			if (status != 0) throw std::runtime_error("Failed to open SHA-256 algorithm provider");
+			try
+			{
+				status = BCryptGetProperty(hAlgorithm, BCRYPT_OBJECT_LENGTH, (PUCHAR)&hashObjectLength, sizeof(DWORD),
+				                           &resultLength, 0);
+				if (status != 0) throw std::runtime_error("Failed to get hash object length");
+				hashObject.resize(hashObjectLength);
+				status = BCryptCreateHash(hAlgorithm, &hHash, hashObject.data(), hashObjectLength, nullptr, 0, 0);
+				if (status != 0) throw std::runtime_error("Failed to create hash");
+				try
+				{
+					status = BCryptHashData(hHash, (PUCHAR)input.data(), input.size(), 0);
+					if (status != 0) throw std::runtime_error("Failed to hash data");
+					status = BCryptFinishHash(hHash, hash.data(), hashLength, 0);
+					if (status != 0) throw std::runtime_error("Failed to finish hash");
+				}
+				catch (std::runtime_error e)
+				{
+					BCryptDestroyHash(hHash);
+					throw std::runtime_error(e);
+				}
+			}
+			catch (std::runtime_error e)
+			{
+				BCryptCloseAlgorithmProvider(hAlgorithm, 0);
+				throw std::runtime_error(e);
+			}
+			BCryptDestroyHash(hHash);
+			BCryptCloseAlgorithmProvider(hAlgorithm, 0);
+
+			return bytes_to_hex_string(hash);
 		}
 
 		void RecurseDirectoryPaths(std::vector<std::string>& paths, std::string directory, bool ignore_versioning)
 		{
-			std::vector<std::string> dirs = pd2hook::Util::GetDirectoryContents(directory, true);
-			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(directory);
+			std::vector<std::string> dirs = raidhook::Util::GetDirectoryContents(directory, true);
+			std::vector<std::string> files = raidhook::Util::GetDirectoryContents(directory);
 			for (auto it = files.begin(); it < files.end(); it++)
 			{
 				std::string fpath = directory + *it;
@@ -83,8 +109,10 @@ namespace pd2hook
 			}
 			for (auto it = dirs.begin(); it < dirs.end(); it++)
 			{
-				if (*it == "." || *it == "..") continue;
-				if (ignore_versioning && (*it == ".hg" || *it == ".git")) continue;
+				if (*it == "." || *it == "..")
+					continue;
+				if (ignore_versioning && (*it == ".hg" || *it == ".git"))
+					continue;
 				RecurseDirectoryPaths(paths, directory + *it + "/", false);
 			}
 		}
@@ -113,7 +141,7 @@ namespace pd2hook
 
 			for (auto it = paths.begin(); it < paths.end(); it++)
 			{
-				std::string hashstr = sha256(pd2hook::Util::GetFileContents(*it));
+				std::string hashstr = sha256(raidhook::Util::GetFileContents(*it));
 				hashconcat += hashstr;
 			}
 
@@ -122,18 +150,18 @@ namespace pd2hook
 
 		std::string GetFileHash(std::string file)
 		{
-			// This has to be hashed twice otherwise it won't be the same hash if we're checking against a file uploaded to the server
-			std::string hash = sha256(pd2hook::Util::GetFileContents(file));
+			// This has to be hashed twice otherwise it won't be the same hash if we're checking against a file uploaded
+			// to the server
+			std::string hash = sha256(raidhook::Util::GetFileContents(file));
 			return sha256(hash);
 		}
 
-		template<>
-		std::string ToHex(uint64_t value)
+		template <> std::string ToHex(uint64_t value)
 		{
 			std::stringstream ss;
 			ss << std::hex << std::setw(16) << std::setfill('0') << value;
 			return ss.str();
 		}
 
-	}
-}
+	} // namespace Util
+} // namespace raidhook

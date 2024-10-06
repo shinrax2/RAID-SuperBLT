@@ -66,7 +66,7 @@ static void normalise_hash(WrenVM* vm)
 	wrenSetSlotString(vm, 0, result);
 }
 
-WrenForeignMethodFn pd2hook::tweaker::wren_utils::bind_wren_utils_method(WrenVM* vm, const char* module,
+WrenForeignMethodFn raidhook::tweaker::wren_utils::bind_wren_utils_method(WrenVM* vm, const char* module,
                                                                          const char* className, bool isStatic,
                                                                          const char* signature)
 {

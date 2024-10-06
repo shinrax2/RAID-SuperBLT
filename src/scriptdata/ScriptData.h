@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 
-namespace pd2hook::scriptdata
+namespace raidhook::scriptdata
 {
 
 	bool determine_is_32bit(size_t length, const uint8_t *data);

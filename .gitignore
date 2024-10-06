@@ -2,12 +2,11 @@
 /.vs
 /out
 
-# LibreSSL, since it's extracted from a tarball and not a git submodule
-/lib/sys/libressl-*
-!/lib/sys/libressl-*.tar.gz
-
 # CMake build directory
 /build/
 
 # Swap files
 .*.swp
+
+# tmp file
+/src/Resource.aps

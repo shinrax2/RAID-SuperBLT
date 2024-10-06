@@ -9,7 +9,7 @@
 
 // Thread-safe, type-safe event manager
 
-namespace pd2hook
+namespace raidhook
 {
 	class IEventQueue
 	{
@@ -81,13 +81,20 @@ namespace pd2hook
 		}
 	};
 
-#define PD2HOOK_CONCAT_IMPL(x, y) x ## y
-#define PD2HOOK_CONCAT(x, y) PD2HOOK_CONCAT_IMPL(x, y)
+#define RAIDHOOK_CONCAT_IMPL(x, y) x ## y
+#define RAIDHOOK_CONCAT(x, y) RAIDHOOK_CONCAT_IMPL(x, y)
 
 	// Not strictly necessary, but is a nice chance to make sure the static instance is initialised before there's a chance for multithreaded calls
-#define PD2HOOK_REGISTER_EVENTQUEUE(DataT, Name) \
-	namespace { ::pd2hook::EventQueueRuntimeRegisterer<DataT> PD2HOOK_CONCAT(staticRegisterer, __COUNTER__); ::pd2hook::EventQueue<DataT>& Get##Name##Queue() { return ::pd2hook::EventQueue<DataT>::GetSingleton(); } }
-#define PD2HOOK_REGISTER_EVENTQUEUE_EASY(DataT) PD2HOOK_REGISTER_EVENTQUEUE(DataT, DataT)
+#define RAIDHOOK_REGISTER_EVENTQUEUE(DataT, Name) \
+	namespace                                                                                         \
+	{                                                                                                 \
+		::raidhook::EventQueueRuntimeRegisterer<DataT> RAIDHOOK_CONCAT(staticRegisterer, __COUNTER__); \
+		::raidhook::EventQueue<DataT>& Get##Name##Queue()                                              \
+		{                                                                                             \
+			return ::raidhook::EventQueue<DataT>::GetSingleton();                                      \
+		}                                                                                             \
+	}
+#define RAIDHOOK_REGISTER_EVENTQUEUE_EASY(DataT) RAIDHOOK_REGISTER_EVENTQUEUE(DataT, DataT)
 
 	#pragma region Implementation
 

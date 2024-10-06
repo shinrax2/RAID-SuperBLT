@@ -92,10 +92,10 @@ add_executable(luajit ${LUAJIT_SOURCES})
 
 target_link_libraries(luajit lua51 ${CMAKE_CURRENT_SOURCE_DIR}/lj_vm.obj)
 
-target_include_directories(lua51 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src)
-target_include_directories(lua51-shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src)
-target_include_directories(LuaBuildVM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src)
-target_include_directories(luajit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src)
+target_include_directories(lua51 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/luajit/src)
+target_include_directories(lua51-shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/luajit/src)
+target_include_directories(LuaBuildVM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/luajit/src)
+target_include_directories(luajit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/luajit/src)
 
 target_compile_definitions(lua51-shared PUBLIC LUA_BUILD_AS_DLL)
 

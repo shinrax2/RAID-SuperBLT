@@ -6,7 +6,7 @@
 
 #include <lua.h>
 
-namespace pd2hook::tweaker::lua_io
+namespace raidhook::tweaker::lua_io
 {
 	void register_lua_functions(lua_State* L);
 
@@ -16,4 +16,4 @@ namespace pd2hook::tweaker::lua_io
 	                                         const char* signature);
 #endif
 
-} // namespace pd2hook::tweaker::lua_io
+} // namespace raidhook::tweaker::lua_io
