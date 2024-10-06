@@ -6,7 +6,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
-static const char *DOWNLOAD_URL = "https://sblt-update.znix.xyz/pd2update/download/get.php?src=dll&id=payday2blt"; // FIXME!!!
+static const char *DOWNLOAD_URL = "https://api.modworkshop.net/mods/49758/download";
 static const char *OUT_FILE_NAME = "blt_basemod_download.zip";
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
