@@ -116,6 +116,7 @@ set(RENAME_ZCONF OFF) # turn off renaming of zconf.h
 set(ZLIB_BUILD_EXAMPLES OFF) # no thanks
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
+set_target_properties(zlibstatic PROPERTIES DEBUG_POSTFIX "") # workaround for ZLIB_LIBRARY below (zlib d suffixes lib with 'd', if not overriden here)
 target_link_libraries(SuperBLT zlibstatic)
 
 #### CURL ####
