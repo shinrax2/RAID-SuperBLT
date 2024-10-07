@@ -112,10 +112,11 @@ target_link_libraries(SuperBLT subhook)
 
 #### zlib ####
 
-# # zlib requires an old version of cmake before target_include_directories was added
-set(RENAME_ZCONF OFF)
+set(RENAME_ZCONF OFF) # turn off renaming of zconf.h
+set(ZLIB_BUILD_EXAMPLES OFF) # no thanks
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
+set_target_properties(zlibstatic PROPERTIES DEBUG_POSTFIX "") # workaround for ZLIB_LIBRARY below (zlib suffixes lib with 'd' on debug builds, if not overriden here)
 target_link_libraries(SuperBLT zlibstatic)
 
 #### CURL ####
