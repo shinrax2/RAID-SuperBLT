@@ -44,7 +44,16 @@ void blt::platform::InitPlatform()
 		console = new CConsole();
 #endif
 
-	SignatureSearch::Search();
+	if (!SignatureSearch::Search())
+	{
+		MessageBoxA(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);
+
+		// TODO: check for update, self update (if available) (1. rename self, 2. extract new dll, 3. restart game, 4. cleanup renamed dll)
+
+		if (console)
+			console->Close(true);
+		return;
+	}
 
 	blt::win32::InitAssets();
 
@@ -55,7 +64,7 @@ void blt::platform::ClosePlatform()
 {
 	// Okay... let's not do that.
 	// I don't want to keep this in memory, but it CRASHES THE SHIT OUT if you delete this after all is said and done.
-	if (console) delete console;
+	delete console;
 }
 
 void blt::platform::GetPlatformInformation(lua_State * L)

@@ -47,12 +47,20 @@ CConsole::CConsole() : m_OwnConsole(false)
 	m_OwnConsole = true;
 }
 
-CConsole::~CConsole()
+void CConsole::Close(bool withPostMessage) const
 {
 	if (m_OwnConsole)
 	{
+		HWND hWnd = GetConsoleWindow();
 		std::cout.rdbuf(sb);
 		SetConsoleCtrlHandler(MyConsoleCtrlHandler, FALSE);
 		FreeConsole();
+		if (withPostMessage)
+			PostMessage(hWnd, WM_CLOSE, 0, 0);
 	}
+}
+
+CConsole::~CConsole()
+{
+	Close(false);
 }
