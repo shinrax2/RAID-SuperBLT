@@ -13,7 +13,6 @@ The Lua component of the BLT, which controls mod loading, can be found in its ow
 Visit ![modworkshop.net: RAID-SuperBLT](https://modworkshop.net/mod/49744) to get the latest stable download. 
 
 ## Documentation
-Documentation for the original BLT can be found on the [GitHub Wiki](https://github.com/JamesWilko/Payday-2-BLT/wiki) for the project.
 
 Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz). (ignore everything related to XAudio! We don't have that in RAID.)
 
