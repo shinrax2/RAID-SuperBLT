@@ -21,7 +21,7 @@ void blt::platform::InitPlatform()
 	ifstream infiledebug("mods/debugger.txt");
 	if (infiledebug.good())
 	{
-		MessageBoxA(NULL, "Debug Me", "Debug Me", MB_OK);
+		MessageBox(NULL, "Debug Me", "Debug Me", MB_OK);
 	}
 
 	// Set up logging first, so we can see messages from the signature search process
@@ -46,7 +46,7 @@ void blt::platform::InitPlatform()
 
 	if (!SignatureSearch::Search())
 	{
-		MessageBoxA(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);
+		MessageBox(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);
 
 		// TODO: check for update, self update (if available) (1. rename self, 2. extract new dll, 3. restart game, 4. cleanup renamed dll)
 

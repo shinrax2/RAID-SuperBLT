@@ -73,7 +73,7 @@ namespace raidhook
 
 		bool IsSymlink(const std::string& path)
 		{
-			DWORD dwAttrib = GetFileAttributesA(path.c_str());
+			DWORD dwAttrib = GetFileAttributes(path.c_str());
 
 			if (dwAttrib == FILE_ATTRIBUTE_REPARSE_POINT)
 			{
@@ -109,7 +109,7 @@ namespace raidhook
 
 		FileType GetFileType(const std::string &path)
 		{
-			DWORD dwAttrib = GetFileAttributesA(path.c_str());
+			DWORD dwAttrib = GetFileAttributes(path.c_str());
 
 			if (dwAttrib == INVALID_FILE_ATTRIBUTES)
 			{

@@ -94,6 +94,7 @@ foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE C
 endforeach(flag_var)
 
 # Link against libraries
+target_link_libraries(SuperBLT ws2_32.lib)
 target_link_libraries(SuperBLT version.lib)
 
 # Allow both SuperBLT and the loaders access to the headers
