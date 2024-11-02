@@ -65,8 +65,7 @@ namespace raidhook
 		}
 		else
 		{
-			// TODO add lua_pushnil signature, and use that instead
-			lua_pushboolean(L, false);
+			lua_pushnil(L);
 		}
 		return 1;
 	}
@@ -141,7 +140,7 @@ namespace raidhook
 			getline(infile, line);
 			infile.close();
 
-			DeleteFileA(debugfile_name.c_str());
+			DeleteFile(debugfile_name.c_str());
 
 			ConnectFromParameters(line);
 

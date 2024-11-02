@@ -914,7 +914,7 @@ namespace blt
 
 				if (!Util::DirectoryExists("mods/base/wren"))
 				{
-					int result = MessageBoxA(NULL, "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
+					int result = MessageBox(NULL, "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
 					                         "Please delete your 'mods/base' folder, and run the game again to automatically download a compatible version",
 					                         "BLT basemod outdated", MB_OK);
 

@@ -185,7 +185,7 @@ static void internal_warn_bad_mod(WrenVM* vm)
 	// it in a bug report for whatever reason.
 	RAIDHOOK_LOG_ERROR(message.c_str());
 
-	MessageBoxA(0, message.c_str(), "SuperBLT: Failed to load Wren mod", MB_OK);
+	MessageBox(0, message.c_str(), "SuperBLT: Failed to load Wren mod", MB_OK);
 }
 
 static WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* class_name)

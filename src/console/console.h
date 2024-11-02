@@ -13,6 +13,7 @@ class CConsole
 	bool m_OwnConsole;
 public:
 	CConsole();
+	void Close(bool) const;
 	~CConsole();
 };
 

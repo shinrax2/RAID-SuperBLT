@@ -224,7 +224,7 @@ static size_t FindPattern(char* module, const char* funcname, const char* patter
 	return NULL;
 }
 
-static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache, int* cache_misses)
+static bool FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache, int* cache_misses)
 {
 	*cache_misses = 0;
 
@@ -265,7 +265,7 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 				goto cache_fail;
 			results.push_back((void*)result);
 		}
-		return;
+		return true; // cache was good
 
 	cache_fail:
 		results.clear();
@@ -311,6 +311,12 @@ static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	{
 		RAIDHOOK_LOG_WARN(string("Located too many instances of the asset loading function:"));
 	}
+	else
+	{
+		return true; // cache was bad, but sigs still seem fine, at least count matches
+	}
+
+	return false; // sig count mismatch, something went wrong
 }
 
 std::vector<SignatureF>* allSignatures = NULL;
@@ -328,7 +334,7 @@ SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char*
 	allSignatures->push_back(ins);
 }
 
-void SignatureSearch::Search()
+bool SignatureSearch::Search()
 {
 	// Find the name of the current EXE
 	TCHAR processPath[MAX_PATH + 1];
@@ -352,6 +358,7 @@ void SignatureSearch::Search()
 	RAIDHOOK_LOG_LOG(string("Scanning for signatures in ") + string(filename));
 
 	int cacheMisses = 0;
+	bool hasError = false;
 	std::vector<SignatureF>::iterator it;
 	for (it = allSignatures->begin(); it < allSignatures->end(); it++)
 	{
@@ -367,6 +374,8 @@ void SignatureSearch::Search()
 		if (addr == NULL)
 		{
 			hintCorrect = true; // If the signature doesn't exist at all, it's not the cache's fault
+			if (!hasError)
+				hasError = true;
 		}
 		else if (hint == -1 && addr != NULL)
 		{
@@ -390,7 +399,7 @@ void SignatureSearch::Search()
 	}
 
 	int asset_cache_misses = 0;
-	FindAssetLoadSignatures(filename, cache, &asset_cache_misses);
+	if (!FindAssetLoadSignatures(filename, cache, &asset_cache_misses) && !hasError) hasError = true;
 	cacheMisses += asset_cache_misses;
 
 	unsigned long ms_end = GetTickCount64();
@@ -404,6 +413,8 @@ void SignatureSearch::Search()
 		RAIDHOOK_LOG_LOG("Saving signature cache");
 		cache.Save();
 	}
+
+	return !hasError;
 }
 
 void* SignatureSearch::GetFunctionByName(const char* name)

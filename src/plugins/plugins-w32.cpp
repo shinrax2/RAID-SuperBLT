@@ -72,7 +72,7 @@ private:
 
 WindowsPlugin::WindowsPlugin(std::string file) : Plugin(file)
 {
-	module = LoadLibraryA(file.c_str());
+	module = LoadLibrary(file.c_str());
 
 	if (!module) throw string("Failed to load module: ERR") + to_string(GetLastError());
 
