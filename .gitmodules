@@ -13,3 +13,6 @@
 [submodule "lib/luajit"]
 	path = lib/luajit
 	url = https://github.com/LeonTheo02/LuaJIT.git
+[submodule "lib/subhook"]
+	path = lib/subhook
+	url = https://github.com/BangL/subhook.git
