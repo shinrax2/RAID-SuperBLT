@@ -774,6 +774,13 @@ namespace raidhook
 		lua_pushstring(L, strVersion.c_str());
 		return 1;
 	}
+	
+	static int luaF_flush_log(lua_State* L)
+	{
+		Logging::Logger::Instance().flush();
+
+		return 1;
+	}
 
 	static int luaF_sd_identify(lua_State* L)
 	{
@@ -974,6 +981,7 @@ namespace blt
 				{ "load_native", luaF_load_native },
 				{ "blt_info", luaF_blt_info },
 				{ "blt_version", luaF_blt_version },
+				{ "flush_log", luaF_flush_log },
 
 				// Functions that are supposed to be in Lua, but are either omitted or implemented improperly (pcall)
 				{ "pcall", luaF_pcall_proper }, // Lua pcall shouldn't print errors, however BLT's global pcall does (leave it for compat)
