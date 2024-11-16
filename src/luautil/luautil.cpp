@@ -70,7 +70,7 @@ static int vmlua_dofile (lua_State *L)
 
 	if (luaL_loadfilex(L, fname, "t") != 0) lua_error(L);
 	
-	lua_call(L, 0, LUA_MULTRET);
+	lua_call_exe(L, 0, LUA_MULTRET);
 	return lua_gettop(L) - n;
 }
 

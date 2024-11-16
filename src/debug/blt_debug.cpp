@@ -183,7 +183,7 @@ namespace raidhook
 				mq.clear();
 
 				// Call the function, popping it and it's argument off
-				lua_call(L, 1, 0);
+				lua_call_exe(L, 1, 0);
 			}
 			else
 			{

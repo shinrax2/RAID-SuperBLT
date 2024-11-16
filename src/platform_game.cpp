@@ -60,7 +60,7 @@ static void lua_close_new(lua_State* L)
 	subhook::ScopedHookRemove scoped_remove(&luaCloseDetour);
 
 	blt::lua_functions::close(L);
-	lua_close(L);
+	lua_close_exe(L);
 }
 
 static void node_from_xml_new(void* node, char* data, int* len)

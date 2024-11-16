@@ -829,7 +829,7 @@ namespace raidhook
 	static void luaF_close(lua_State* L)
 	{
 		remove_active_state(L);
-		lua_close(L);
+		lua_close_exe(L);
 	}
 
 	void InitiateStates()
@@ -864,7 +864,7 @@ namespace blt
 			{
 				// Debug isn't available, use normal call
 				lua_remove(L, -1);
-				return lua_call(L, args, returns);
+				return lua_call_exe(L, args, returns);
 			}
 			lua_getfield(L, -1, "traceback");
 			lua_remove(L, -2);
