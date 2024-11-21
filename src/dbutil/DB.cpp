@@ -44,9 +44,6 @@ struct dsl_Vector
 static void skipVector(std::istream& in)
 {
 	in.seekg(sizeof(dsl_Vector), std::ios::cur);
-
-	// Suppress the unused function warning
-	(void)skipVector;
 }
 
 template <typename T> static std::vector<T> loadVector(std::istream& in, int offset, dsl_Vector& vec)
