@@ -6,5 +6,5 @@ CREATE_CALLABLE_CLASS_SIGNATURE(application_update, void*, "\x48\x89\x5C\x24\x10
 CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml, void, "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x20\x57\x48\x83\xEC\x50", "xxxxxxxxxxxxxxx", 0, void*, char*, int*)
 CREATE_CALLABLE_CLASS_SIGNATURE(try_open_property_match_resolver, int, "\x48\x89\x54\x24\x10\x55\x53\x56\x57\x41\x55\x41\x56\x41\x57\x48\x8D\x6C\x24\xE9", "xxxxxxxxxxxxxxxxxxxx", 0)
 
-CREATE_NORMAL_CALLABLE_SIGNATURE(Archive_ctor_datastore_thing, int64_t, "\x48\x89\x5C\x24\x10\x48\x89\x6C\x24\x18\x48\x89\x74\x24\x20\x57\x48\x83\xEC\x30\x48\x8D\x2D", "xxxxxxxxxxxxxxxxxxxxxxx", 0)
+CREATE_NORMAL_CALLABLE_SIGNATURE(Archive_ctor_datastore_thing, int64_t, "\x48\x89\x5C\x24\x00\x57\x48\x83\xEC\x00\x48\x8D\x3D\x00\x00\x00\x00\x48\x89\x7C\x24", "xxxx?xxxx?xxx????xxxx", 0)
 CREATE_NORMAL_CALLABLE_SIGNATURE(index2adr, void*, "\x4C\x8B\xC1\x85\xD2\x7E\x00\x48\x8B\x41\x00\x48\x63\xD2", "xxxxxx?xxx?xxx", 0, lua_State*, int)
