@@ -906,6 +906,14 @@ namespace blt
 		{
 			add_active_state(L);
 
+			std::ifstream infileunsafedev("mods/unsafe_developer.txt"); // TODO find better name?
+			if (infileunsafedev.good())
+			{
+				RAIDHOOK_LOG_LOG("Forcing pcalls early!\nPlease backup your save file as this feature is intended for developers only and might break alot of things down the line!");
+				luaF_forcepcalls(L);
+			}
+
+
 			if (!setup_check_done)
 			{
 				setup_check_done = true;
