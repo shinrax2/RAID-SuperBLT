@@ -31,8 +31,6 @@ void blt::win32::InitAssets()
 {
 #define SETUP_PASSTHROUGH(func) hook_##func.Install(func, stub_##func, HOOK_FLAG)
 #define SETUP_PASSTHROUGH_ARRAY(id) hook_##id.Install(try_open_functions.at(id), stub_##id, HOOK_FLAG)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-cast"
 
 	if (!try_open_functions.empty())
 		SETUP_PASSTHROUGH_ARRAY(0);
@@ -43,6 +41,5 @@ void blt::win32::InitAssets()
 
 	SETUP_PASSTHROUGH(try_open_property_match_resolver);
 
-#pragma clang diagnostic pop
 	setup_extra_asset_hooks();
 }

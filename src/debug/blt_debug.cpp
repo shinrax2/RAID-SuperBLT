@@ -365,10 +365,7 @@ namespace raidhook
 		int iResult = shutdown(sock, SD_SEND);
 		if (iResult == SOCKET_ERROR)
 		{
-			string msg = "shutdown failed with error: " + WSAGetLastError();
-			closesocket(sock);
-			WSACleanup();
-			throw msg;
+			Logging::Logger::Instance().log("shutdown failed with error: " + WSAGetLastError(), Logging::LogType::LOGGING_ERROR);
 		}
 
 		// cleanup
