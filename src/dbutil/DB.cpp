@@ -140,7 +140,9 @@ DieselDB* DieselDB::Instance()
 
 static void          loadPackageHeader(DieselBundle* bundle, const std::string& headerPath, const std::string& dataPath, FileList);
 static void          loadBundleHeader(DieselBundle* bundle, const std::string& headerPath, const std::string& dataPath, FileList);
+static DieselBundle* loadPackageBundle(const std::string& dataPath);
 static DieselBundle* loadBundle(const std::string& dataPath);
+
 ////////////////////////
 ////// DSL FILE ////////
 ////////////////////////
@@ -155,50 +157,73 @@ std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
         realLength = (unsigned int)fi.tellg() - offset;
     }
 
-    size_t blockIdx       = offset / 0x10000;
-    size_t bufferOffset   = offset % 0x10000;
-    size_t destFileOffset = 0;
+    std::vector<uint8_t> result;
 
-    std::vector<uint8_t> result(realLength);
-    std::vector<uint8_t> data(0x10000);
-
-    while (destFileOffset < realLength)
+    if (bundle->ChunkOffsets.empty())
     {
-        uint32_t compressedLength;
+        fi.seekg(offset, std::ios::beg);
+        std::vector<uint8_t> data(length);
+        fi.read((char*)data.data(), data.size());
 
-        if (blockIdx >= bundle->ChunkOffsets.size())
-            throw std::runtime_error("block index bigger then chunk offsets");
+        uint32_t dstSize = *reinterpret_cast<uint32_t*>(data.data() + (data.size() - sizeof(uint32_t)));
+        result.resize(dstSize);
 
-        auto fileOffset = bundle->ChunkOffsets[blockIdx];
+        auto destSize   = static_cast<uLongf>(dstSize);
+        auto sourceSize = static_cast<uLongf>(data.size());
 
-        fi.seekg(fileOffset, std::ios::beg);
-        fi.read((char*)&compressedLength, sizeof(compressedLength));
-
-        std::vector<uint8_t> compressedData(compressedLength);
-        fi.read((char*)compressedData.data(), compressedData.size());
-
-        auto destSize   = static_cast<uLongf>(0x10000);
-        auto sourceSize = static_cast<uLongf>(compressedData.size());
-
-        auto ret = uncompress2(data.data(), &destSize, compressedData.data(), &sourceSize);
+        auto ret = uncompress2(result.data(), &destSize, data.data(), &sourceSize);
 
         if (ret != Z_OK)
             throw std::runtime_error("Failed to decompress data");
-
-        auto dataPtr = data.data();
-
-        if (destFileOffset == 0)
-        {
-            dataPtr += bufferOffset;
-            destSize -= bufferOffset;
-        }
-
-        memcpy(result.data() + destFileOffset, dataPtr, min(destSize, (realLength - destFileOffset)));
-        destFileOffset += destSize;
-
-        ++blockIdx;
     }
+    else
+    {
+        size_t blockIdx       = offset / 0x10000;
+        size_t bufferOffset   = offset % 0x10000;
+        size_t destFileOffset = 0;
 
+        std::vector<uint8_t> data(0x10000);
+
+        while (destFileOffset < realLength)
+        {
+            uint32_t compressedLength;
+
+            if (blockIdx >= bundle->ChunkOffsets.size())
+                throw std::runtime_error("block index bigger then chunk offsets");
+
+            auto fileOffset = bundle->ChunkOffsets[blockIdx];
+
+            fi.seekg(fileOffset, std::ios::beg);
+            fi.read((char*)&compressedLength, sizeof(compressedLength));
+
+            std::vector<uint8_t> compressedData(compressedLength);
+            fi.read((char*)compressedData.data(), compressedData.size());
+
+            uint32_t dstSize = *reinterpret_cast<uint32_t*>(compressedData.data() + (compressedData.size() - sizeof(uint32_t)));
+            result.resize(dstSize);
+
+            auto destSize   = static_cast<uLongf>(dstSize);
+            auto sourceSize = static_cast<uLongf>(compressedData.size());
+
+            auto ret = uncompress2(data.data(), &destSize, compressedData.data(), &sourceSize);
+
+            if (ret != Z_OK)
+                throw std::runtime_error("Failed to decompress data");
+
+            auto dataPtr = data.data();
+
+            if (destFileOffset == 0)
+            {
+                dataPtr += bufferOffset;
+                destSize -= bufferOffset;
+            }
+
+            memcpy(result.data() + destFileOffset, dataPtr, min(destSize, (realLength - destFileOffset)));
+            destFileOffset += destSize;
+
+            ++blockIdx;
+        }
+    }
     return result;
 }
 
@@ -339,8 +364,9 @@ DieselDB::DieselDB()
     // printf("File count: %ld\n", files.size());
 
     // Load each of the bundle headers
-    std::string suffix = "_h.bundle";
-    std::string prefix = "all_";
+    std::string suffix        = "_h.bundle";
+    std::string prefix        = "all_";
+    std::string stream_prefix = "stream_";
     for (const std::string& name : raidhook::Util::GetDirectoryContents("assets"))
     {
         if (name.length() <= suffix.size())
@@ -360,14 +386,21 @@ DieselDB::DieselDB()
         std::string dataPath = headerPath;
         dataPath.erase(dataPath.end() - 9, dataPath.end() - 7);
 
-        DieselBundle* bundle = loadBundle(dataPath);
+        if (name.compare(0, stream_prefix.size(), stream_prefix) == 0)
+            package = false;
 
         // TODO: call loadBundleHeader for stream_init_* & stream_default_*
 
         if (package)
+        {
+            DieselBundle* bundle = loadPackageBundle(dataPath);
             loadPackageHeader(bundle, headerPath, dataPath, filesList);
+        }
         else
+        {
+            DieselBundle* bundle = loadBundle(dataPath);
             loadBundleHeader(bundle, headerPath, dataPath, filesList);
+        }
     }
 
     // We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
@@ -469,15 +502,31 @@ static void loadBundleHeader(DieselBundle* dieselBundle, const std::string& head
     in.exceptions(std::ios::failbit | std::ios::badbit);
     in.open(headerPath, std::ios::binary);
 
-    // Skip an int, the length of the header
-    in.seekg(4, std::ios::cur);
+    FileHeader fileHeader;
+    in.read((char*)&fileHeader, sizeof(fileHeader));
+
+    BlockHeader blockHeader;
+    in.read((char*)&blockHeader, sizeof(blockHeader));
+
+    std::vector<uint8_t> srcData(blockHeader.CompressedSize);
+    std::vector<uint8_t> dstData(max(fileHeader.UncompressedSize, 1024 * 64)); // maybe 64kb blocks only
+
+    in.read((char*)srcData.data(), srcData.size());
+
+    auto destSize   = static_cast<uLongf>(dstData.size());
+    auto sourceSize = static_cast<uLongf>(srcData.size());
+
+    auto ret = uncompress2(dstData.data(), &destSize, srcData.data(), &sourceSize);
+
+    if (ret != Z_OK)
+        throw std::runtime_error("Failed to decompress package header");
 
     struct BundleInfo
     {
-        intptr_t       id;
-        dsl_Vector_old vec;
-        intptr_t       zero;
-        intptr_t       one;
+        intptr_t   id;
+        dsl_Vector vec;
+        intptr_t   zero;
+        intptr_t   one;
     };
 
     static_assert(sizeof(BundleInfo) == 48);
@@ -490,8 +539,8 @@ static void loadBundleHeader(DieselBundle* dieselBundle, const std::string& head
     };
     static_assert(sizeof(ItemInfo) == 12); // True on 32/64 bit
 
-    BundleInfo bundle = {0};
-    in.read((char*)&bundle, sizeof(bundle));
+    BundleInfo bundle = *reinterpret_cast<BundleInfo*>(dstData.data() + sizeof(uint32_t));
+    size_t     offset = sizeof(uint32_t) + sizeof(BundleInfo);
 
     assert(bundle.zero == 0);
     assert(bundle.one == 1);
@@ -499,16 +548,16 @@ static void loadBundleHeader(DieselBundle* dieselBundle, const std::string& head
     dieselBundle->headerPath = headerPath;
     dieselBundle->path       = dataPath;
 
-    for (ItemInfo item : loadVector<ItemInfo>(in, 4, bundle.vec))
+    for (ItemInfo item : loadVector<ItemInfo>(dstData.data() + sizeof(uint32_t), 0, bundle.vec))
     {
         DslFile* fi = &files.at(item.fileId - 1);
         fi->bundle  = dieselBundle;
-        fi->offset  = item.offset;
+        fi->offset  = item.offset; // Compressed File Offset
         fi->length  = item.length;
     }
 }
 
-static DieselBundle* loadBundle(const std::string& dataPath)
+static DieselBundle* loadPackageBundle(const std::string& dataPath)
 {
     // Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
     DieselBundle* bundle = new DieselBundle();
@@ -534,6 +583,15 @@ static DieselBundle* loadBundle(const std::string& dataPath)
 
         in.seekg(blockHeader.CompressedSize, std::ios::cur);
     }
+
+    return bundle;
+}
+
+static DieselBundle* loadBundle(const std::string& dataPath)
+{
+    DieselBundle* bundle = new DieselBundle();
+
+    bundle->DecompressedFileSize = ~0;
 
     return bundle;
 }
