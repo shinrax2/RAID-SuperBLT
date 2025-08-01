@@ -384,16 +384,17 @@ static void loadPackageHeader(DieselBundle* bundle, const std::string& headerPat
     in.exceptions(std::ios::failbit | std::ios::badbit);
     in.open(bundle->headerPath, std::ios::binary);
 
-    uint64_t uncompressedSize;
-    in.read((char*)&uncompressedSize, sizeof(uncompressedSize));
+    in.seekg(sizeof(uint64_t), std::ios::beg);
 
     uint32_t compressedSize;
     in.read((char*)&compressedSize, sizeof(compressedSize));
 
     std::vector<uint8_t> srcData(compressedSize);
-    std::vector<uint8_t> dstData(max(uncompressedSize, 1024 * 64)); // maybe 64kb blocks only
-
     in.read((char*)srcData.data(), srcData.size());
+
+    uint32_t dstSize = *reinterpret_cast<uint32_t*>(srcData.data() + (srcData.size() - sizeof(uint32_t)));
+
+    std::vector<uint8_t> dstData(dstSize);
 
     auto destSize   = static_cast<uLongf>(dstData.size());
     auto sourceSize = static_cast<uLongf>(srcData.size());
@@ -467,16 +468,15 @@ static void loadBundleHeader(DieselBundle* dieselBundle, const std::string& head
 
     in.seekg(sizeof(uint64_t), std::ios::beg);
 
-    uint64_t uncompressedSize;
-    in.read((char*)&uncompressedSize, sizeof(uncompressedSize));
-
     uint32_t compressedSize;
     in.read((char*)&compressedSize, sizeof(compressedSize));
 
     std::vector<uint8_t> srcData(compressedSize);
-    std::vector<uint8_t> dstData(max(uncompressedSize, 1024 * 64)); // maybe 64kb blocks only
-
     in.read((char*)srcData.data(), srcData.size());
+
+    uint32_t dstSize = *reinterpret_cast<uint32_t*>(srcData.data() + (srcData.size() - sizeof(uint32_t)));
+
+    std::vector<uint8_t> dstData(dstSize);
 
     auto destSize   = static_cast<uLongf>(dstData.size());
     auto sourceSize = static_cast<uLongf>(srcData.size());
