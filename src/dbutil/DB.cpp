@@ -246,11 +246,7 @@ DieselDB::DieselDB()
 
     in.open("assets/" + blb_path, std::ios::binary);
 
-    uint32_t blockHeader;
-    in.read((char*)&blockHeader, sizeof(blockHeader));
-
-    uint32_t blockSize; // if BlockSize != 0 then there are more vector blocks in this file
-    in.read((char*)&blockSize, sizeof(blockSize));
+    in.seekg(sizeof(uint32_t) * 2, std::ios::beg);
 
     // Build out the LanguageID-to-idstring mappings
     struct LanguageData
