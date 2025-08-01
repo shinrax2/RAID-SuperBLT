@@ -178,6 +178,8 @@ std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
     }
     else
     {
+        result.resize(realLength);
+
         size_t blockIdx       = offset / 0x10000;
         size_t bufferOffset   = offset % 0x10000;
         size_t destFileOffset = 0;
@@ -200,7 +202,7 @@ std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
             fi.read((char*)compressedData.data(), compressedData.size());
 
             uint32_t dstSize = *reinterpret_cast<uint32_t*>(compressedData.data() + (compressedData.size() - sizeof(uint32_t)));
-            result.resize(dstSize);
+            data.resize(dstSize);
 
             auto destSize   = static_cast<uLongf>(dstSize);
             auto sourceSize = static_cast<uLongf>(compressedData.size());
@@ -224,6 +226,7 @@ std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
             ++blockIdx;
         }
     }
+
     return result;
 }
 
