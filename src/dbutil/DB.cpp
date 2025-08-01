@@ -36,15 +36,6 @@ static uint64_t monotonicTimeMicros()
 }
 
 #pragma pack(1)
-struct dsl_Vector_old
-{
-    unsigned int size;
-    unsigned int capacity;
-    unsigned int dw1;
-    unsigned int dw2;
-    unsigned int contents_ptr;
-};
-
 struct dsl_Vector
 {
     uint64_t ElementCount;
@@ -110,21 +101,6 @@ static std::vector<T> loadVector(std::istream& in, int offset)
     in.read((char*)&vec, sizeof(vec));
 
     return loadVector<T>(in, offset, vec);
-}
-
-template<typename T>
-static std::vector<T> loadVector(std::istream& in, int offset, dsl_Vector_old& vec)
-{
-    std::vector<T> data;
-    data.resize(vec.size);
-
-    // Read the vector contents
-    pos_t pos = in.tellg();
-    in.seekg(vec.contents_ptr + offset);
-    in.read((char*)data.data(), sizeof(T) * data.size());
-    in.seekg(pos);
-
-    return data;
 }
 
 static std::mutex db_setup_mutex;
