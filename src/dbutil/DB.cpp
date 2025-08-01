@@ -36,21 +36,12 @@ static uint64_t monotonicTimeMicros()
 }
 
 #pragma pack(1)
+
 struct dsl_Vector
 {
     uint64_t ElementCount;
     uint64_t ElementCapacity;
     uint64_t ElementOffset;
-};
-
-struct BlockHeader
-{
-    uint32_t CompressedSize;
-};
-
-struct FileHeader
-{
-    uint64_t UncompressedSize;
 };
 
 #pragma pack()
@@ -255,13 +246,8 @@ DieselDB::DieselDB()
 
     in.open("assets/" + blb_path, std::ios::binary);
 
-    BlockHeader blockHeader;
+    uint32_t blockHeader;
     in.read((char*)&blockHeader, sizeof(blockHeader));
-
-    if (blockHeader.CompressedSize != 0)
-    {
-        // TODO: decompress
-    }
 
     uint32_t blockSize; // if BlockSize != 0 then there are more vector blocks in this file
     in.read((char*)&blockSize, sizeof(blockSize));
@@ -368,8 +354,6 @@ DieselDB::DieselDB()
         if (name.compare(0, stream_prefix.size(), stream_prefix) == 0)
             package = false;
 
-        // TODO: call loadBundleHeader for stream_init_* & stream_default_*
-
         if (package)
         {
             DieselBundle* bundle = loadPackageBundle(dataPath);
@@ -400,14 +384,14 @@ static void loadPackageHeader(DieselBundle* bundle, const std::string& headerPat
     in.exceptions(std::ios::failbit | std::ios::badbit);
     in.open(bundle->headerPath, std::ios::binary);
 
-    FileHeader fileHeader;
-    in.read((char*)&fileHeader, sizeof(fileHeader));
+    uint64_t uncompressedSize;
+    in.read((char*)&uncompressedSize, sizeof(uncompressedSize));
 
-    BlockHeader blockHeader;
-    in.read((char*)&blockHeader, sizeof(blockHeader));
+    uint32_t compressedSize;
+    in.read((char*)&compressedSize, sizeof(compressedSize));
 
-    std::vector<uint8_t> srcData(blockHeader.CompressedSize);
-    std::vector<uint8_t> dstData(max(blockHeader.CompressedSize, 1024 * 64)); // maybe 64kb blocks only
+    std::vector<uint8_t> srcData(compressedSize);
+    std::vector<uint8_t> dstData(max(uncompressedSize, 1024 * 64)); // maybe 64kb blocks only
 
     in.read((char*)srcData.data(), srcData.size());
 
@@ -481,14 +465,16 @@ static void loadBundleHeader(DieselBundle* dieselBundle, const std::string& head
     in.exceptions(std::ios::failbit | std::ios::badbit);
     in.open(headerPath, std::ios::binary);
 
-    FileHeader fileHeader;
-    in.read((char*)&fileHeader, sizeof(fileHeader));
+    in.seekg(sizeof(uint64_t), std::ios::beg);
 
-    BlockHeader blockHeader;
-    in.read((char*)&blockHeader, sizeof(blockHeader));
+    uint64_t uncompressedSize;
+    in.read((char*)&uncompressedSize, sizeof(uncompressedSize));
 
-    std::vector<uint8_t> srcData(blockHeader.CompressedSize);
-    std::vector<uint8_t> dstData(max(fileHeader.UncompressedSize, 1024 * 64)); // maybe 64kb blocks only
+    uint32_t compressedSize;
+    in.read((char*)&compressedSize, sizeof(compressedSize));
+
+    std::vector<uint8_t> srcData(compressedSize);
+    std::vector<uint8_t> dstData(max(uncompressedSize, 1024 * 64)); // maybe 64kb blocks only
 
     in.read((char*)srcData.data(), srcData.size());
 
@@ -548,19 +534,19 @@ static DieselBundle* loadPackageBundle(const std::string& dataPath)
     auto fileSize = in.tellg();
     in.seekg(0, std::ios::beg);
 
-    FileHeader fileHeader;
-    in.read((char*)&fileHeader, sizeof(fileHeader));
+    uint64_t decompressedFileSize;
+    in.read((char*)&decompressedFileSize, sizeof(decompressedFileSize));
 
-    bundle->DecompressedFileSize = fileHeader.UncompressedSize;
+    bundle->DecompressedFileSize = decompressedFileSize;
 
     while (in.tellg() < fileSize)
     {
         bundle->ChunkOffsets.push_back(in.tellg());
 
-        BlockHeader blockHeader;
-        in.read((char*)&blockHeader, sizeof(blockHeader));
+        uint32_t compressedSize;
+        in.read((char*)&compressedSize, sizeof(compressedSize));
 
-        in.seekg(blockHeader.CompressedSize, std::ios::cur);
+        in.seekg(compressedSize, std::ios::cur);
     }
 
     return bundle;
