@@ -111,14 +111,27 @@ target_link_libraries(SuperBLT mxml)
 target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
-#### zlib ####
+#### zlib-ng ####
 
-set(RENAME_ZCONF OFF) # turn off renaming of zconf.h
-set(ZLIB_BUILD_EXAMPLES OFF) # no thanks
+set(ZLIB_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+set(ZLIB_COMPAT ON CACHE BOOL "" FORCE)  # Ensures zlib-ng mimics zlib 1.2.x API
+set(ZLIB_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
-target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
-set_target_properties(zlibstatic PROPERTIES DEBUG_POSTFIX "") # workaround for ZLIB_LIBRARY below (zlib suffixes lib with 'd' on debug builds, if not overriden here)
-target_link_libraries(SuperBLT zlibstatic)
+
+target_include_directories(zlib PUBLIC
+    $<BUILD_INTERFACE:${zlib_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${zlib_BINARY_DIR}>
+)
+
+# Link to the expected CURL-compatible zlib target
+set(ZLIB_LIBRARY zlib)
+set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
+target_link_libraries(SuperBLT zlib)
+
+# Sanity check
+get_target_property(_zlib_inc zlib INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "zlib-ng include dirs: ${_zlib_inc}")
 
 #### CURL ####
 
@@ -138,8 +151,10 @@ set(CURL_DISABLE_NTLM ON) # included in SSPI
 set(CURL_DISABLE_WEBSOCKETS ON) # disable websocket support [ ws(s):// ]
 
 # link curl against our included static zlib, to enable it's libz features
-set(ZLIB_LIBRARY ${zlib_BINARY_DIR}/${CMAKE_CFG_INTDIR}/zlibstatic.lib)
-set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
+set(CURL_ZLIB OFF CACHE BOOL "" FORCE)        # prevent it from trying to find system zlib
+set(CMAKE_DISABLE_FIND_PACKAGE_ZLIB ON CACHE BOOL "" FORCE)  # disable external find
+set(ZLIB_LIBRARY zlib CACHE STRING "" FORCE)
+set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR} CACHE PATH "" FORCE)
 
 set(CURL_USE_LIBPSL OFF) # TODO: include https://github.com/rockdaboot/libpsl
 
