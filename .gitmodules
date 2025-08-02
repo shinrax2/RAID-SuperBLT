@@ -6,7 +6,7 @@
 	url = https://github.com/munificent/wren.git
 [submodule "lib/sys/zlib"]
 	path = lib/sys/zlib
-	url = https://github.com/madler/zlib.git
+	url = https://github.com/zlib-ng/zlib-ng.git
 [submodule "lib/sys/curl"]
 	path = lib/sys/curl
 	url = https://github.com/curl/curl.git
