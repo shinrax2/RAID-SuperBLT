@@ -4,6 +4,22 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 1.0.1.0
+
+blt.asset_db rewrite for RAID
+
+## Version 1.0.0.3
+
+new signatures for U25
+
+## Version 1.0.0.2
+
+new signatures for U24.4
+
+## Version 1.0.0.1
+
+added check to prevent crashing the game after updates
+
 ## Version 1.0.0.0
 
 based on PD2-SuperBLT DLL v3.3.8
