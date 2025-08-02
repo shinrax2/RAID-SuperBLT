@@ -7,6 +7,7 @@ Contributors other than maintainers are listed in parenthesis after specific cha
 ## Version 1.0.1.0
 
 blt.asset_db rewrite for RAID
+updated curl, wren and replaced zlib with zlib-ng
 
 ## Version 1.0.0.3
 
