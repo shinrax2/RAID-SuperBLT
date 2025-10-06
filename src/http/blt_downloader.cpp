@@ -9,6 +9,12 @@
 static const char *DOWNLOAD_URL = "https://api.modworkshop.net/mods/49758/download";
 static const char *OUT_FILE_NAME = "blt_basemod_download.zip";
 
+static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
+static const char *DOWNLOAD_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/download";
+
+static const char *VERSION_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/version";
+static const char *VERSION_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/version";
+
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
 	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
@@ -91,4 +97,33 @@ void raidhook::download_blt()
 
 	MessageBox(0, "The installation has finished.\nPlease restart the game.", "SuperBLT Downloader", MB_OK);
 	exit(0);
+}
+
+void raidhook::update_blt_dll()
+{
+	// init curl
+	curl_global_init(CURL_GLOBAL_ALL);
+	// check which dll is used
+	char *DLL = "WSOCK32.dll"
+	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
+	if (infile_iphlpapi.good())
+	{
+		DLL = "IPHLPAPI.dll"
+	}
+
+	// check for updates
+	CURL *curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	if (DLL == "IPHLPAPI.dll")
+	{
+		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_IPHLPAPI);
+	}
+	else
+	{
+		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_WSOCK32);
+	}
+	res = curl_easy_perform(curl);
+	printf(res);
+
 }

@@ -49,6 +49,7 @@ void blt::platform::InitPlatform()
 		MessageBox(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);
 
 		// TODO: check for update, self update (if available) (1. rename self, 2. extract new dll, 3. restart game, 4. cleanup renamed dll)
+		update_blt_dll();
 
 		if (console)
 			console->Close(true);
