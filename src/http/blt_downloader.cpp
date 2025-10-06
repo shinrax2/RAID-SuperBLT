@@ -162,7 +162,7 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-void raidhook::update_blt_dll()
+void update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
