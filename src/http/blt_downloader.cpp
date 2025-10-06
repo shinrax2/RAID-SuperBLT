@@ -175,7 +175,7 @@ void update_blt_dll()
 	{
 		DLL = "IPHLPAPI.dll";
 	}
-	printf("DLL used: %s\n", DLL.c_str())
+	printf("DLL used: %s\n", DLL.c_str());
 	// check for updates
 
 	// get remote version
