@@ -137,8 +137,8 @@ void update_blt_dll()
 	// get local version
 	std::string local_version = GetDllVersion();
 
-	printf(remote_version);
-	printf(local_version);
+	printf(remote_version.c_str());
+	printf(local_version.c_str());
 	
 
 
@@ -151,7 +151,7 @@ size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata) {
     return count;
 }
 
-std::string GetDllVersion(std::string DllFile)
+std::string GetDllVersion()
 {
 	HMODULE hModule;
 	std::string ret = "0.0.0.0";
@@ -167,7 +167,7 @@ std::string GetDllVersion(std::string DllFile)
 
 	if (verSize == 0)
 	{
-		return "0.0.0.0");
+		return "0.0.0.0";
 	}
 
 	std::string verData;
