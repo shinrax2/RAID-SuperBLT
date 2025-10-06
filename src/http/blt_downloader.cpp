@@ -4,6 +4,9 @@
 #include "platform.h"
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <format>
+#include <iostream>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -137,8 +140,8 @@ void update_blt_dll()
 	// get local version
 	std::string local_version = GetDllVersion();
 
-	printf(remote_version.c_str());
-	printf(local_version.c_str());
+	printf("%s", remote_version.c_str());
+	printf("%s", local_version.c_str());
 	
 
 
