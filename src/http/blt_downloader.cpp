@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include "platform.h"
 #include <fstream>
+#include <sstream>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -100,13 +101,13 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-void raidhook::update_blt_dll()
+void update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
-	CURLcode res;
+	std::ostringstream stream;
 	// check which dll is used
-	char DLL = "WSOCK32.dll";
+	std::string = "WSOCK32.dll";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	if (infile_iphlpapi.good())
 	{
@@ -114,8 +115,12 @@ void raidhook::update_blt_dll()
 	}
 
 	// check for updates
+
+	// get remote version
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
 
 	if (DLL == "IPHLPAPI.dll")
 	{
@@ -125,8 +130,74 @@ void raidhook::update_blt_dll()
 	{
 		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_WSOCK32);
 	}
-	res = curl_easy_perform(curl);
-	printf(res);
+	CURLcode res = curl_easy_perform(curl);
+
+	std::string remote_version = stream.str();
+
+	// get local version
+	std::string local_version = GetDllVersion();
+
+	printf(remote_version);
+	printf(local_version);
+	
+
 
 }
-//bla
+
+size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    std::ostringstream *stream = (std::ostringstream*)userdata;
+    size_t count = size * nmemb;
+    stream->write(ptr, count);
+    return count;
+}
+
+std::string GetDllVersion(std::string DllFile)
+{
+	HMODULE hModule;
+	std::string ret = "0.0.0.0";
+	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(GetDllVersion), &hModule);
+	char path[MAX_PATH + 1];
+	size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);
+	path[pathSize] = '\0';
+
+	DWORD verHandle = 0;
+	UINT size = 0;
+	LPBYTE lpBuffer = NULL;
+	uint32_t verSize = GetFileVersionInfoSize(path, &verHandle);
+
+	if (verSize == 0)
+	{
+		return "0.0.0.0");
+	}
+
+	std::string verData;
+	verData.resize(verSize);
+
+	if (!GetFileVersionInfo(path, verHandle, verSize, verData.data()))
+	{
+		return ret;
+	}
+
+	if (!VerQueryValue(verData.data(), "\\", (VOID FAR * FAR *)&lpBuffer, &size))
+	{
+		return ret;
+	}
+
+	if (size == 0)
+	{
+		return ret;
+	}
+
+	VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+	if (verInfo->dwSignature != 0xfeef04bd)
+	{
+		return ret;
+	}
+
+	ret = std::format("{}.{}.{}.{}",
+										 (verInfo->dwFileVersionMS >> 16) & 0xFFFF,
+										 (verInfo->dwFileVersionMS >> 0) & 0xFFFF,
+										 (verInfo->dwFileVersionLS >> 16) & 0xFFFF,
+										 (verInfo->dwFileVersionLS >> 0) & 0xFFFF);
+	return ret;
+}
