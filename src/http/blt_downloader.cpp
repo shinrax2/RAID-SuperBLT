@@ -49,7 +49,7 @@ std::string GetDllVersion()
 
 	if (verSize == 0)
 	{
-		return "0.0.0.0";
+		return ret;
 	}
 
 	std::string verData;
@@ -164,15 +164,11 @@ void raidhook::download_blt()
 
 void update_blt_dll()
 {
-	printf("update_blt_dll:start");
-	printf("update_blt_dll:console");
 	blt::platform::win32::OpenConsole();
 	// init curl
-	printf("update_blt_dll:curl_init");
 	curl_global_init(CURL_GLOBAL_ALL);
-	std::ostringstream stream;
+	std::ostringstream datastream;
 	// check which dll is used
-	printf("update_blt_dll:dll_check");
 	std::string DLL = "WSOCK32.dll";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	if (infile_iphlpapi.good())
@@ -183,10 +179,9 @@ void update_blt_dll()
 	// check for updates
 
 	// get remote version
-	printf("update_blt_dll:remote_version");
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // Enable the progress meter
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
 	if (DLL == "IPHLPAPI.dll")
 	{
@@ -197,13 +192,12 @@ void update_blt_dll()
 		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_WSOCK32);
 	}
 
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
+	//curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
+	//curl_easy_setopt(curl, CURLOPT_WRITEDATA, &datastream);
 
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK)
 	{
-		printf("error while downloading");
 		curl_easy_cleanup(curl);
 		exit(0);
 	}
@@ -212,6 +206,8 @@ void update_blt_dll()
 
 	// get local version
 	std::string local_version = GetDllVersion();
+
+	MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
 
 	printf("remote: %s\n", remote_version.c_str());
 	printf("local: %s\n", local_version.c_str());
