@@ -1,0 +1,1 @@
+void update_blt_dll();

@@ -4,6 +4,7 @@
 #include "signatures/signatures.h"
 #include "assets/assets.h"
 #include <util/util.h>
+#include "http/blt_downloader.h"
 
 #include <fstream>
 #include <string>
