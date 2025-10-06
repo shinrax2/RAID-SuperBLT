@@ -166,7 +166,7 @@ void update_blt_dll()
 {
 	blt::platform::win32::OpenConsole();
 	// init curl
-	curl_global_init(CURL_GLOBAL_ALL);
+	//curl_global_init(CURL_GLOBAL_ALL);
 	std::ostringstream stream;
 	// check which dll is used
 	std::string DLL = "WSOCK32.dll";
