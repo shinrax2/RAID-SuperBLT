@@ -10,6 +10,7 @@
 [submodule "lib/sys/curl"]
 	path = lib/sys/curl
 	url = https://github.com/curl/curl.git
+	tag= curl-8_16_0
 [submodule "lib/luajit"]
 	path = lib/luajit
 	url = https://github.com/LeonTheo02/LuaJIT.git
