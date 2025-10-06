@@ -104,6 +104,7 @@ void raidhook::update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
+	CURLcode res;
 	// check which dll is used
 	char DLL = "WSOCK32.dll";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
