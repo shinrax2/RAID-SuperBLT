@@ -164,11 +164,15 @@ void raidhook::download_blt()
 
 void update_blt_dll()
 {
+	printf("update_blt_dll:start")
+	printf("update_blt_dll:console")
 	blt::platform::win32::OpenConsole();
 	// init curl
-	//curl_global_init(CURL_GLOBAL_ALL);
+	printf("update_blt_dll:curl_init")
+	curl_global_init(CURL_GLOBAL_ALL);
 	std::ostringstream stream;
 	// check which dll is used
+	printf("update_blt_dll:dll_check")
 	std::string DLL = "WSOCK32.dll";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	if (infile_iphlpapi.good())
@@ -179,10 +183,10 @@ void update_blt_dll()
 	// check for updates
 
 	// get remote version
+	printf("update_blt_dll:remote_version")
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // Enable the progress meter
 
 	if (DLL == "IPHLPAPI.dll")
 	{
@@ -192,6 +196,10 @@ void update_blt_dll()
 	{
 		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_WSOCK32);
 	}
+
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
+
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK)
 	{
