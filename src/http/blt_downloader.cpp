@@ -2,6 +2,7 @@
 #include "util/util.h"
 #include <curl/curl.h>
 #include "platform.h"
+#include <fstream>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -104,11 +105,11 @@ void raidhook::update_blt_dll()
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
 	// check which dll is used
-	char *DLL = "WSOCK32.dll"
+	char DLL = "WSOCK32.dll";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	if (infile_iphlpapi.good())
 	{
-		DLL = "IPHLPAPI.dll"
+		DLL = "IPHLPAPI.dll";
 	}
 
 	// check for updates
