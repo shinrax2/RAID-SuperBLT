@@ -104,7 +104,7 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-void update_blt_dll()
+void raidhook::update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -122,7 +122,7 @@ void update_blt_dll()
 	// get remote version
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
 
 	if (DLL == "IPHLPAPI.dll")
@@ -147,7 +147,7 @@ void update_blt_dll()
 
 }
 
-size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata) {
+size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
     std::ostringstream *stream = (std::ostringstream*)userdata;
     size_t count = size * nmemb;
     stream->write(ptr, count);
