@@ -202,7 +202,7 @@ void update_blt_dll()
 		exit(0);
 	}
 
-	std::string remote_version = stream.str();
+	std::string remote_version = "stream.str()";
 
 	// get local version
 	std::string local_version = GetDllVersion();
