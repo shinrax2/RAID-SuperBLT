@@ -107,7 +107,7 @@ void update_blt_dll()
 	curl_global_init(CURL_GLOBAL_ALL);
 	std::ostringstream stream;
 	// check which dll is used
-	std::string = "WSOCK32.dll";
+	std::string DLL = "WSOCK32.dll";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	if (infile_iphlpapi.good())
 	{
