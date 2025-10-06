@@ -26,6 +26,64 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 	return written;
 }
 
+size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    std::ostringstream *stream = (std::ostringstream*)userdata;
+    size_t count = size * nmemb;
+    stream->write(ptr, count);
+    return count;
+}
+
+std::string GetDllVersion()
+{
+	HMODULE hModule;
+	std::string ret = "0.0.0.0";
+	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(GetDllVersion), &hModule);
+	char path[MAX_PATH + 1];
+	size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);
+	path[pathSize] = '\0';
+
+	DWORD verHandle = 0;
+	UINT size = 0;
+	LPBYTE lpBuffer = NULL;
+	uint32_t verSize = GetFileVersionInfoSize(path, &verHandle);
+
+	if (verSize == 0)
+	{
+		return "0.0.0.0";
+	}
+
+	std::string verData;
+	verData.resize(verSize);
+
+	if (!GetFileVersionInfo(path, verHandle, verSize, verData.data()))
+	{
+		return ret;
+	}
+
+	if (!VerQueryValue(verData.data(), "\\", (VOID FAR * FAR *)&lpBuffer, &size))
+	{
+		return ret;
+	}
+
+	if (size == 0)
+	{
+		return ret;
+	}
+
+	VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+	if (verInfo->dwSignature != 0xfeef04bd)
+	{
+		return ret;
+	}
+
+	ret = std::format("{}.{}.{}.{}",
+										 (verInfo->dwFileVersionMS >> 16) & 0xFFFF,
+										 (verInfo->dwFileVersionMS >> 0) & 0xFFFF,
+										 (verInfo->dwFileVersionLS >> 16) & 0xFFFF,
+										 (verInfo->dwFileVersionLS >> 0) & 0xFFFF);
+	return ret;
+}
+
 void raidhook::download_blt()
 {
 	blt::platform::win32::OpenConsole();
@@ -145,62 +203,4 @@ void raidhook::update_blt_dll()
 	
 
 
-}
-
-size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    std::ostringstream *stream = (std::ostringstream*)userdata;
-    size_t count = size * nmemb;
-    stream->write(ptr, count);
-    return count;
-}
-
-std::string GetDllVersion()
-{
-	HMODULE hModule;
-	std::string ret = "0.0.0.0";
-	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(GetDllVersion), &hModule);
-	char path[MAX_PATH + 1];
-	size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);
-	path[pathSize] = '\0';
-
-	DWORD verHandle = 0;
-	UINT size = 0;
-	LPBYTE lpBuffer = NULL;
-	uint32_t verSize = GetFileVersionInfoSize(path, &verHandle);
-
-	if (verSize == 0)
-	{
-		return "0.0.0.0";
-	}
-
-	std::string verData;
-	verData.resize(verSize);
-
-	if (!GetFileVersionInfo(path, verHandle, verSize, verData.data()))
-	{
-		return ret;
-	}
-
-	if (!VerQueryValue(verData.data(), "\\", (VOID FAR * FAR *)&lpBuffer, &size))
-	{
-		return ret;
-	}
-
-	if (size == 0)
-	{
-		return ret;
-	}
-
-	VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
-	if (verInfo->dwSignature != 0xfeef04bd)
-	{
-		return ret;
-	}
-
-	ret = std::format("{}.{}.{}.{}",
-										 (verInfo->dwFileVersionMS >> 16) & 0xFFFF,
-										 (verInfo->dwFileVersionMS >> 0) & 0xFFFF,
-										 (verInfo->dwFileVersionLS >> 16) & 0xFFFF,
-										 (verInfo->dwFileVersionLS >> 0) & 0xFFFF);
-	return ret;
 }
