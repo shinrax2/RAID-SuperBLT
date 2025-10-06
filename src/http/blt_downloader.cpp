@@ -164,6 +164,7 @@ void raidhook::download_blt()
 
 void update_blt_dll()
 {
+	blt::platform::win32::OpenConsole();
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
 	std::ostringstream stream;
@@ -174,7 +175,7 @@ void update_blt_dll()
 	{
 		DLL = "IPHLPAPI.dll";
 	}
-
+	printf("DLL used: %s\n", DLL.c_str())
 	// check for updates
 
 	// get remote version
@@ -192,15 +193,22 @@ void update_blt_dll()
 		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_WSOCK32);
 	}
 	CURLcode res = curl_easy_perform(curl);
+	if (res != CURLE_OK)
+	{
+		printf("error while downloading");
+		curl_easy_cleanup(curl);
+		exit(0);
+	}
 
 	std::string remote_version = stream.str();
 
 	// get local version
 	std::string local_version = GetDllVersion();
 
-	printf("%s", remote_version.c_str());
-	printf("%s", local_version.c_str());
+	printf("remote: %s\n", remote_version.c_str());
+	printf("local: %s\n", local_version.c_str());
 	
 
-
+	/* cleanup curl stuff */
+	curl_easy_cleanup(curl);
 }
