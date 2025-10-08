@@ -170,17 +170,19 @@ void raidhook::update_blt_dll()
 	curl_global_init(CURL_GLOBAL_ALL);
 	// check which dll is used
 	std::string DLL = "WSOCK32.dll";
+	std::string DLL_old = "WSOCK32.dll.old"
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	std::ostringstream datastream;
 	if (infile_iphlpapi.good())
 	{
 		DLL = "IPHLPAPI.dll";
+		DLL_old = "IPHLPAPI.dll.old"
 	}
 
 	// remove left over old dll
-	if (std::filesystem::exists(DLL.append(".old").c_str()))
+	if (std::filesystem::exists(DLL_old.c_str()))
 	{
-		std::filesystem::remove(DLL.append(".old").c_str());
+		std::filesystem::remove(DLL_old.c_str());
 	}
 
 	// check for updates
@@ -289,7 +291,7 @@ void raidhook::update_blt_dll()
 		// move old dll
 		try 
 		{
-			std::filesystem::rename(DLL.c_str(), DLL.append(".old").c_str());
+			std::filesystem::rename(DLL.c_str(), DLL_old.c_str());
 		}
 		catch (std::filesystem::filesystem_error& e)
 		{
