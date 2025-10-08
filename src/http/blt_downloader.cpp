@@ -210,7 +210,7 @@ void raidhook::update_blt_dll()
 	if (res != CURLE_OK)
 	{
 		curl_easy_cleanup(curl);
-		exit(0);
+		return;
 	}
 
 	std::string remote_version = datastream.str();
@@ -255,6 +255,11 @@ void raidhook::update_blt_dll()
 	// download new dll
 	if (newer == true)
 	{
+		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT dll?\nThis is recommended.", "SuperBLT dll out of date", MB_YESNO);
+		if (result == IDNO){
+			curl_easy_cleanup(curl);
+			return;
+		}
 		if (DLL == "IPHLPAPI.dll")
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_IPHLPAPI);
