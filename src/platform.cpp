@@ -45,7 +45,6 @@ void blt::platform::InitPlatform()
 		console = new CConsole();
 #endif
 
-	update_blt_dll();
 	if (!SignatureSearch::Search())
 	{
 		MessageBox(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);

@@ -5,6 +5,8 @@
 #include "util/util.h"
 #include <filesystem>
 #include <windows.h>
+#include <thread>
+#include "http/http.h"
 
 #include <memory>
 
@@ -174,6 +176,11 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		// load DieselLuaDebugger even before us, if installed. but only if their own loader isnt installed
 		if (std::filesystem::exists("DieselLuaDebugger.dll") && !std::filesystem::exists("VERSION.dll"))
 			hLDebugger = LoadLibrary("DieselLuaDebugger.dll");
+
+		// check for dll update
+		// done on a seperate thread to avoid loader lock
+		std::thread update_thread(raidhook::update_blt_dll)
+		update_thread.join();
 
 		InitiateStates();
 	}
