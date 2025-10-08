@@ -12,6 +12,7 @@ namespace raidhook
 {
 
 	void download_blt();
+	void update_blt_dll();
 	struct HTTPItem;
 
 	typedef void(*HTTPCallback)(HTTPItem* httpItem);
