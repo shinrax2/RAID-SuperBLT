@@ -162,7 +162,7 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-void update_blt_dll()
+void raidhook::update_blt_dll()
 {
 	blt::platform::win32::OpenConsole();
 	// init curl
