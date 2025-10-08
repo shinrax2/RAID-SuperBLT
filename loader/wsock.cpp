@@ -179,7 +179,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 
 		// check for dll update
 		// done on a seperate thread to avoid loader lock
-		std::thread update_thread(raidhook::update_blt_dll)
+		std::thread update_thread(raidhook::update_blt_dll);
 		update_thread.join();
 
 		InitiateStates();
