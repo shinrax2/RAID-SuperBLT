@@ -7,6 +7,7 @@
 #include <string>
 #include <format>
 #include <iostream>
+#include <filesystem>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -14,6 +15,7 @@
 static const char *DOWNLOAD_URL = "https://api.modworkshop.net/mods/49758/download";
 static const char *OUT_FILE_NAME = "blt_basemod_download.zip";
 
+static const char *DLL_UPDATE_FILE = "blt_basemod_download.zip";
 static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
 static const char *DOWNLOAD_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/download";
 
@@ -164,17 +166,23 @@ void raidhook::download_blt()
 
 void raidhook::update_blt_dll()
 {
-	blt::platform::win32::OpenConsole();
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
-	std::ostringstream datastream;
 	// check which dll is used
 	std::string DLL = "WSOCK32.dll";
-	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
+	std::ifstream infile_iphlpapi("IPHLPAPI.dll");,
+	std::ostringstream datastream;
 	if (infile_iphlpapi.good())
 	{
 		DLL = "IPHLPAPI.dll";
 	}
+
+	// remove left over old dll
+	if (std::filesystem::exists(DLL.append(".old").c_str()))
+	{
+		std::filesystem::remove(DLL.append(".old").c_str());
+	}
+
 	// check for updates
 
 	// get remote version
@@ -203,16 +211,103 @@ void raidhook::update_blt_dll()
 		exit(0);
 	}
 
-	std::string remote_version = "stream.str()";
+	std::string remote_version = stream.str();
 
 	// get local version
 	std::string local_version = GetDllVersion();
 
 	printf("remote: %s\n", remote_version.c_str());
 	printf("local: %s\n", local_version.c_str());
-	MessageBox(0, remote_version.c_str(), "BLT Downloader", MB_OK);
-	MessageBox(0, local_version.c_str(), "BLT Downloader", MB_OK);
-	
+
+	// compare versions
+	int lVerMaj;
+	int lVerMin;
+	int lVerPatch;
+	int lVerRev;
+	int rVerMaj;
+	int rVerMin;
+	int rVerPatch;
+	int rVerRev;
+	bool newer = false;
+
+	sscanf(local_version.c_str(), "%d.%d.%d.%d", &lVerMaj, &lVerMin, &lVerPatch, &lVerRev)
+	sscanf(remote_version.c_str(), "%d.%d.%d.%d", &rVerMaj, &rVerMin, &rVerPatch, &rVerRev)
+
+	if (rVerMaj > lVerMaj)
+	{
+		newer = true;
+	}
+	if (rVerMin > lVerMin and newer == false)
+	{
+		newer = true;
+	}
+	if (rVerPatch > lVerPatch and newer == false)
+	{
+		newer = true;
+	}
+	if (rVerRev > lVerRev and newer == false)
+	{
+		newer = true;
+	}
+
+	// download new dll
+	if (newer == true)
+	{
+		if (DLL == "IPHLPAPI.dll")
+		{
+			curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_IPHLPAPI);
+		}
+		else
+		{
+			curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_WSOCK32);
+		}
+
+		FILE *pagefile = NULL;
+		errno_t err = fopen_s(&pagefile, DLL_UPDATE_FILE, "wb");
+		if (err != 0)
+		{
+			/* cleanup curl stuff */
+			curl_easy_cleanup(curl);
+			printf("\nError opening output file %s - err %d\n", OUT_FILE_NAME, err);
+			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
+			exit(0);
+		}
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, pagefile);
+		CURLcode res2 = curl_easy_perform(curl);
+
+		fclose(pagefile);
+
+		if (cerr != CURLE_OK)
+		{
+			printf("\nError downloading basemod with error %d (URL=%s)\nERR: %s\n", cerr, DOWNLOAD_URL, errbuf);
+			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
+			exit(0);
+		}
+
+		// move old dll
+		try 
+		{
+			std::filesystem::rename(DLL.c_str(), DLL.append(".old").c_str());
+		}
+		catch (std::filesystem::filesystem_error& e)
+		{
+			printf("%s\n", e.what());
+		}
+
+		// unpack new dll
+		raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
+
+		//clean up
+		std::filesystem::remove(DLL_UPDATE_FILE)
+		curl_easy_cleanup(curl);
+
+		// tell user to restart game
+		MessageBox(0, "SuperBLT dll was updated successfully.\nPlease restart your game.", "SuperBLT Updater", MB_OK);
+		exit(0);
+
+	}
 
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl);
