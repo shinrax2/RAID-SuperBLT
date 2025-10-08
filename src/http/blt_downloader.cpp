@@ -175,13 +175,14 @@ void update_blt_dll()
 	{
 		DLL = "IPHLPAPI.dll";
 	}
-	printf("DLL used: %s\n", DLL.c_str());
 	// check for updates
 
 	// get remote version
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+	char errbuf[CURL_ERROR_SIZE];
+	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
 	if (DLL == "IPHLPAPI.dll")
 	{
@@ -192,8 +193,8 @@ void update_blt_dll()
 		curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_WSOCK32);
 	}
 
-	//curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
-	//curl_easy_setopt(curl, CURLOPT_WRITEDATA, &datastream);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &datastream);
 
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK)
@@ -207,10 +208,10 @@ void update_blt_dll()
 	// get local version
 	std::string local_version = GetDllVersion();
 
-	MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
-
 	printf("remote: %s\n", remote_version.c_str());
 	printf("local: %s\n", local_version.c_str());
+	MessageBox(0, remote_version.c_str(), "BLT Downloader", MB_OK);
+	MessageBox(0, local_version.c_str(), "BLT Downloader", MB_OK);
 	
 
 	/* cleanup curl stuff */
