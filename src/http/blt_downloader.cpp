@@ -170,7 +170,7 @@ void raidhook::update_blt_dll()
 	curl_global_init(CURL_GLOBAL_ALL);
 	// check which dll is used
 	std::string DLL = "WSOCK32.dll";
-	std::ifstream infile_iphlpapi("IPHLPAPI.dll");,
+	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	std::ostringstream datastream;
 	if (infile_iphlpapi.good())
 	{
@@ -300,7 +300,7 @@ void raidhook::update_blt_dll()
 		raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
 
 		//clean up
-		std::filesystem::remove(DLL_UPDATE_FILE)
+		std::filesystem::remove(DLL_UPDATE_FILE);
 		curl_easy_cleanup(curl);
 
 		// tell user to restart game
