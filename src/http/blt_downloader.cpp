@@ -164,7 +164,7 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-int WINAPI raidhook::update_blt_dll()
+void raidhook::update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -211,7 +211,7 @@ int WINAPI raidhook::update_blt_dll()
 	if (res != CURLE_OK)
 	{
 		curl_easy_cleanup(curl);
-		return 0;
+		return;
 	}
 
 	std::string remote_version = datastream.str();
@@ -259,7 +259,7 @@ int WINAPI raidhook::update_blt_dll()
 		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL?\nThis is recommended.", "SuperBLT DLL out of date", MB_YESNO);
 		if (result == IDNO){
 			curl_easy_cleanup(curl);
-			return 0;
+			return;
 		}
 		if (DLL == "IPHLPAPI.dll")
 		{
@@ -321,5 +321,5 @@ int WINAPI raidhook::update_blt_dll()
 
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl);
-	return 0;
+	return;
 }

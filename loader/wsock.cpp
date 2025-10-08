@@ -135,6 +135,13 @@ namespace raidhook
 	} // namespace
 } // namespace raidhook
 
+
+DWORD WINAPI ThreadProc(LPVOID lpParam)
+{
+	raidhook::update_blt_dll();
+	return 0;
+}
+
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 {
 	using namespace raidhook;
@@ -181,7 +188,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		HANDLE hNewThread = CreateThread(
 			NULL,
 			0, 
-			raidhook::update_blt_dll,
+			ThreadProc,
 			NULL,
 			0,
 			NULL
