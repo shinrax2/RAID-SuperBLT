@@ -164,7 +164,7 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-void raidhook::update_blt_dll()
+DWORD WINAPI raidhook::update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -211,7 +211,7 @@ void raidhook::update_blt_dll()
 	if (res != CURLE_OK)
 	{
 		curl_easy_cleanup(curl);
-		return;
+		return 0;
 	}
 
 	std::string remote_version = datastream.str();
@@ -321,4 +321,5 @@ void raidhook::update_blt_dll()
 
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl);
+	return 0;
 }

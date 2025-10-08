@@ -5,7 +5,6 @@
 #include "util/util.h"
 #include <filesystem>
 #include <windows.h>
-#include <thread>
 #include "http/http.h"
 
 #include <memory>
@@ -179,8 +178,23 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 
 		// check for dll update
 		// done on a seperate thread to avoid loader lock
-		std::thread update_thread(raidhook::update_blt_dll);
-		update_thread.join();
+		HANDLE hNewThread = CreateThread(
+			NULL,
+			0, 
+			raidhook::update_blt_dll,
+			NULL,
+			0,
+			NULL
+			);
+
+		if(hNewThread != INVALID_HANDLE_VALUE){
+			printf("New thread created.\n");
+		} else {
+			exit(EXIT_FAILURE);
+		}
+
+		//let's wait as long as it takes
+		WaitForSingleObject(hNewThread, INFINITE);
 
 		InitiateStates();
 	}
