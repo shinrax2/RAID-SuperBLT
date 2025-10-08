@@ -259,7 +259,7 @@ int WINAPI raidhook::update_blt_dll()
 		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL?\nThis is recommended.", "SuperBLT DLL out of date", MB_YESNO);
 		if (result == IDNO){
 			curl_easy_cleanup(curl);
-			return;
+			return 0;
 		}
 		if (DLL == "IPHLPAPI.dll")
 		{
