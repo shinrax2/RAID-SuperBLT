@@ -211,7 +211,7 @@ void raidhook::update_blt_dll()
 		exit(0);
 	}
 
-	std::string remote_version = stream.str();
+	std::string remote_version = datastream.str();
 
 	// get local version
 	std::string local_version = GetDllVersion();
@@ -279,9 +279,9 @@ void raidhook::update_blt_dll()
 
 		fclose(pagefile);
 
-		if (cerr != CURLE_OK)
+		if (res2 != CURLE_OK)
 		{
-			printf("\nError downloading basemod with error %d (URL=%s)\nERR: %s\n", cerr, DOWNLOAD_URL, errbuf);
+			printf("\nError downloading basemod with error %d (URL=%s)\nERR: %s\n", res2, DOWNLOAD_URL, errbuf);
 			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
 			exit(0);
 		}
@@ -294,6 +294,8 @@ void raidhook::update_blt_dll()
 		catch (std::filesystem::filesystem_error& e)
 		{
 			printf("%s\n", e.what());
+			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
+			exit(0);
 		}
 
 		// unpack new dll
