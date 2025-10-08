@@ -55,7 +55,7 @@ void blt::platform::InitPlatform()
 	}
 
 	// TODO: check for update, self update (if available) (1. rename self, 2. extract new dll, 3. restart game, 4. cleanup renamed dll)
-	update_blt_dll();
+	//update_blt_dll();
 	blt::win32::InitAssets();
 
 	setup_platform_game();

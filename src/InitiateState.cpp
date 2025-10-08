@@ -904,6 +904,7 @@ namespace blt
 		// Mine worked fine, but this seems more elegant.
 		void initiate_lua(lua_State *L)
 		{
+			update_blt_dll();
 			add_active_state(L);
 
 			std::ifstream infileunsafedev("mods/unsafe_developer.txt"); // TODO find better name?
