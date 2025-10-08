@@ -255,7 +255,7 @@ void raidhook::update_blt_dll()
 	// download new dll
 	if (newer == true)
 	{
-		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT dll?\nThis is recommended.", "SuperBLT dll out of date", MB_YESNO);
+		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL?\nThis is recommended.", "SuperBLT DLL out of date", MB_YESNO);
 		if (result == IDNO){
 			curl_easy_cleanup(curl);
 			return;
@@ -313,7 +313,7 @@ void raidhook::update_blt_dll()
 		curl_easy_cleanup(curl);
 
 		// tell user to restart game
-		MessageBox(0, "SuperBLT dll was updated successfully.\nPlease restart your game.", "SuperBLT Updater", MB_OK);
+		MessageBox(0, "SuperBLT DLL was updated successfully.\nPlease restart your game.", "SuperBLT DLL Updater", MB_OK);
 		exit(0);
 
 	}
