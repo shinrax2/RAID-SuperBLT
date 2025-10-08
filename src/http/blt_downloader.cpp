@@ -230,8 +230,8 @@ void raidhook::update_blt_dll()
 	int rVerRev;
 	bool newer = false;
 
-	sscanf(local_version.c_str(), "%d.%d.%d.%d", &lVerMaj, &lVerMin, &lVerPatch, &lVerRev)
-	sscanf(remote_version.c_str(), "%d.%d.%d.%d", &rVerMaj, &rVerMin, &rVerPatch, &rVerRev)
+	sscanf(local_version.c_str(), "%d.%d.%d.%d", &lVerMaj, &lVerMin, &lVerPatch, &lVerRev);
+	sscanf(remote_version.c_str(), "%d.%d.%d.%d", &rVerMaj, &rVerMin, &rVerPatch, &rVerRev);
 
 	if (rVerMaj > lVerMaj)
 	{
