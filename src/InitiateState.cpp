@@ -905,7 +905,7 @@ namespace blt
 		void initiate_lua(lua_State *L)
 		{
 			// TODO: move before signature check if possible
-			update_blt_dll();
+			//update_blt_dll();
 			add_active_state(L);
 
 			std::ifstream infileunsafedev("mods/unsafe_developer.txt"); // TODO find better name?
