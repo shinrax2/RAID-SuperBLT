@@ -164,7 +164,7 @@ void raidhook::download_blt()
 	exit(0);
 }
 
-DWORD WINAPI raidhook::update_blt_dll()
+int WINAPI raidhook::update_blt_dll()
 {
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
