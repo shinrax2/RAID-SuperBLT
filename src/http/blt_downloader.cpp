@@ -222,14 +222,14 @@ void raidhook::update_blt_dll()
 	printf("local: %s\n", local_version.c_str());
 
 	// compare versions
-	int lVerMaj;
-	int lVerMin;
-	int lVerPatch;
-	int lVerRev;
-	int rVerMaj;
-	int rVerMin;
-	int rVerPatch;
-	int rVerRev;
+	int lVerMaj = 0;
+	int lVerMin = 0;
+	int lVerPatch = 0;
+	int lVerRev = 0;
+	int rVerMaj = 0;
+	int rVerMin = 0;
+	int rVerPatch = 0;
+	int rVerRev = 0;
 	bool newer = false;
 
 	sscanf(local_version.c_str(), "%d.%d.%d.%d", &lVerMaj, &lVerMin, &lVerPatch, &lVerRev);
