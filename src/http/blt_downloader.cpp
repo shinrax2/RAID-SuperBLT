@@ -191,6 +191,7 @@ void raidhook::update_blt_dll()
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // debug
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
