@@ -183,6 +183,7 @@ int main(int argc, char *argv[])
 
 		// unpack new dll
 		//raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
+        MessageBox(0, "BLABLA.", "BLT Downloader", MB_OK);
 
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
