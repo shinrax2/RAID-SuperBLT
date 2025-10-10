@@ -143,7 +143,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 	if (reason == DLL_PROCESS_ATTACH)
 	{
 		// only load SBLT for raid
-		std::string raid_exe = "raid_win64_release";
+		TCHAR raid_exe = "raid_win64_release";
 		TCHAR processPath[MAX_PATH + 1];
 		GetModuleFileName(NULL, processPath, MAX_PATH + 1); // Get the path
 		TCHAR filename[MAX_PATH + 1];
@@ -154,7 +154,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 			filename, MAX_PATH, // Grab the filename
 			NULL, 0 // Extension is always .exe
 		);
-		if(filename != raid_exe.c_str())
+		if (_tcscmp(filename, raid_exe) != 0)
 		{
 			return 1;
 		}
