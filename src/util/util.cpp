@@ -169,6 +169,7 @@ namespace raidhook
 		std::string GetDllVersion(std::string dll_name)
 		{
 			std::string ret = "0.0.0.0";
+			HMODULE hModule;
 			GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(GetFileHash), &hModule);
 			char path[MAX_PATH + 1];
 			size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);

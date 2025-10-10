@@ -88,7 +88,6 @@ int main(int argc, char *argv[])
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK)
 	{
-        print(errbuf)
 		curl_easy_cleanup(curl);
 		return 2;
 	}
