@@ -189,4 +189,5 @@ target_compile_options(WSOCK32 PRIVATE -DBLT_USE_WSOCK)
 ###############################################################################
 add_executable(SBLT_DLL_UPDATER updater/updater.cpp src/util/compression.cpp)
 target_link_libraries(SBLT_DLL_UPDATER libcurl_static)
-target_include_directories(SBLT_DLL_UPDATER PRIVATE src/util)
+target_link_libraries(SBLT_DLL_UPDATER zlib)
+target_include_directories(SBLT_DLL_UPDATER PRIVATE updater)
