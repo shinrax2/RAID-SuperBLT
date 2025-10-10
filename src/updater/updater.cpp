@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 
 		// unpack new dll
 		//raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
-        system(std::format("for %i in ({}) do tar -xf "%i"", DLL_UPDATE_FILE).c_str());
+        system(std::format("for %i in ({}) do tar -xf \"%i\"", DLL_UPDATE_FILE).c_str());
 
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
