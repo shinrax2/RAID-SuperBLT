@@ -1,8 +1,3 @@
-1. check for missing error handling
-2. check if both dlls exist -> error
-3. fix issue with IPHLPAPI.dll breaking updater
-4. move updater out of src?
-5. add more comments
+3. fix issue with IPHLPAPI.dll breaking updater, no clue how?!
 6. updater for the updater?
-7. add debug features
-8. find crossplatform way to unpack zip
+7. try to deduplicate compress.cpp/ figure out linking in util.h without all the lua.h/platform.h depencies

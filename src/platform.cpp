@@ -59,11 +59,16 @@ void blt::platform::InitPlatform()
 
 	// run external dll updater
 	// needs to be external because we are still in LoaderLock which blocks network I/O
-	int ret = system(std::format("SBLT_DLL_UPDATER.exe {}", raidhook::Util::GetDllVersion()).c_str());
-	if (ret == 1)
+	if (std::filesystem::exists("SBLT_DLL_UPDATER.exe"))
 	{
-		exit(0);
+		int ret = system(std::format("SBLT_DLL_UPDATER.exe {}", raidhook::Util::GetDllVersion()).c_str());
+		if (ret == 1)
+		{
+			// user has updated dll -> exit game to restart
+			exit(0);
+		}
 	}
+
 	if (!SignatureSearch::Search())
 	{
 		MessageBox(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);

@@ -40,21 +40,44 @@ int main(int argc, char *argv[])
     */
     if (argc < 2)
     {
+		// no local_version given
+		MessageBox(NULL, "SBLT_DLL_UPDATER is coded to be started from within SBLT DLL", "SBLT DLL Downloader", MB_OK);
         return 2;
     }
     
 	// init curl
 	curl_global_init(CURL_GLOBAL_ALL);
 	// check which dll is used
-	std::string DLL = "WSOCK32.dll";
-	std::string DLL_old = "WSOCK32.dll.old";
+	std::string DLL = "";
+	std::string DLL_old = "";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
+	std::ifstream infile_wsock32("WSOCK32.dll");
+	std::ifstream infile_debug_updater("mods/debug_updater.txt");
 	std::ostringstream datastream;
     std::string URL;
+
+	
+	if (infile_iphlpapi.good() and infile_wsock32.good())
+	{
+		// both dlls present
+		return 2;
+	}
+
 	if (infile_iphlpapi.good())
 	{
 		DLL = "IPHLPAPI.dll";
 		DLL_old = "IPHLPAPI.dll.old";
+	}
+	if (infile_wsock32.good())
+	{
+		DLL = "WSOCK32.dll";
+		DLL_old = "WSOCK32.dll.old";
+	}
+
+	if (DLL == "")
+	{
+		// no dll could be detected
+		return 2;
 	}
 
 	// remove left over old dll
@@ -95,7 +118,15 @@ int main(int argc, char *argv[])
 	std::string remote_version = datastream.str();
 
 	// get local version
-	std::string local_version = argv[1];
+	std::string local_version;
+	if (infile_debug_updater.good())
+	{
+		local_version = "0.0.0.0"
+	}
+	else
+	{
+		local_version = argv[1];
+	}
 
 	// compare versions
 	int lVerMaj = 0;
@@ -108,6 +139,7 @@ int main(int argc, char *argv[])
 	int rVerRev = 0;
 	bool newer = false;
 
+	// parse version strings into ints
 	sscanf(local_version.c_str(), "%d.%d.%d.%d", &lVerMaj, &lVerMin, &lVerPatch, &lVerRev);
 	sscanf(remote_version.c_str(), "%d.%d.%d.%d", &rVerMaj, &rVerMin, &rVerPatch, &rVerRev);
 
@@ -155,7 +187,7 @@ int main(int argc, char *argv[])
 			/* cleanup curl stuff */
 			curl_easy_cleanup(curl);
 			printf("\nError opening output file %s - err %d\n", DLL_UPDATE_FILE, err);
-			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
+			MessageBox(0, "An error occured.", "SBLT DLL Downloader", MB_OK);
 			return 2;
 		}
 
@@ -186,7 +218,6 @@ int main(int argc, char *argv[])
 
 		// unpack new dll
 		raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
-        //system(std::format("for %i in ({}) do tar -xf \"%i\"", DLL_UPDATE_FILE).c_str()); // FIXME: doesnt work under wine/proton
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
 		curl_easy_cleanup(curl);
