@@ -13,6 +13,13 @@ namespace raidhook
 		const int32_t MagicFileHeader = 0x04034b50;
 
 		typedef std::pair<int32_t, std::string> DataPair_t;
+		void EnsurePathWritable(const std::string& path)
+		{
+			int finalSlash = path.find_last_of('/');
+			std::string finalPath = path.substr(0, finalSlash);
+			if (DirectoryExists(finalPath)) return;
+			CreateDirectoryPath(finalPath);
+		}
 
 		class ByteStream
 		{
@@ -127,7 +134,7 @@ namespace raidhook
 		bool WriteFile(const std::string& extractPath, const ZIPFileData& data)
 		{
 			const std::string finalWritePath = extractPath + "/" + data.filepath;
-			Util::EnsurePathWritable(finalWritePath);
+			EnsurePathWritable(finalWritePath);
 
 			// There doesn't seem to be a better way to detect if the "file" in question is a directory.
 			char trailingChar = finalWritePath.at(finalWritePath.size()-1);
@@ -141,9 +148,6 @@ namespace raidhook
 				std::ofstream outFile(finalWritePath.c_str(), std::ios::binary);
 				if (!outFile)
 				{
-
-					RAIDHOOK_LOG_WARN(std::string("Failed to extract file: ") + finalWritePath);
-
 					return false;
 				}
 
@@ -165,8 +169,6 @@ namespace raidhook
 				files.push_back(std::move(file));
 			}
 		}
-
-		RAIDHOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
 		bool result = true;
 		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)
 		{
