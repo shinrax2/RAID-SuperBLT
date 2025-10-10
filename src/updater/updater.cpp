@@ -35,17 +35,17 @@ size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
 
 std::string GetDllVersion(std::string dll_name)
 {
-	//HMODULE hModule = LoadLibraryExA(dll_name.c_str(), NULL, DONT_RESOLVE_DLL_REFERENCES);
+	HMODULE hModule = LoadLibraryExA(dll_name.c_str(), NULL, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
 	std::string ret = "0.0.0.0";
 	//GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(raidhook::download_blt), &hModule); //FIXME: find other way to get module handle?
 	char path[MAX_PATH + 1];
-	//size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);
-	//path[pathSize] = '\0';
+	size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);
+	path[pathSize] = '\0';
 
 	DWORD verHandle = 0;
 	UINT size = 0;
 	LPBYTE lpBuffer = NULL;
-	uint32_t verSize = GetFileVersionInfoSize(dll_name.c_str(), &verHandle);
+	uint32_t verSize = GetFileVersionInfoSize(path, &verHandle);
 
 	if (verSize == 0)
 	{
@@ -55,7 +55,7 @@ std::string GetDllVersion(std::string dll_name)
 	std::string verData;
 	verData.resize(verSize);
 
-	if (!GetFileVersionInfo(dll_name.c_str(), verHandle, verSize, verData.data()))
+	if (!GetFileVersionInfo(path, verHandle, verSize, verData.data()))
 	{
 		return ret;
 	}
