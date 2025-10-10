@@ -1,7 +1,8 @@
 1. check for missing error handling
 2. check if both dlls exist -> error
 3. fix issue with IPHLPAPI.dll breaking updater
-4. move updater our of src?
+4. move updater out of src?
 5. add more comments
 6. updater for the updater?
 7. add debug features
+8. find crossplatform way to unpack zip

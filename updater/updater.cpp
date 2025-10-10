@@ -9,6 +9,9 @@
 #include <iostream>
 #include <filesystem>
 
+#define __SBLT_UTIL_COMPRESSION_STANDALONE
+#include "compression.h"
+
 static const char *DLL_UPDATE_FILE = "sblt_dll.zip";
 static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
 static const char *DOWNLOAD_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/download";
@@ -28,6 +31,27 @@ size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
     stream->write(ptr, count);
     return count;
 }
+
+bool ExtractZIPArchive(const std::string& path, const std::string& extractPath)
+	{
+		ByteStream mainStream(path);
+
+		std::list<std::unique_ptr<ZIPFileData>> files;
+		{
+			std::unique_ptr<ZIPFileData> file;
+			while ((file = ReadFile(mainStream)))
+			{
+				files.push_back(std::move(file));
+			}
+		}
+
+		bool result = true;
+		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)
+		{
+			result &= WriteFile(extractPath, *data);
+		});
+		return result;
+	}
 
 int main(int argc, char *argv[])
 {
@@ -183,9 +207,8 @@ int main(int argc, char *argv[])
 		}
 
 		// unpack new dll
-		//raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
-		// use shell + tar to avoid having to compile util.h and its depencies into the updater
-        system(std::format("for %i in ({}) do tar -xf \"%i\"", DLL_UPDATE_FILE).c_str()); 
+		raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
+        //system(std::format("for %i in ({}) do tar -xf \"%i\"", DLL_UPDATE_FILE).c_str()); // FIXME: doesnt work under wine/proton
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
 		curl_easy_cleanup(curl);

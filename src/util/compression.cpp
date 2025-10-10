@@ -1,4 +1,8 @@
+#ifndef __SBLT_UTIL_COMPRESSION_STANDALONE
+
 #include "util.h"
+
+#endif
 
 #include <zlib.h>
 
@@ -143,7 +147,11 @@ namespace raidhook
 				std::ofstream outFile(finalWritePath.c_str(), std::ios::binary);
 				if (!outFile)
 				{
+
+#ifndef __SBLT_UTIL_COMPRESSION_STANDALONE
 					RAIDHOOK_LOG_WARN(std::string("Failed to extract file: ") + finalWritePath);
+#endif
+
 					return false;
 				}
 
@@ -166,8 +174,9 @@ namespace raidhook
 			}
 		}
 
+#ifndef __SBLT_UTIL_COMPRESSION_STANDALONE
 		RAIDHOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
-
+#endif
 		bool result = true;
 		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)
 		{

@@ -328,6 +328,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 	if (reason == DLL_PROCESS_ATTACH)
 	{
 		// only load SBLT for raid
+		// accomodate SBLT_DLL_UPDATER and possibily other executables users placed next to the games executable
 		TCHAR raid_exe[] = _T("raid_win64_release");
 		TCHAR processPath[MAX_PATH + 1];
 		GetModuleFileName(NULL, processPath, MAX_PATH + 1); // Get the path
