@@ -6,6 +6,8 @@
 #include <iostream>
 #include <filesystem>
 
+#include "util/util.h"
+
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
