@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
     */
     if (argc < 2)
     {
-        print("not enough arguments")
         return 2;
     }
     
