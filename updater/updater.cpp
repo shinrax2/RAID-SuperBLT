@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	std::string local_version;
 	if (infile_debug_updater.good())
 	{
-		local_version = "0.0.0.0"
+		local_version = "0.0.0.0";
 	}
 	else
 	{
