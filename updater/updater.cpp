@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
 	// get remote version
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // debug
+	//curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+	//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // debug
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
@@ -94,9 +94,6 @@ int main(int argc, char *argv[])
 
 	// get local version
 	std::string local_version = argv[1];
-
-	printf("remote: %s\n", remote_version.c_str());
-	printf("local: %s\n", local_version.c_str());
 
 	// compare versions
 	int lVerMaj = 0;
@@ -132,6 +129,7 @@ int main(int argc, char *argv[])
 	// download new dll
 	if (newer == true)
 	{
+		// ask user to update
 		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL?\nThis is recommended.", "SuperBLT DLL out of date", MB_YESNO);
 		if (result == IDNO){
 			curl_easy_cleanup(curl);
@@ -168,7 +166,7 @@ int main(int argc, char *argv[])
 		if (res2 != CURLE_OK)
 		{
 			printf("\nError downloading SBLT DLL with error %d (URL=%s)\nERR: %s\n", res2, URL.c_str(), errbuf);
-			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
+			MessageBox(0, "An error occured.", "SBLT DLL Downloader", MB_OK);
 			return 2;
 		}
 
@@ -180,14 +178,14 @@ int main(int argc, char *argv[])
 		catch (std::filesystem::filesystem_error& e)
 		{
 			printf("%s\n", e.what());
-			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
+			MessageBox(0, "An error occured.", "SBLT DLL Downloader", MB_OK);
 			return 2;
 		}
 
 		// unpack new dll
 		//raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
-        system(std::format("for %i in ({}) do tar -xf \"%i\"", DLL_UPDATE_FILE).c_str());
-
+		// use shell + tar to avoid having to compile util.h and its depencies into the updater
+        system(std::format("for %i in ({}) do tar -xf \"%i\"", DLL_UPDATE_FILE).c_str()); 
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
 		curl_easy_cleanup(curl);
