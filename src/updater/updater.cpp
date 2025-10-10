@@ -9,8 +9,6 @@
 #include <iostream>
 #include <filesystem>
 
-//#include "util/util.h"
-
 static const char *DLL_UPDATE_FILE = "sblt_dll.zip";
 static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
 static const char *DOWNLOAD_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/download";
@@ -188,6 +186,7 @@ int main(int argc, char *argv[])
 
 		// unpack new dll
 		//raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
+        system(std::format("for %i in ({}) do tar -xf "%i"", DLL_UPDATE_FILE).c_str());
 
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);

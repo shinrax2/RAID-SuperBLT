@@ -167,7 +167,7 @@ namespace raidhook
 			return ss.str();
 		}
 
-		std::string GetDllVersion(std::string dll_name)
+		std::string GetDllVersion()
 		{
 			std::string ret = "0.0.0.0";
 			HMODULE hModule;

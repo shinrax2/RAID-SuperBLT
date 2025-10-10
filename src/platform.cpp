@@ -46,7 +46,7 @@ void blt::platform::InitPlatform()
 #endif
 
 	// run external dll updater
-	//system("notepad.exe");
+	system(std::format("SBLT_DLL_UPDATER.exe {}", raidhook::Util::GetDllVersion()).c_str());
 	if (!SignatureSearch::Search())
 	{
 		MessageBox(nullptr, "This SuperBLT version is not compatible with your current game version. The game will be started without SuperBLT.", "SuperBLT version incompatible", MB_OK);
