@@ -158,7 +158,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		);
 		if (_tcscmp(filename, raid_exe) != 0)
 		{
-			return 1;
+			return false;
 		}
 		
 		DisableThreadLibraryCalls(hInst);
