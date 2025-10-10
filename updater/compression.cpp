@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace raidhook
 {
@@ -53,7 +54,7 @@ namespace raidhook
 
 		bool DirectoryExists(const std::string& dir)
 		{
-			string clean = dir;
+			std::string clean = dir;
 
 			if (clean[clean.length() - 1] == '/')
 			{
