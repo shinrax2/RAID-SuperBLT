@@ -357,8 +357,8 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		State->hL = hL;
 
 		// Load the addresses for all the functions
-#define REGISTER(name, symbol, symbol_num) farproc.o##name = GetProcAddress(hL, #name);
-		ALLFUNC(REGISTER);
+#define REGISTER(name, symbol, symbol_num) farproc.o##name = GetProcAddress(hL, #name #symbol #symbol_num);
+		ALLFUNC(REGISTER, @);
 #undef REGISTER
 
 		// load DieselLuaDebugger even before us, if installed. but only if their own loader isnt installed
