@@ -1,10 +1,12 @@
 #include <zlib.h>
+#include <fileapi.h>
 
 #include <algorithm>
 #include <cstdint>
 #include <fstream>
 #include <list>
 #include <memory>
+#include <string>
 
 namespace raidhook
 {
@@ -13,6 +15,34 @@ namespace raidhook
 		const int32_t MagicFileHeader = 0x04034b50;
 
 		typedef std::pair<int32_t, std::string> DataPair_t;
+
+		bool CreateDirectoryPath(const std::string& path)
+		{
+			std::string newPath = "";
+			std::vector<std::string> paths = Util::SplitString(path, '/');
+			for (const auto& i : paths)
+			{
+				newPath = newPath + i + "/";
+				CreateDirectorySingle(newPath);
+			}
+			return true;
+		}
+
+		bool DirectoryExists(const std::string& dir)
+		{
+			string clean = dir;
+
+			if (clean[clean.length() - 1] == '/')
+			{
+				clean.erase(clean.end() - 1);
+			}
+
+			DWORD ftyp = GetFileAttributes(clean.c_str());
+			if (ftyp == INVALID_FILE_ATTRIBUTES) return false;
+			if (ftyp & FILE_ATTRIBUTE_DIRECTORY) return true;
+			return false;
+		}
+
 		void EnsurePathWritable(const std::string& path)
 		{
 			int finalSlash = path.find_last_of('/');
