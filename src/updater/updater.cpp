@@ -3,8 +3,6 @@
 #include <libloaderapi.h>
 #include <winver.h>
 
-SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
-
 #include <curl/curl.h>
 #include <fstream>
 #include <sstream>
@@ -88,6 +86,7 @@ std::string GetDllVersion(std::string dll_name)
 
 int main()
 {
+    SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
     /* return codes:
         0: no update found/done
         1: update successful
