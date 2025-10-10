@@ -1,7 +1,5 @@
-#ifndef __SBLT_UTIL_COMPRESSION_STANDALONE
-
+#if __has_include( "util.h" )
 #include "util.h"
-
 #endif
 
 #include <zlib.h>
@@ -148,7 +146,7 @@ namespace raidhook
 				if (!outFile)
 				{
 
-#ifndef __SBLT_UTIL_COMPRESSION_STANDALONE
+#if __has_include( "util.h" )
 					RAIDHOOK_LOG_WARN(std::string("Failed to extract file: ") + finalWritePath);
 #endif
 
@@ -174,7 +172,7 @@ namespace raidhook
 			}
 		}
 
-#ifndef __SBLT_UTIL_COMPRESSION_STANDALONE
+#if __has_include( "util.h" )
 		RAIDHOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
 #endif
 		bool result = true;

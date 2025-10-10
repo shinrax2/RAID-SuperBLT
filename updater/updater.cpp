@@ -9,7 +9,6 @@
 #include <iostream>
 #include <filesystem>
 
-#define __SBLT_UTIL_COMPRESSION_STANDALONE
 #include "compression.h"
 
 static const char *DLL_UPDATE_FILE = "sblt_dll.zip";
