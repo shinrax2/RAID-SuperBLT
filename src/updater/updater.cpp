@@ -10,8 +10,6 @@
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
-#include <libloaderapi.h>
-#include <winver.h>
 
 static const char *DLL_UPDATE_FILE = "sblt_dll.zip";
 static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
@@ -33,58 +31,7 @@ size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
     return count;
 }
 
-std::string GetDllVersion(std::string dll_name)
-{
-	HMODULE hModule = LoadLibraryEx(dll_name.c_str(), NULL, LOAD_LIBRARY_AS_DATAFILE);
-	std::string ret = "0.0.0.0";
-	//GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(raidhook::download_blt), &hModule); //FIXME: find other way to get module handle?
-	char path[MAX_PATH + 1];
-	size_t pathSize = GetModuleFileName(hModule, path, sizeof(path) - 1);
-	path[pathSize] = '\0';
-
-	DWORD verHandle = 0;
-	UINT size = 0;
-	LPBYTE lpBuffer = NULL;
-	uint32_t verSize = GetFileVersionInfoSize(path, &verHandle);
-
-	if (verSize == 0)
-	{
-		return ret;
-	}
-
-	std::string verData;
-	verData.resize(verSize);
-
-	if (!GetFileVersionInfo(path, verHandle, verSize, verData.data()))
-	{
-		return ret;
-	}
-
-	if (!VerQueryValue(verData.data(), "\\", (VOID FAR * FAR *)&lpBuffer, &size))
-	{
-		return ret;
-	}
-
-	if (size == 0)
-	{
-		return ret;
-	}
-
-	VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
-	if (verInfo->dwSignature != 0xfeef04bd)
-	{
-		return ret;
-	}
-
-	ret = std::format("{}.{}.{}.{}",
-										 (verInfo->dwFileVersionMS >> 16) & 0xFFFF,
-										 (verInfo->dwFileVersionMS >> 0) & 0xFFFF,
-										 (verInfo->dwFileVersionLS >> 16) & 0xFFFF,
-										 (verInfo->dwFileVersionLS >> 0) & 0xFFFF);
-	return ret;
-}
-
-int main()
+int main(int argc, char *argv[])
 {
     /* return codes:
         0: no update found/done
@@ -143,7 +90,7 @@ int main()
 	std::string remote_version = datastream.str();
 
 	// get local version
-	std::string local_version = GetDllVersion(DLL);
+	std::string local_version = argv[1];
 
 	printf("remote: %s\n", remote_version.c_str());
 	printf("local: %s\n", local_version.c_str());
