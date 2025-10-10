@@ -11,6 +11,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 #include <libloaderapi.h>
+#include <winver.h>
 
 static const char *DLL_UPDATE_FILE = "sblt_dll.zip";
 static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
