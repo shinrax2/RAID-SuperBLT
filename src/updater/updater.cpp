@@ -3,7 +3,7 @@
 #include <libloaderapi.h>
 #include <winver.h>
 
-SetDllDirectoryA("");
+SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 #include <curl/curl.h>
 #include <fstream>
