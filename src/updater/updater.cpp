@@ -86,7 +86,9 @@ std::string GetDllVersion(std::string dll_name)
 
 int main()
 {
+    MessageBox(0, "1", "SuperBLT DLL Updater", MB_OK);
     SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
+    MessageBox(0, "2", "SuperBLT DLL Updater", MB_OK);
     /* return codes:
         0: no update found/done
         1: update successful
