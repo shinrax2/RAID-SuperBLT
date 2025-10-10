@@ -189,4 +189,4 @@ add_executable(SBLT_DLL_UPDATER src/updater/updater.cpp src/util/compression.cpp
 target_link_libraries(SBLT_DLL_UPDATER libcurl_static)
 target_link_libraries(SBLT_DLL_UPDATER zlib)
 target_include_directories(SBLT_DLL_UPDATER PUBLIC src)
-target_include_directories(SBLT_DLL_UPDATER PUBLIC lib/luajit)
+target_include_directories(SBLT_DLL_UPDATER PUBLIC lib/luajit/src)
