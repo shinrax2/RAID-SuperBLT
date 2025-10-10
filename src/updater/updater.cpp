@@ -35,7 +35,7 @@ size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
 
 std::string GetDllVersion(std::string dll_name)
 {
-	HMODULE hModule = LoadLibraryExA(dll_name.c_str(), NULL, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+	HMODULE hModule = LoadLibraryEx(dll_name.c_str(), NULL, LOAD_LIBRARY_AS_DATAFILE);
 	std::string ret = "0.0.0.0";
 	//GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(raidhook::download_blt), &hModule); //FIXME: find other way to get module handle?
 	char path[MAX_PATH + 1];
