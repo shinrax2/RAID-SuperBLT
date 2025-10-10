@@ -85,7 +85,7 @@ std::string GetDllVersion(std::string dll_name)
 int main()
 {
     /* return codes:
-        0: no update found
+        0: no update found/done
         1: update successful
         2: error while updating
     */
@@ -183,7 +183,7 @@ int main()
 		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL?\nThis is recommended.", "SuperBLT DLL out of date", MB_YESNO);
 		if (result == IDNO){
 			curl_easy_cleanup(curl);
-			return;
+			return 0;
 		}
 		if (DLL == "IPHLPAPI.dll")
 		{
