@@ -235,7 +235,7 @@ int main()
 		}
 
 		// unpack new dll
-		raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
+		//raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
 
 		//clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
