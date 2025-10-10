@@ -96,6 +96,7 @@ int main()
 	std::string DLL_old = "WSOCK32.dll.old";
 	std::ifstream infile_iphlpapi("IPHLPAPI.dll");
 	std::ostringstream datastream;
+    std::string URL;
 	if (infile_iphlpapi.good())
 	{
 		DLL = "IPHLPAPI.dll";
@@ -187,10 +188,12 @@ int main()
 		if (DLL == "IPHLPAPI.dll")
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_IPHLPAPI);
+            URL = DOWNLOAD_URL_DLL_IPHLPAPI;
 		}
 		else
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_WSOCK32);
+            URL = DOWNLOAD_URL_DLL_WSOCK32;
 		}
 
 		FILE *pagefile = NULL;
@@ -199,7 +202,7 @@ int main()
 		{
 			/* cleanup curl stuff */
 			curl_easy_cleanup(curl);
-			printf("\nError opening output file %s - err %d\n", OUT_FILE_NAME, err);
+			printf("\nError opening output file %s - err %d\n", DLL_UPDATE_FILE, err);
 			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
 			return 2;
 		}
@@ -212,7 +215,7 @@ int main()
 
 		if (res2 != CURLE_OK)
 		{
-			printf("\nError downloading basemod with error %d (URL=%s)\nERR: %s\n", res2, DOWNLOAD_URL, errbuf);
+			printf("\nError downloading SBLT DLL with error %d (URL=%s)\nERR: %s\n", res2, URL, errbuf);
 			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
 			return 2;
 		}
