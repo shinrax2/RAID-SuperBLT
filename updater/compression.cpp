@@ -43,7 +43,7 @@ namespace raidhook
 		bool CreateDirectoryPath(const std::string& path)
 		{
 			std::string newPath = "";
-			std::vector<std::string> paths = Util::SplitString(path, '/');
+			std::vector<std::string> paths = SplitString(path, '/');
 			for (const auto& i : paths)
 			{
 				newPath = newPath + i + "/";
