@@ -215,7 +215,7 @@ int main()
 
 		if (res2 != CURLE_OK)
 		{
-			printf("\nError downloading SBLT DLL with error %d (URL=%s)\nERR: %s\n", res2, URL, errbuf);
+			printf("\nError downloading SBLT DLL with error %d (URL=%s)\nERR: %s\n", res2, URL.c_str(), errbuf);
 			MessageBox(0, "An error occured.", "BLT Downloader", MB_OK);
 			return 2;
 		}
