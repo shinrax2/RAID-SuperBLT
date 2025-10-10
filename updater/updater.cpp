@@ -31,27 +31,6 @@ size_t write_data_stream(char *ptr, size_t size, size_t nmemb, void *userdata) {
     return count;
 }
 
-bool ExtractZIPArchive(const std::string& path, const std::string& extractPath)
-	{
-		ByteStream mainStream(path);
-
-		std::list<std::unique_ptr<ZIPFileData>> files;
-		{
-			std::unique_ptr<ZIPFileData> file;
-			while ((file = ReadFile(mainStream)))
-			{
-				files.push_back(std::move(file));
-			}
-		}
-
-		bool result = true;
-		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)
-		{
-			result &= WriteFile(extractPath, *data);
-		});
-		return result;
-	}
-
 int main(int argc, char *argv[])
 {
     /* return codes:
