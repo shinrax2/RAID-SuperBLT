@@ -185,7 +185,7 @@ target_compile_options(IPHLPAPI PRIVATE -DBLT_USE_IPHLPAPI)
 target_compile_options(WSOCK32 PRIVATE -DBLT_USE_WSOCK)
 
 # build external updater for dll
-add_executable(SBLT_DLL_UPDATER src/updater/updater.cpp src/util/compression.cpp)
+add_executable(SBLT_DLL_UPDATER src/updater/updater.cpp src/util/compression.cpp src/util/logging.cpp)
 target_link_libraries(SBLT_DLL_UPDATER libcurl_static)
 target_link_libraries(SBLT_DLL_UPDATER zlib)
 target_include_directories(SBLT_DLL_UPDATER PUBLIC src)
