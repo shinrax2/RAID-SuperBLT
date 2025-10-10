@@ -9,6 +9,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace raidhook
 {
@@ -17,6 +18,26 @@ namespace raidhook
 		const int32_t MagicFileHeader = 0x04034b50;
 
 		typedef std::pair<int32_t, std::string> DataPair_t;
+
+		void SplitString(const std::string &s, char delim, std::vector<std::string> &elems)
+		{
+			std::istringstream ss(s);
+			std::string item;
+			while (std::getline(ss, item, delim))
+			{
+				if (!item.empty())
+				{
+					elems.push_back(item);
+				}
+			}
+		}
+
+		std::vector<std::string> SplitString(const std::string &s, char delim)
+		{
+			std::vector<std::string> elems;
+			SplitString(s, delim, elems);
+			return elems;
+		}
 
 		bool CreateDirectoryPath(const std::string& path)
 		{
