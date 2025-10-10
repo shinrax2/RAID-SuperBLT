@@ -3,8 +3,6 @@
 #include <libloaderapi.h>
 #include <winver.h>
 
-char bufd[200];
-GetSystemDirectory(bufd, 200);
 SetDllDirectoryA("");
 
 #include <curl/curl.h>
