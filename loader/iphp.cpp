@@ -326,21 +326,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		std::string raid_exe = "raid_win64_release";
-		TCHAR processPath[MAX_PATH + 1];
-		GetModuleFileName(NULL, processPath, MAX_PATH + 1); // Get the path
-		TCHAR filename[MAX_PATH + 1];
-		_splitpath_s( // Find the filename part of the path
-			processPath, // Input
-			NULL, 0, // Don't care about the drive letter
-			NULL, 0, // Don't care about the directory
-			filename, MAX_PATH, // Grab the filename
-			NULL, 0 // Extension is always .exe
-		);
-		if(filename != raid_exe.c_str())
-		{
-			return 1;
-		}
+		
 		char bufd[200];
 		GetSystemDirectory(bufd, 200);
 		strcat_s(bufd, "\\IPHLPAPI.dll");
@@ -357,6 +343,23 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 #define REGISTER(name, symbol, symbol_num) farproc.o##name = GetProcAddress(hL, #name #symbol #symbol_num);
 		ALLFUNC(REGISTER, @);
 #undef REGISTER
+
+		// only load SBLT for raid
+		std::string raid_exe = "raid_win64_release";
+		TCHAR processPath[MAX_PATH + 1];
+		GetModuleFileName(NULL, processPath, MAX_PATH + 1); // Get the path
+		TCHAR filename[MAX_PATH + 1];
+		_splitpath_s( // Find the filename part of the path
+			processPath, // Input
+			NULL, 0, // Don't care about the drive letter
+			NULL, 0, // Don't care about the directory
+			filename, MAX_PATH, // Grab the filename
+			NULL, 0 // Extension is always .exe
+		);
+		if(filename != raid_exe.c_str())
+		{
+			return 1;
+		}
 
 		// load DieselLuaDebugger even before us, if installed. but only if their own loader isnt installed
 		if (std::filesystem::exists("DieselLuaDebugger.dll") && !std::filesystem::exists("VERSION.dll"))
