@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <format>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
