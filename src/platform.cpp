@@ -9,6 +9,7 @@
 #include <string>
 #include <stdlib.h>
 #include <format>
+#include <filesystem>
 
 using namespace std;
 using namespace raidhook;
@@ -45,6 +46,16 @@ void blt::platform::InitPlatform()
 	if (debug_mode != "disabled")
 		console = new CConsole();
 #endif
+
+	// remove left over dll if it exists
+	if (std::filesystem::exists("WSOCK32.dll.old"))
+	{
+		std::filesystem::remove("WSOCK32.dll.old");
+	}
+	if (std::filesystem::exists("IPHLPAPI.dll.old"))
+	{
+		std::filesystem::remove("IPHLPAPI.dll.old");
+	}
 
 	// run external dll updater
 	system(std::format("SBLT_DLL_UPDATER.exe {}", raidhook::Util::GetDllVersion()).c_str());
