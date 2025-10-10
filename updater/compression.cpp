@@ -20,6 +20,11 @@ namespace raidhook
 
 		typedef std::pair<int32_t, std::string> DataPair_t;
 
+		bool CreateDirectorySingle(const std::string& path)
+		{
+			return CreateDirectory(path.c_str(), NULL);
+		}
+
 		void SplitString(const std::string &s, char delim, std::vector<std::string> &elems)
 		{
 			std::istringstream ss(s);
