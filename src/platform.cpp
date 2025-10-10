@@ -58,8 +58,8 @@ void blt::platform::InitPlatform()
 	}
 
 	// run external dll updater
-	int return = system(std::format("SBLT_DLL_UPDATER.exe {}", raidhook::Util::GetDllVersion()).c_str());
-	if (return == 1)
+	int ret = system(std::format("SBLT_DLL_UPDATER.exe {}", raidhook::Util::GetDllVersion()).c_str());
+	if (ret == 1)
 	{
 		exit(0);
 	}
