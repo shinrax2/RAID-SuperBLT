@@ -120,8 +120,9 @@ int main(int argc, char *argv[])
 	}
 
 	int selfupdate_remote_version = 0;
+	std::string selfupdate_rver_str = selfupdate_rver.str()
 
-	sscanf(selfupdate_rver.c_str(), "%d", &selfupdate_remote_version);
+	sscanf(selfupdate_rver_str.c_str() , "%d", &selfupdate_remote_version);
 
 	// SELF: compare versions
 	bool self_update = false;
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
 		{
 			/* cleanup curl stuff */
 			curl_easy_cleanup(curl);
-			printf("\nError opening output file %s - err %d\n", DLL_UPDATE_FILE, err);
+			printf("\nError opening output file %s - err %d\n", DLL_UPDATE_FILE, err2);
 			MessageBox(0, "An error occured.", "SBLT DLL Downloader", MB_OK);
 			return 2;
 		}
