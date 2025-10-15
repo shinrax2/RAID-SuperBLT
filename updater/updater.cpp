@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 	}
 
 	int selfupdate_remote_version = 0;
-	std::string selfupdate_rver_str = selfupdate_rver.str()
+	std::string selfupdate_rver_str = selfupdate_rver.str();
 
 	sscanf(selfupdate_rver_str.c_str() , "%d", &selfupdate_remote_version);
 
