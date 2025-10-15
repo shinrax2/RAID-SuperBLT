@@ -12,11 +12,17 @@
 #include "compression.h"
 
 static const char *DLL_UPDATE_FILE = "sblt_dll.zip";
+static const char *UPDATER_FILE = "sblt_updater.zip";
+
+static const char *DOWNLOAD_URL_DLL_UPDATER = "https://api.modworkshop.net/mods/54109/download";
 static const char *DOWNLOAD_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/download";
 static const char *DOWNLOAD_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/download";
 
+static const char *VERSION_URL_DLL_UPDATER = "https://api.modworkshop.net/mods/54109/version";
 static const char *VERSION_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/version";
 static const char *VERSION_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/version";
+
+static const int UPDATER_VERSION = 1;
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -54,6 +60,7 @@ int main(int argc, char *argv[])
 	std::ifstream infile_wsock32("WSOCK32.dll");
 	std::ifstream infile_debug_updater("mods/debug_updater.txt");
 	std::ostringstream datastream;
+	std::ostringstream selfupdate_rver;
     std::string URL;
 
 	
@@ -67,6 +74,10 @@ int main(int argc, char *argv[])
 	{
 		DLL = "IPHLPAPI.dll";
 		DLL_old = "IPHLPAPI.dll.old";
+
+		// FIXME: IPHLPAPI.dll in same directory as SBLT_DLL_UPDATER breaks it
+		MessageBox(NULL, "Updating IPHLPAPI.dll is currently not supported.", "SBLT DLL Downloader", MB_OK);
+        return 2;
 	}
 	if (infile_wsock32.good())
 	{
@@ -80,21 +91,93 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 
-	// remove left over old dll
+	// remove left over old files
 	if (std::filesystem::exists(DLL_old.c_str()))
 	{
 		std::filesystem::remove(DLL_old.c_str());
 	}
+	if (std::filesystem::exists("SBLT_DLL_UPDATER.exe.old"))
+	{
+		std::filesystem::remove("SBLT_DLL_UPDATER.exe.old");
+	}
 
-	// check for updates
-
-	// get remote version
+	// init curl
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-	//curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 	//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // debug
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+
+	// SELF: check for updates
+	curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_UPDATER);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &selfupdate_rver);
+	CURLcode res = curl_easy_perform(curl);
+	if (res != CURLE_OK)
+	{
+		curl_easy_cleanup(curl);
+		return 2;
+	}
+
+	int selfupdate_remote_version = 0;
+
+	sscanf(selfupdate_rver.str(), "%d", &selfupdate_remote_version);
+
+	// SELF: compare versions
+	bool self_update = false;
+
+	if ( UPDATER_VERSION < selfupdate_remote_version)
+	{
+		// ask user to update dll updater
+		int self_result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL Updater?\nThis is recommended.", "SuperBLT DLL Updater out of date", MB_YESNO);
+		if (self_result == IDYES){
+			self_update = true;
+		}
+	}
+
+	// SELF: update updater
+	if (self_update == true)
+	{
+		// download new updater
+		curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_UPDATER);
+		FILE *pagefile2 = NULL;
+		errno_t err = fopen_s(&pagefile2, UPDATER_FILE, "wb");
+		if (err != 0)
+		{
+			/* cleanup curl stuff */
+			curl_easy_cleanup(curl);
+			printf("\nError opening output file %s - err %d\n", DLL_UPDATE_FILE, err);
+			MessageBox(0, "An error occured.", "SBLT DLL Downloader", MB_OK);
+			return 2;
+		}
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, pagefile2);
+		CURLcode res3 = curl_easy_perform(curl);
+
+		fclose(pagefile2);
+
+		// rename current updater
+		if (std::filesystem::exists("SBLT_DLL_UPDATER.exe")
+		{
+			std::filesystem::rename("SBLT_DLL_UPDATER.exe", "SBLT_DLL_UPDATER.exe.old")
+		}
+
+		// DLL: unpack new dll
+		raidhook::ExtractZIPArchive(UPDATER_FILE, ".");
+		// DLL: clean up
+		std::filesystem::remove(UPDATER_FILE);
+		curl_easy_cleanup(curl);
+
+		// DLL: tell user to restart game
+		MessageBox(0, "SuperBLT DLL Updater was updated successfully.\nPlease restart your game.", "SuperBLT DLL Updater", MB_OK);
+		return 1;
+
+	}
+
+	
+	// DLL: check for updates
+	// DLL: get remote version
 
 	if (DLL == "IPHLPAPI.dll")
 	{
@@ -117,7 +200,7 @@ int main(int argc, char *argv[])
 
 	std::string remote_version = datastream.str();
 
-	// get local version
+	// DLL: get local version
 	std::string local_version;
 	if (infile_debug_updater.good())
 	{
@@ -128,7 +211,7 @@ int main(int argc, char *argv[])
 		local_version = argv[1];
 	}
 
-	// compare versions
+	// DLL: compare versions
 	int lVerMaj = 0;
 	int lVerMin = 0;
 	int lVerPatch = 0;
@@ -139,7 +222,7 @@ int main(int argc, char *argv[])
 	int rVerRev = 0;
 	bool newer = false;
 
-	// parse version strings into ints
+	// DLL: parse version strings into ints
 	sscanf(local_version.c_str(), "%d.%d.%d.%d", &lVerMaj, &lVerMin, &lVerPatch, &lVerRev);
 	sscanf(remote_version.c_str(), "%d.%d.%d.%d", &rVerMaj, &rVerMin, &rVerPatch, &rVerRev);
 
@@ -160,10 +243,10 @@ int main(int argc, char *argv[])
 		newer = true;
 	}
 
-	// download new dll
+	// DLL: download new dll
 	if (newer == true)
 	{
-		// ask user to update
+		// DLL: ask user to update
 		int result = MessageBox(NULL, "Do you want to update the RAID SuperBLT DLL?\nThis is recommended.", "SuperBLT DLL out of date", MB_YESNO);
 		if (result == IDNO){
 			curl_easy_cleanup(curl);
@@ -204,7 +287,7 @@ int main(int argc, char *argv[])
 			return 2;
 		}
 
-		// move old dll
+		// DLL: move old dll
 		try 
 		{
 			std::filesystem::rename(DLL.c_str(), DLL_old.c_str());
@@ -216,13 +299,13 @@ int main(int argc, char *argv[])
 			return 2;
 		}
 
-		// unpack new dll
+		// DLL: unpack new dll
 		raidhook::ExtractZIPArchive(DLL_UPDATE_FILE, ".");
-		//clean up
+		// DLL: clean up
 		std::filesystem::remove(DLL_UPDATE_FILE);
 		curl_easy_cleanup(curl);
 
-		// tell user to restart game
+		// DLL: tell user to restart game
 		MessageBox(0, "SuperBLT DLL was updated successfully.\nPlease restart your game.", "SuperBLT DLL Updater", MB_OK);
 		return 1;
 

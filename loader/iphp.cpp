@@ -340,6 +340,10 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 			filename, MAX_PATH, // Grab the filename
 			NULL, 0 // Extension is always .exe
 		);
+		if (_tcscmp(filename, raid_exe) != 0)
+		{
+			return true;
+		}
 		
 		char bufd[200];
 		GetSystemDirectory(bufd, 200);
@@ -357,10 +361,6 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 #define REGISTER(name, symbol, symbol_num) farproc.o##name = GetProcAddress(hL, #name #symbol #symbol_num);
 		ALLFUNC(REGISTER, @);
 #undef REGISTER
-		if (_tcscmp(filename, raid_exe) != 0)
-		{
-			return true;
-		}
 
 		// load DieselLuaDebugger even before us, if installed. but only if their own loader isnt installed
 		if (std::filesystem::exists("DieselLuaDebugger.dll") && !std::filesystem::exists("VERSION.dll"))
