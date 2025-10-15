@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
 	curl_easy_setopt(curl, CURLOPT_URL, VERSION_URL_DLL_UPDATER);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data_stream);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &selfupdate_rver);
-	CURLcode res = curl_easy_perform(curl);
-	if (res != CURLE_OK)
+	CURLcode res4 = curl_easy_perform(curl);
+	if (res4 != CURLE_OK)
 	{
 		curl_easy_cleanup(curl);
 		return 2;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
 	int selfupdate_remote_version = 0;
 
-	sscanf(selfupdate_rver.str(), "%d", &selfupdate_remote_version);
+	sscanf(selfupdate_rver.c_str(), "%d", &selfupdate_remote_version);
 
 	// SELF: compare versions
 	bool self_update = false;
@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
 		// download new updater
 		curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL_DLL_UPDATER);
 		FILE *pagefile2 = NULL;
-		errno_t err = fopen_s(&pagefile2, UPDATER_FILE, "wb");
-		if (err != 0)
+		errno_t err2 = fopen_s(&pagefile2, UPDATER_FILE, "wb");
+		if (err2 != 0)
 		{
 			/* cleanup curl stuff */
 			curl_easy_cleanup(curl);
@@ -158,9 +158,9 @@ int main(int argc, char *argv[])
 		fclose(pagefile2);
 
 		// rename current updater
-		if (std::filesystem::exists("SBLT_DLL_UPDATER.exe")
+		if (std::filesystem::exists("SBLT_DLL_UPDATER.exe"))
 		{
-			std::filesystem::rename("SBLT_DLL_UPDATER.exe", "SBLT_DLL_UPDATER.exe.old")
+			std::filesystem::rename("SBLT_DLL_UPDATER.exe", "SBLT_DLL_UPDATER.exe.old");
 		}
 
 		// DLL: unpack new dll
