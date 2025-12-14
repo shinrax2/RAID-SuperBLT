@@ -325,7 +325,7 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 	static HINSTANCE hLDebugger = 0;
 
 	if (reason == DLL_PROCESS_ATTACH)
-	{
+	{		
 		char bufd[200];
 		GetSystemDirectory(bufd, 200);
 		strcat_s(bufd, "\\IPHLPAPI.dll");
