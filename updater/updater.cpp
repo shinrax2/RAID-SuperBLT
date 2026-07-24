@@ -22,7 +22,7 @@ static const char *VERSION_URL_DLL_UPDATER = "https://api.modworkshop.net/mods/5
 static const char *VERSION_URL_DLL_WSOCK32 = "https://api.modworkshop.net/mods/49746/version";
 static const char *VERSION_URL_DLL_IPHLPAPI = "https://api.modworkshop.net/mods/49745/version";
 
-static const int UPDATER_VERSION = 1;
+static const int UPDATER_VERSION = 2;
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 	// init curl
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
 	//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // debug
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
