@@ -13,6 +13,7 @@ Contributors other than maintainers are listed in parenthesis after specific cha
     - Features: alt-svc AsynchDNS HSTS HTTPS-proxy IPv6 Largefile PSL SSL SSPI threadsafe
     - Enabled SSL backends: Schannel
 - updated wren (latest git commit)
+- add 10 second timeout to updater
 
 ## Version 1.1.0.1
 
